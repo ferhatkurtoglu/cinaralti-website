@@ -1,0 +1,26 @@
+# Çevresel değişkenler ve hassas bilgiler
+.env
+.env.local
+.env.*.local
+
+# Veritabanı dosyaları
+*.sqlite
+*.sqlite3
+*.db
+
+# Cache ve geçici dosyalar
+/cache/*
+!/cache/.gitkeep
+/tmp/*
+!/tmp/.gitkeep
+.DS_Store
+Thumbs.db
+
+# Log dosyaları
+*.log
+/logs/*
+!/logs/.gitkeep
+
+# Admin uygulaması build klasörleri
+/admin/.next
+/admin/node_modules 

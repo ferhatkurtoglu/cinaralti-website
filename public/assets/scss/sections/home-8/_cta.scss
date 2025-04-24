@@ -1,0 +1,119 @@
+@use "../../abstract" as *;
+/*=========== Home 8 : Cta ==========*/
+
+.cta-home-8 {
+    background-color: $l7-secondary-hex;
+    padding-bottom: 60px;
+
+    @media (min-width: 768px) {
+        background-color: transparent;
+        padding-bottom: 0;
+    }
+
+    .cta-home-8-wrapper {
+        background-color: $l7-secondary-hex;
+        border-radius: 5px;
+        padding-top: 50px;
+        padding-bottom: 0;
+        position: relative;
+        z-index: 10;
+
+        @media (min-width: 768px) {
+            margin-bottom: -191px;
+            padding-top: 80px;
+            padding-bottom: 80px;
+            // transform: translateY(250px);
+        }
+
+        @media (min-width:992px) {
+            padding-top: 100px;
+            padding-top: 100px;
+        }
+    }
+
+    &-shape {
+        position: absolute;
+        left: 5%;
+        top: 18%;
+        z-index: 1;
+        width: 16%;
+        display: none;
+
+        @media (min-width:992px) {
+            display: block;
+        }
+
+        img {
+            width: 100%;
+        }
+    }
+
+    .cta-content-block {
+        max-width: 560px;
+        margin-right: auto;
+        margin-left: auto;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        row-gap: 30px;
+        position: relative;
+        z-index: 2;
+        color: $white;
+
+        @media (min-width:992px) {
+            row-gap: 50px;
+        }
+
+
+        p {
+            color: rgba($cream-hex, 0.8);
+        }
+    }
+
+    .cta-button-group {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+
+        @media (min-width: 576px) {
+            gap: 20px;
+            flex-direction: row;
+        }
+
+        .btn-outline-l08 {
+            --btn-border-color: #fff;
+            --btn-color: #fff;
+        }
+
+        .btn-fill--slide {
+            --btn-bg: transparent;
+
+            &:hover {
+                --btn-color: #fff;
+                --btn-fill-border-color: #fff;
+            }
+        }
+
+        .btn-fill--slide-reverse {
+            &:hover {
+                --btn-color: #0A102F;
+            }
+        }
+    }
+
+    .curved-bg {
+        height: 250px;
+        background: $black-2;
+        position: relative;
+        display: none;
+
+        img {
+            width: 100%;
+        }
+
+        @media (min-width: 768px) {
+            display: block;
+        }
+    }
+}

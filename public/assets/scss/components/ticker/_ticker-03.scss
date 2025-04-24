@@ -1,0 +1,61 @@
+@use "../../abstract/" as *;
+/* ========== Component : Ticker Style 1 ============= */
+.ticker {
+    &-03 {
+        &_section {
+            // background-color: #fff;
+        }
+
+        &_wrapper {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: nowrap;
+            padding-top: 20px;
+            padding-bottom: 20px;
+
+            .ticker-item {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+        }
+
+        &_content {
+            display: flex;
+            column-gap: 24px;
+            flex-direction: row;
+            flex-wrap: nowrap;
+            white-space: nowrap;
+            align-items: flex-start;
+            align-content: flex-start;
+            justify-content: flex-start;
+            margin: 0 13px;
+            animation: ticker 60s linear infinite;
+
+            &--reverse {
+                animation: ticker-reverse 60s linear infinite;
+            }
+        }
+    }
+
+}
+
+@keyframes ticker {
+    0% {
+        transform: translateX(0, 0, 0);
+    }
+
+    100% {
+        transform: translateX(-100%);
+    }
+}
+
+@keyframes ticker-reverse {
+    0% {
+        transform: translateX(-100%);
+    }
+
+    100% {
+        transform: translateX(0);
+    }
+}

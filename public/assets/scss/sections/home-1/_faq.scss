@@ -1,0 +1,23 @@
+@use"../../abstract" as *;
+/* ========== Home 1 : FAQ Section Style ============= */
+.home-1{
+    &_faq-section{
+        position: relative;
+        z-index: 1;
+        .row--custom{
+            justify-content: center;
+        }
+    }
+    &_faq-shape-1{
+        position: absolute;
+        top: 0;
+        left: 0;
+        z-index: -1;
+    }
+    &_faq-shape-2{
+        position: absolute;
+        right: 0;
+        bottom: 0;
+        z-index: -1;
+    }
+}

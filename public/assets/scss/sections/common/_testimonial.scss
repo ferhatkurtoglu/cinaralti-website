@@ -1,0 +1,19 @@
+/* ========== Testimonial masonry layout ============= */
+.testimonial-masonry{
+    row-gap: 30px;
+    justify-content: center;
+    column-count: 1;
+    column-gap: 24px;
+    @media (min-width:768px) {
+        column-count: 2;
+    }
+    @media (min-width:992px) {
+        column-count: 3;
+    }
+    &-item{
+        break-inside: avoid;
+        vertical-align: top;
+        margin-bottom: 24px;
+    }
+  }
+  

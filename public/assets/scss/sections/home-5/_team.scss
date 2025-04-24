@@ -1,0 +1,21 @@
+@use "../../abstract/" as *;
+/* ========== Home 5 : Team Section Style ============= */
+.home-5{
+    &_team-section{
+        background: #FDFBF9;
+        .team-card-row{
+            overflow: hidden;
+            --bs-gutter-y:24px;
+            --bs-gutter-x:0;
+            @media (min-width:768px){
+                --bs-gutter-y:0;
+                border-radius: 5px;
+            }
+        }
+
+        .btn-primary-l05 {
+            --btn-fill-bg: #1B1C1D;
+            --btn-fill-color: #fff;
+        }
+    }
+}

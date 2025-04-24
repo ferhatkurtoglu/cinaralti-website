@@ -1,0 +1,99 @@
+@use '../../abstract' as *;
+/* ========== Brand Section Style ============= */
+.brand-section{
+    .brands-wrapper-inner{
+        padding-top: 60px;
+        padding-bottom: 60px;
+        @media (min-width:576px){
+          padding-top: 80px;
+          padding-bottom: 80px;
+        }
+        @media (min-width:992px){
+          padding-top: 100px;
+          padding-bottom: 100px;
+        }
+    }
+    .brand-heading{
+      margin-bottom: 30px;
+      @media (min-width:992px){
+        margin-bottom: 40px;
+      }
+      @media (min-width:1200px){
+        margin-bottom: 60px;
+      }
+      @media (min-width:1400px){
+        margin-bottom: 80px;
+      }
+      &__title{
+        font-weight: 600;
+        text-align: center;
+        margin-bottom: 30px;
+        @include body-20;
+        color: rgba(#0A102F, 0.7);
+        font-family: $font-family-base;
+      }
+    }
+    .brand-heading-2{
+      margin-bottom: 25px;
+      @media (min-width:992px) {
+        margin-bottom: 40px;
+      }
+    }
+    .brands-wrapper{
+        display: flex;
+        flex-wrap: wrap;
+        row-gap: 35px;
+        justify-content: center;
+        @media (min-width:1200px){
+          justify-content: space-between;
+        }
+        &.filter-grayscale{
+          img{
+            width: 100%;
+            max-width: auto;
+            filter: grayscale(100%);
+            @media (min-width:1200px){
+              width: auto;
+              max-width: 100%;
+            }
+          }
+        }
+    }
+    .single-brand{
+        @include px(15px);
+        width: 51%;
+        @media (min-width:480px){
+          width: 50%;
+        }
+        @media (min-width:768px){
+          width: 33.333%;
+        }
+        @media (min-width:992px){
+          width: 20%;
+        }
+        @media (min-width:1200px){
+          width: auto;
+        }
+        img{
+          max-width: 100%
+        }
+    }
+
+    .single-brand-2{
+      @include px(15px);
+      width: 34%;
+      @media (min-width:768px){
+        width: 33.333%;
+      }
+      @media (min-width:992px){
+        width: 25%;
+      }
+      @media (min-width:1200px){
+        width: auto;
+      }
+      img{
+        max-width: 100%
+      }
+  }
+    
+}

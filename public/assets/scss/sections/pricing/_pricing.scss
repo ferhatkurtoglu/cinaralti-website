@@ -1,0 +1,15 @@
+@use "../../abstract/" as *;
+/* ========== Home 7 : Content Section 2 Style ============= */
+.pricing{
+    &_main_pricing-section{
+        .section-heading{
+            p{
+                color: rgba(#121212, 0.8);
+                @media (min-width:992px){
+                    margin: 0 auto;
+                max-width: 600px;
+                }
+            }
+        }
+    }
+}

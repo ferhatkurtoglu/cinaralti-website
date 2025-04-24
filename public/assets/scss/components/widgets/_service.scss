@@ -1,0 +1,50 @@
+@use "../../abstract/" as *; 
+ 
+ /* ========== Component   : service Style ============= */
+.service-widget{
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: space-between;
+    height: 100%;
+    &__head{
+        margin-bottom: 30px;
+        @include heading-30;
+    }
+    &__body{
+        padding-top: 30px;
+        border-top: 2px solid rgba( $cream-hex,  0.1);
+    }
+    &__title{
+        font-family: $font-family-general-sans;
+        @include heading-30;
+        color: $cream-hex;
+        margin-bottom: 15px;
+    }
+    &__heading{
+        padding-bottom: 5px;
+    }
+    p{
+        @include body-20;
+        letter-spacing: -0.025em;
+        color: rgba($cream-hex,0.8);
+        margin-bottom: 30px;
+        max-width: 380px;
+    }
+    &__link{
+        
+        font-family: $font-family-general-sans;
+        @include body-18(600,1.44);
+            color: $cream-hex !important;        
+        
+        &:hover{
+            color:  $l5-primary-hex !important;
+        }
+    }
+    &.hover-enable{
+        &:hover {
+            background: $offwhite-hex;
+            }
+    }
+}

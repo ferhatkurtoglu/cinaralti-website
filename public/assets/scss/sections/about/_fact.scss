@@ -1,0 +1,105 @@
+@use "../../abstract" as *;
+/* ========== about : Content Section Style ============= */
+.about{
+    &_fact-section{
+        .row--custom{
+        --bs-gutter-y: 40px;
+        --bs-gutter-x: 40px;
+        justify-content: center;
+        text-align: center;
+        @media (min-width:992px) {
+            justify-content: space-between;
+        }
+        }
+        .content{
+            text-align: center;
+            align-items: center;
+            @media (min-width:992px){
+                max-width: 636px;
+                text-align: initial;
+                align-items: initial;
+            }
+            p{
+                max-width: 605px;
+            }
+        }
+    }
+    &_stats-wrapper{
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        @media (min-width:1400px) {
+            margin-left: 50px;
+        }
+        &>*{
+            border-bottom: 1px solid rgba(34, 31, 26, 0.1);
+            border-right: 1px solid rgba(34, 31, 26, 0.1);
+            &:nth-child(1){
+                &>div{
+                    margin-right: 30px;
+                    margin-bottom: 30px;
+                    @media (min-width:992px){
+                        margin-bottom: 50px;
+                        }
+                }
+              }
+          &:nth-last-child(-n+2){
+            border-bottom: 0;
+            &>div{
+                margin-top: 30px;
+                margin-right: 30px;
+                
+            }
+          }
+          &:nth-of-type(2n){
+            border-right:0px ;
+            &>div{
+                margin-left: 30px;
+                
+            }
+          }
+        //   @media (min-width:576px) {
+        //     &:nth-child(-n+2){
+        //         &>div{
+        //             margin-right: 42px;
+        //         }
+        //       }
+        //   }
+            @media (min-width:992px){
+                &:nth-child(1){
+                    &>div{
+                        margin-bottom: 50px;
+                    }
+                  }
+                  &:nth-child(2){
+                    &>div{
+                        margin-bottom: 50px;
+                    }
+                  }
+              &:nth-last-child(-n+2){
+                &>div{
+                    margin-top: 50px;
+                }
+              }
+              &:nth-of-type(2n){
+                &>div{
+                    margin-left: 30px;
+                    
+                }
+              }
+            }
+          }
+    }
+    &_stats-single{
+        span{
+            @include heading-20;
+            color: #3147FF;
+            font-family: $font-family-base-main;
+        }
+       
+        &__count{
+            @include heading-70;
+            
+        }
+      }
+}

@@ -1,0 +1,13 @@
+@use "../../abstract/" as *;
+/* ========== Home 8 : Blog Section Style ============= */
+.home-8{
+    &_blog-section{
+        p{
+            @media (min-width:992px) {
+                max-width: 595px;
+                margin: 0 auto;
+            }
+        }
+    }
+}
+

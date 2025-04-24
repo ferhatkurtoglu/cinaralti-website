@@ -1,0 +1,89 @@
+@use "../../abstract/" as *;
+/* ========== Home 5 : Testimonial Section Style ============= */
+.home-5{
+    &_testimonial-section{
+        .row--custom{
+            justify-content: center;
+            --bs-gutter-y: 30px;
+            @media (min-width:992px) {
+                flex-direction: row-reverse;
+                align-items: center;
+                justify-content: space-between;
+            }
+        }
+    }
+    &_testimonial-wrapper{
+        border-top: 1px solid rgba(#1B1C1D, 0.1);
+        padding-top: 60px;
+        @media (min-width:576px){
+        padding-top: 80px;
+        }
+        @media (min-width:992px){
+        padding-top: 100px;
+        }
+        @media (min-width:1200px){
+        padding-top: 120px;
+        }
+    }
+}
+.testimonial-widget-3{
+    display: flex;
+    flex-direction: column;
+    row-gap: 50px;
+    text-align: center;
+    @media (min-width:992px) {
+        text-align: initial;
+    }
+    &__text-block{
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        row-gap: 24px;
+        @media (min-width:992px) {
+            align-items: initial;
+        }
+    }
+    p{
+        font-family: $font-family-base;
+        @include  heading-24;
+        color: $l5-secondary-hex;
+        padding-bottom: 0;
+    }
+    &__user-name{
+        font-family: $font-family-base;
+        @include heading-20;
+        color: $l5-secondary-hex;
+        padding-bottom: 5px;
+    }
+    &__user-position{
+        font-family: $font-family-base;
+        @include body-18(400,1.67);
+        color: $l5-secondary-hex;
+    }
+   &__image-block{
+    position: relative;
+    overflow: hidden;
+    margin-right: 24px;
+    margin-left: 24px;
+    img{
+        width: 100%;
+    }
+  }
+  &__button{
+
+  }
+  &__image{
+    border-radius: 61% 39% 59% 41%/53% 48% 52% 47%;  ;
+    img{
+        width: 100%;
+        height: 100%;
+        border-radius: inherit;
+        object-fit: cover;
+    }
+    &.absolute-center{
+        width: 95%;
+        top: 48%;
+        left: 50%;
+       }
+  }
+}

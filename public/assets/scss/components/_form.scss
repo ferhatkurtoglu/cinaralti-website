@@ -1,0 +1,211 @@
+/* ======== Newsletter Section =========== */
+
+@use '../abstract' as *;
+
+// .newsletter-form-1 {
+//   @include row-gap(28px);
+//   position: relative;
+//   z-index: 1;
+//   input.form-control {
+//     width: 100%;
+//     border: 1.5px solid #eaedf0;
+//     border-radius: 12px;
+//     padding-left: 24px;
+//     padding-right: 20px;
+//     font-weight: 500;
+//     font-size: 16px;
+//     line-height: 1.5;
+//     color: $neutral-06;
+//     background: $white;
+//     height: 60px;
+//     box-shadow: none;
+//     @media (min-width: 576px) {
+//       height: 72px;
+//       padding-right: 240px;
+//     }
+//     @media (min-width: 992px) {
+//       padding-right: 240px;
+//     }
+//   }
+//   &__button-wrapper {
+//     margin-top: 15px;
+//     @media (min-width: 768px) {
+//       position: absolute;
+//       right: 5px;
+//       top: 6px;
+//       text-align: initial;
+//       margin-top: initial;
+//     }
+//     .btn {
+//       font-weight: 500;
+//       font-size: 16px;
+//       line-height: 1.56;
+//       color: $white;
+//       height: 55px;
+//       @media (min-width: 576px) {
+//         height: 60px;
+//         font-size: 18px;
+//       }
+//     }
+//   }
+//   &--dark {
+//     background: transparent;
+//     border: 1.5px solid #e5eaf1;
+//     letter-spacing: 0.5px;
+//     color: $neutral-04;
+//     input {
+//       letter-spacing: 0.5px;
+//     }
+//   }
+// }
+/* ======== Newsletter Form 1 =========== */
+.newsletter-form-1 {
+  position: relative;
+  .form-control {
+    width: 100%;
+    border: 1px solid $black;
+    border-radius: 500px;
+    padding-left: 24px;
+    padding-right: 20px;
+    font-weight: 700;
+    font-size: 16px;
+    line-height: 1.5;
+    height: 60px;
+    display: flex;
+    flex-wrap: wrap;
+    font-size: 1rem;
+    line-height: 1.5;
+    margin-bottom: 15px;
+    &:focus {
+      box-shadow: none;
+    }
+    &::placeholder {
+      font-weight: 700;
+      color: rgba($black, 0.6);
+    }
+  }
+  button {
+    width: 100%;
+    @media (min-width: 480px) {
+      width: initial;
+      position: absolute;
+      right: 4px;
+      top: 4px;
+      text-align: initial;
+      margin-top: initial;
+      font-weight: 700;
+      padding-top: 13px;
+      padding-bottom: 13px;
+    }
+  }
+}
+
+/* ======== Newsletter Form 2 =========== */
+
+.newsletter-form-2 {
+  .form-control {
+    width: 100%;
+    background: #FFFFFF;
+    border-radius: 3px;
+    border-color: $white;
+    padding-left: 24px;
+    padding-right: 20px;
+    font-size: 16px;
+    line-height: 1.5;
+    height: 60px;
+    display: flex;
+    flex-wrap: wrap;
+    font-size: 1rem;
+    line-height: 1.5;
+    margin-bottom: 15px;
+    &:focus {
+      outline: none;
+  box-shadow: none;
+  border-color: $white;
+  color: initial;
+    }
+    &::placeholder {
+      font-weight: 600;
+    color: rgba($black-2-hex, 0.5);
+    
+    }
+  }
+  button {
+    width: 100%;
+    @media (min-width: 480px) {
+      border-radius: 3px;
+      width: initial;
+      position: absolute;
+      right: 1%;
+      top: 5%;
+      text-align: initial;
+      margin-top: initial;
+      font-weight: 700;
+      height: 50px;
+    }
+  }
+}
+
+
+
+
+
+/* ======== Form box Style =========== */
+.form-box-style{
+  &-heading__title{
+    @include heading-24;
+    font-family: var(--font-family-base);
+    color: $black;
+  }
+  &__form-wrapper{
+    border: 1px solid rgba(10, 16, 47, 0.5);
+    border-radius: 10px;
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    row-gap: 30px;
+    @media (min-width:992px){
+    row-gap: 40px;}
+    &.border-none{
+        border-width: 0px;
+    }
+    .form-control {
+        // background: #FFFFFF;
+        border: 1px solid rgba(10, 16, 47, 0.5);
+        border-radius: 500px;
+        padding: 15px 30px;
+        width: 100%;
+        color: rgba(#0A102F, 0.5);
+        box-shadow: none;
+        &.textarea{
+            height: 150px;
+            border-radius: 30px;
+        }
+    }
+  }
+  &__form-input{
+    margin-bottom: 24px;
+    &:last-child{
+      margin-bottom: 0px;
+    }
+    }
+    &-title{
+      @include heading-18;
+      font-family: var(--font-family-base);
+      margin-bottom: 10px;
+      color: $black;
+    }
+  &__form-input-group{
+    display: flex;
+    column-gap: 24px;
+  }
+&__condition{
+        display: flex;
+        flex-wrap: wrap;
+        column-gap: 10px;
+        font-weight: 600;
+        font-size: 14px;
+        line-height: 1.43;
+        color: $black;
+}
+}

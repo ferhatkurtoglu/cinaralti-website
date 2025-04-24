@@ -1,0 +1,30 @@
+@use"../../abstract" as *;
+/* ========== Home 2 : Content Section 3 Style ============= */
+.home-2{
+    &_content-section-3{
+        .row--custom{
+            justify-content: center;
+        }
+        .section-heading{
+            text-align: center;
+            margin-bottom: 30px;
+            @media (min-width:992px) {
+                margin-bottom: 50px;
+            }
+            @media (min-width:1200px) {
+                margin-bottom: 80px;
+            }
+            p{
+                line-height: 1.67;
+                color: rgba($black, 0.8);
+            }
+        }
+    }
+    &_content-image-3{
+        position: relative;
+        img{
+            width: 100%;
+        }
+    }
+
+}

@@ -1,0 +1,74 @@
+@use '../../abstract' as *;
+/* ========== Component : Course Card ============= */
+.course-card{
+  padding: 30px;
+  border-radius: 10px;
+  background: #FDFBF9;
+  display: flex;
+  flex-direction: column;
+  row-gap: 24px;
+  &__image{
+    border-radius: 10px;
+    position: relative;
+    &::before{
+      content: "";
+      background-color:rgba(#0A102F,0.1) ;
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+    }
+    img{
+      border-radius: inherit;
+    }
+  }
+  &__meta {
+    display: flex;
+    column-gap: 10px;
+    justify-content: space-between;
+    margin-bottom: 15px;
+    color: rgb($body-color-rgb,.8);
+    font-weight: 600;
+    line-height: 1.43;
+    font-size: 14px;
+
+    &-tag{
+      display: flex;
+      flex-direction: column;
+      row-gap: 4px;
+      column-gap: 8px;
+      @media (min-width:576px){
+        flex-direction: row;
+        align-items: center;
+        &>*{
+          &:not(:last-child){
+            display: flex;
+            align-items: center;
+            column-gap: 8px;
+            &:after{
+              content: "";
+              background-color: rgb($body-color-rgb,.8);
+              display: block;
+              border-radius: 500px;
+              @include square(6px,500px)
+            }
+          }
+        }
+      }
+    }
+    &-rating{
+      display: flex;
+      column-gap: 8px;
+      align-items: center;
+      i{
+        color: #FFC900;
+      }
+    }
+}
+  &__title{
+    font-family: $font-family-base;
+    @include heading-24(700,null);
+  }
+&__footer{
+  margin-top: auto;
+}
+}

@@ -1,0 +1,33 @@
+@use '../abstract' as *;
+/* ========== Component : Blog Style  ============= */
+.blog-post{
+  &__image{
+    border-radius: 20px;
+    margin-bottom: 30px;
+    img{
+      width: 100%;
+      border-radius: inherit;
+    }
+  }
+  &__title{
+    @include heading-24;
+    margin-bottom: 15px;
+    color: $neutral-07;
+  }
+  p{
+    margin-bottom: 15px;
+    @include body-18;
+    color: $neutral-06;
+  }
+  &__link{
+    margin-top: 20px;
+    font-weight: 500;
+    font-size: 16px;
+    line-height: 1.5;
+    @include column-gap(10px);
+    color: $neutral-07;
+    &:hover{
+      color: $primary;
+    }
+  }
+}

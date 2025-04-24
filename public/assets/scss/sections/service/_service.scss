@@ -1,0 +1,17 @@
+@use"../../abstract" as *;
+/* ========== service : Pricing Section Style ============= */
+.service{
+    &_pricing-section{
+        .section-heading{
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .row--custom{
+            --bs-gutter-y: 30px;
+        }
+        .pricing-control{
+            height: 50px;
+        }
+    }
+}

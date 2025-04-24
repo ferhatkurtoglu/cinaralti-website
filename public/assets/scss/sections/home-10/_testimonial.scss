@@ -1,0 +1,23 @@
+@use"../../abstract" as *;
+/* ========== Home 10 : Testimonial Section Style ============= */
+.home-10{
+   
+    &_testimonial-section{
+        background: #FFF4D9;
+        position: relative;
+        z-index: 1;
+        &::before{
+            content: "";
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #FFD874;
+            z-index: -1;
+            @media (min-width:768px){
+                border-radius: 30px;
+            }
+        }
+    }
+}

@@ -1,0 +1,82 @@
+@use"../../abstract/" as *;
+/* ========== Home 4 : Cta ============= */
+
+.cta-home-4 {
+  position: relative;
+  padding-top: 60px;
+  padding-bottom: 60px;
+  @media (min-width:768px){
+    padding-top: 80px;
+    padding-bottom: 80px;
+  }
+  @media (min-width:992px){
+    padding-top: 100px;
+    padding-bottom: 80px;
+  }
+
+  &__shape{
+    position: absolute;
+
+    img{
+      width: 100%;
+    }
+    &.shape-1{
+      left: 0;
+      top: -25%;
+      max-width: 193px;
+      width: 15%;
+      min-width: 120px;
+      display: none;
+      @media (min-width:992px){
+      display: block;
+      }
+    }
+    &.shape-2{
+      right: 0;
+      bottom: -21%;
+      max-width: 274px;
+      width: 22%;
+      min-width: 150px;
+    }
+  }
+
+  .cta-content-block {
+    max-width: 700px;
+    margin-right: auto;
+    margin-left: auto;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    row-gap: 30px;
+    color: $black;
+
+    @media (min-width:992px) {
+      row-gap: 50px;
+    }
+
+    .heading-md {
+      letter-spacing: -1px;
+    }
+  }
+
+  &-title {
+    color: $black;
+  }
+
+  .cta-button-group {
+    display: flex;
+    row-gap: 10px;
+    flex-direction: column;
+
+    @media (min-width: 768px) {
+      flex-direction: row;
+      column-gap: 20px;
+    }
+
+    a {
+      display: flex;
+      align-items: stretch;
+    }
+  }
+}

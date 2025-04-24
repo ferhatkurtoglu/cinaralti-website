@@ -1,0 +1,47 @@
+@use "../../abstract/" as *;
+/*=========== CTA Base ==========*/
+.cta-base {
+  background: $black;
+  padding-top: 50px;
+  @media (min-width:576px){
+    padding-top: 80px;
+  }
+  @media (min-width:992px){
+    padding-top: 100px;
+  }
+  &__wrapper {
+    padding-bottom: 40px;
+    @media (min-width:576px){
+      padding-bottom: 60px;
+    }
+    @media (min-width:992px){
+      padding-bottom: 80px;
+    }
+  }
+  &__text-block {
+    color: $white;
+    text-align: center;
+    @media (min-width: 768px) {
+      text-align: initial;
+    }
+  }
+  &__button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    .btn {
+      --bs-btn-padding-x: 42px;
+    }
+    &-shape {
+      display: none;
+      position: absolute;
+      right: -40%;
+      bottom: 100%;
+      width: 37.6%;
+      @media (min-width: 768px) {
+        display: block;
+      }
+    }
+  }
+}

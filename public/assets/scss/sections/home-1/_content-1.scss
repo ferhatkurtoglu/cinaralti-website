@@ -1,0 +1,65 @@
+@use"../../abstract" as *;
+/* ========== Home 1 : Content Section 1 Style ============= */
+.home-1{
+    &_content-section-1{
+        background: $offwhite;
+        .row--custom{
+            --bs-gutter-x: 25px;
+            --bs-gutter-y: 40px;
+            justify-content: center;
+           
+            @media (min-width:992px) {
+                flex-direction: row-reverse;
+                align-items: center;
+            }
+        }
+        .content-image{
+            &--mobile-width{
+                @media (max-width: 991px) {
+                    max-width: 360px;
+                  }
+                  @media (max-width: 479px) {
+                    max-width: 260px;
+                }
+            }
+        }
+    }
+    &_content-image-1{
+        position: relative;
+        img{
+            width: 100%;
+        }
+        &-shape{
+            position: absolute;
+            top: -16%;
+            right: -16%;
+            height: 14.7%;
+            width: 38%;
+        }
+    }
+    &_content-1-text-block{
+        text-align: center;
+        @media (min-width:992px) {
+            text-align: initial;
+            padding-right: 52px;
+        }
+        @media (min-width:1200px) {
+            padding-right: 0;
+        }
+        p{
+            max-width: 598px;
+            line-height: 1.67;
+            color: rgba($black, 0.8);
+            &:not(:last-child){
+                margin-bottom: 25px;
+                @media (min-width:992px) {
+                margin-bottom: 35px;       
+                }
+            }
+        }
+    }
+    &_content-title{
+        margin-bottom: 20px;
+        @include heading-46;
+    }
+}

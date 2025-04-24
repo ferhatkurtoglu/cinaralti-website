@@ -1,0 +1,372 @@
+/* ========== Component  : Tastimonial widget Large Style ============= */
+@use"../../abstract" as *;
+
+.testimonial-widget-large{
+    text-align: center;
+    @media (min-width:992px) {
+        text-align: initial;
+    }
+    .row--custom{
+        --bs-gutter-y: 40px;
+        justify-content: center;
+        @media (min-width:992px) {
+            --bs-gutter-x: 24px;
+            justify-content: initial;
+            align-items: center;
+        }
+    }
+    &__image{
+        @media (min-width:1200px){
+            padding-right: 48px;
+        }
+        @media (min-width:1400px){
+            padding-right: 0;
+        }
+        img{
+            width: 100%;
+        }
+    }
+    &__body{
+        @media (min-width:1400px) {
+            padding-left: 58px;
+        }
+    }
+    &__review-text{
+        font-weight: 600;
+        font-size: 24px;
+        line-height: 1.33;
+        letter-spacing: -0.5px;
+        color: $black;
+        margin-bottom: 17px;
+        @media (min-width:992px) {
+            margin-bottom: 27px;
+        }
+    }
+    &__icon{
+        display: block;
+        margin-bottom: 12px;
+        max-width: 50px;
+        @media (min-width:1200px) {
+            display: inline-block;
+            margin-bottom: 25px;
+            max-width: 100%;
+        }
+        img{
+            max-width: 100%;
+        }
+    }
+    &__user-name{
+        font-weight: 600;
+        font-size: 20px;
+        line-height: 1.4;
+        color: $black;
+        font-family: $font-family-base-main;
+    }
+    &__user-position{
+        font-weight: 400;
+        font-size: 18px;
+        line-height: 1.67;
+        color: $black;
+        margin-bottom: 30px;
+        @media (min-width:992px) {
+            margin-bottom: 50px;
+        }
+    }
+    &__link{
+        font-weight: 700;
+        font-size: 16px;
+        line-height: 1.5;
+        color: $primary;
+        a{
+            display: flex;
+            justify-content: center;
+            column-gap: 8px;
+            color: inherit;
+            @media (min-width:992px) {
+                justify-content: initial;
+            }
+        }
+        
+
+    }
+}
+
+
+
+
+/* ========== Component  : Tastimonial widget Large 2 Style ============= */
+.testimonial-widget-large-2{
+    display: flex;
+    flex-direction: column;
+    row-gap: 30px;
+    text-align: center;
+    align-items: center;
+    @media (min-width:992px) {
+        row-gap: 40px;
+        text-align: initial;
+        align-items: initial;
+    }
+    &__review-text{
+        @include heading-24;
+        color: #221F1A;
+    }
+    &__body{
+        display: flex;
+        column-gap: 15px;
+        color: #221F1A;
+    }
+    &__user-name{
+        @include heading-20;
+    }
+    &__user-position{
+        @include heading-18 (400);
+    }
+    &__link{
+        a{
+            display: flex;
+            column-gap: 12px;
+            color: #324438;
+        @include body-16;
+        i{
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 20px;
+            height: 20px;
+            min-width: 20px;
+            max-width: 20px;
+            min-height: 20px;
+            max-height: 20px;
+            border-radius: 500px;
+            color: #F4B905;
+            background-color: #324438;
+         }
+        }
+        
+    }
+}
+
+
+/* ========== Component : Tastimonial widget Large 3 Style ============= */
+
+.testimonial-widget-large-3{
+    text-align: center;
+    @media (min-width:992px) {
+        text-align: initial;
+    }
+    &__image{
+        @media (min-width:1200px){
+            margin-left: 25px;
+        }
+        @media (min-width:1400px){
+           margin-left: 50px;
+        }
+        img{
+            width: 100%;
+        }
+    }
+    &__body{
+        display: flex;
+        flex-direction: column;
+        row-gap: 20px;
+        text-align: center;
+        @media (min-width:992px){
+        text-align: initial;
+        }
+        @media (min-width:1200px){
+        padding-left: 25px;
+        row-gap: 30px;
+        }
+        @media (min-width:1400px) {
+            padding-left: 60px;
+            row-gap: 40px;
+        }
+        p{
+            @include heading-24;
+        }
+    }
+    &__user-name{
+        @include heading-20;
+        color: #221F1A;
+        font-family: $font-family-base-main;
+    }
+    &__user-position{
+        @include body-18(1.67);
+    }
+}
+.testimonial-widget-large-3-row{
+    --bs-gutter-y: 40px;
+        justify-content: center;
+        @media (min-width:992px) {
+            --bs-gutter-x: 24px;
+            justify-content: initial;
+            align-items: center;}
+}
+/* ========== widget : Tastimonial widget 2============= */
+
+.testimonial-widget{
+    // padding: 30px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    text-align: center;
+    row-gap: 30px;
+    @media (min-width:1200px){  
+        @include px(30px);
+    }
+    &__stars{
+        padding-bottom: 28px;
+        display: inline-block;
+    }
+    p{
+        margin-bottom: 0;
+        font-family: $font-family-base-main;
+        color: $black;
+    }
+    &__rating{
+        strong{
+            font-family: $font-family-base-main;
+            font-style: normal;
+            font-weight: 600;
+            font-size: 16px;
+            line-height: 24px;
+
+            color: var(--body-color);
+        }
+        span{
+            font-family: $font-family-base-main;
+            font-style: normal;
+            font-weight: 600;
+            font-size: 16px;
+            line-height: 24px;
+            color: #6B6F7B;
+        }
+    }
+}
+
+/* ========== widget : Tastimonial widget 2============= */
+
+
+.testimonial-widget-2 {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding:0 30px;
+    text-align: center;
+    @media (min-width:992px) {
+        align-items: initial;
+        text-align: initial;
+    }
+    &__star{
+        margin-bottom: 24px;
+    }
+
+    p{
+        font-weight: 400;
+        font-size: 18px;
+        line-height: 1.67;
+        color: #0A102F;
+        margin-bottom: 24px;
+    }
+
+    &__user-block{
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        row-gap: 6px;
+        column-gap: 12px;
+        @media (min-width:992px) {
+            align-items: initial;
+            flex-direction: row;
+        }
+    }
+    &__user-name{
+        font-family: 'Inter',sans-serif;
+        font-weight: 600;
+        font-size: 18px;
+        line-height: 30px;
+        color: $black;
+    }
+    &__user-position{
+        font-family: 'Inter',sans-serif;
+        font-weight: 400;
+        font-size: 14px;
+        line-height: 1.43;
+        color: rgba($l2-secondary-hex,0.7);
+    }
+}
+/* ========== widget : Tastimonial widget 3============= */
+.testimonial-widget-3{
+    display: flex;
+    flex-direction: column;
+    &-text-content{
+        img{
+            padding-bottom: 20px;
+        }
+        p{
+            font-family: $font-family-base;
+            font-weight: 600;
+            font-size: 24px;
+            line-height: 32px;
+            letter-spacing: -0.5px;
+            color: #1B1C1D;
+            padding-bottom: 20px;
+        }
+
+        &__user{
+            padding-bottom: 45px;
+            h4{
+                font-family: $font-family-base;
+                font-weight: 600;
+                font-size: 24px;
+                line-height: 32px;
+                letter-spacing: -0.5px;
+                color: #1B1C1D;
+                padding-bottom: 5px;
+            }
+            span{
+                font-family: $font-family-base;
+                font-weight: 400;
+                font-size: 18px;
+                line-height: 30px;
+                color: #1B1C1D;
+            }
+
+
+        }
+    }
+}
+
+
+/* ========== widget : Tastimonial widget 4============= */
+
+.testimonial-widget-4 {
+    display: flex;
+    flex-direction: column;
+    row-gap: 30px;
+    align-items: center;
+    text-align: center;
+    @media (min-width:992px){
+    align-items: initial;
+    text-align: initial;
+    }
+    p{
+        @include body-18;
+        font-style: italic;
+    }
+    &__body{
+        display: flex;
+        column-gap: 15px;
+    }
+    &__user{
+        @include heading-18;
+        margin-bottom: 5px;
+        &-position{
+            font-size: 14px;
+            line-height: 1.43;
+            color: rgba(#0A102F, 0.8);
+        }
+    }
+}
+

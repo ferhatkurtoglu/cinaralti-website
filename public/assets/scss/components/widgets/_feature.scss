@@ -1,0 +1,312 @@
+@use '../../abstract' as *;
+
+/* ========== Component  : Feature Widget Style 1============= */
+.feature-widget {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    column-gap: 24px;
+    row-gap: 30px;
+    @media (min-width:992px) {
+      flex-direction: row;
+      justify-content: initial;
+      align-items: initial;
+      text-align: initial;
+    }
+    @media (min-width:1400px){
+      padding-right: 40px;
+    }
+      &__title{
+        padding-bottom: 15px;
+        font-family: $font-family-base;
+        font-style: normal;
+        font-weight: 600;
+        font-size: 24px;
+        line-height: 32px;
+        letter-spacing: -0.5px;
+        color: $body-color;
+      }
+  
+      &__body{
+        p{
+          font-weight: 400;
+          font-size: 18px;
+          line-height: 30px;
+          color: rgba($body-color-rgb,0.8);
+          margin-bottom: 0;
+        }
+      }
+  }
+
+/* ========== Component  : Feature Widget Style 2 ============= */
+
+  .feature-widget-2{
+    position: relative;
+    text-align: center;
+    @media (min-width:1200px){
+      padding-left: 30px;
+      padding-right: 30px;
+    }
+    &__icon{
+      margin-bottom: 30px;
+      min-height: 70px;
+      img{
+        display: inline-block;
+      }
+    }
+    p{
+      color: rgba($l5-secondary-hex, 0.8)
+    }
+    &__title{
+      @include heading-24;
+      @media (min-width:992px){
+        font-size: 22px;
+      }
+      @media (min-width:1400px){
+        font-size: 24px;
+      }
+      font-family: $font-family-base-main;
+      margin-bottom: 15px;
+    }
+    
+  }
+/* Applied on : Landing - SEO Agency*/ 
+  .feature-widget-devider{
+    --bs-gutter-y:20px;
+    --bs-gutter-x:30px;
+    @media (min-width:1400px){
+      --bs-gutter-x:52px;
+    }
+    &>*{
+      position: relative;
+      &:after{
+        content: '';
+        width: 2px;
+        height: 50%;
+        min-height: 120px;
+        background-color: rgba($l5-secondary-hex,.1);
+        position: absolute;
+        top: 50%;
+        right: 0;
+        transform: translateY(-50%);
+        display: none;
+      }
+      @media (min-width:1200px){
+        &:not(:last-child){
+          &:after{
+            display: block;
+          }
+        }
+      }
+    }
+  }
+  /* ========== Component  : Feature Widget Style 3 ============= */
+
+.feature-widget-3{
+    padding: 40px;
+    display: flex;
+    column-gap: 25px;
+    @media (min-width:992px) {
+        column-gap: 40px;
+    }
+    &__title{
+        @include heading-24(700);
+        margin-bottom: 15px;
+        font-family: $font-family-syne-sans;
+    }
+    p{
+      color: rgba(#221F1A, 0.8);
+        line-height: 1.67;
+        @media (min-width:992px) {
+            max-width: 395px;
+        }
+    }
+}
+.feature-widget-3-row{
+  &>*{
+      border-bottom: 1px solid #221F1A;
+      &:nth-last-child(-n+2){
+        @media (min-width:992px) {
+          border-bottom: 0px ;
+
+        }
+        
+    }
+      position: relative;
+      @media (min-width:992px){
+        &:after{
+          content: '';
+          width: 1px;
+          height: 50%;
+          max-height: 100px;
+          background-color: #221F1A;
+          position: absolute;
+          top: 50%;
+          right: 0;
+          transform: translateY(-50%);
+        }
+      }
+      &:nth-of-type(2n){
+        &:after{
+          display: none;
+        }
+      }
+      // @media (min-width:768px){
+      //   &:not(:last-child){
+      //     &:after{
+      //       display: block;
+      //     }
+      //   }
+      // }
+    }
+}
+  /* ========== Component  : Feature Widget Style 5 ============= */
+  .feature-widget-5 {
+    display: flex;
+    column-gap: 20px;
+    border-radius: 20px;
+    transition: 300ms;
+    height: 100%;
+    row-gap: 15px;
+    flex-direction: column;
+    padding: 20px;
+    @media (min-width:480px){
+      padding: 30px;
+      flex-direction: row;
+    }
+    @media (min-width:992px) {
+      column-gap: 25px;
+      border-radius: 25px;
+    }
+    @media (min-width:1200px) {
+      column-gap: 40px;
+      border-radius: 40px;
+    }
+    &__icon{
+      
+      img{
+        max-width: 50px;
+        @media (min-width:768px){
+          max-width:initial;
+        }
+      }
+    }
+    &__title {
+      @include heading-24(500,0.04166666em);
+      font-family: 'Clash Display', sans-serif; 
+      margin-bottom: 15px;
+    }
+  
+    p {
+     @include body-18(400,1.67);
+    }
+  }
+  .feature-widget-5-divider{
+    &>*{
+      border-bottom: 1px solid rgba(34, 31, 26, 0.1);
+     
+      @media (min-width:992px){
+        border-right: 1px solid rgba(34, 31, 26, 0.1);
+        &:nth-last-child(-n+2){
+          border-bottom: 0;
+          &>div{
+            padding-bottom: 0;
+          }
+        }
+        &:nth-of-type(-n + 2){
+          &>div{
+            padding-top: 0;
+          }
+        }
+        &:nth-of-type(2n){
+          border-right:0px ;
+        }
+      }
+      
+    }
+  }
+
+
+
+
+
+
+/* ========== Widget : Feature Style 6 ============= */
+
+.feature-widget-6{
+  max-width: 430px;
+  display: flex;
+  flex-direction: column;
+  column-gap: 30px;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  @media (min-width:768px){
+  align-items: initial;
+  text-align: initial;
+  flex-direction: row;
+  }
+  &__icon{
+    margin-bottom: 30px;
+    img{
+      display: inline-block;
+    }
+  }
+
+  &__title{
+    @include heading-24;
+    margin-bottom: 15px;
+    font-family: $font-family-base-main;
+  }
+  
+  p {
+    font-weight: 400;
+    font-size: 18px;
+    line-height: 30px;
+    color: rgba($body-color-rgb, 0.8);
+    margin-bottom: 0;
+    span{
+      font-weight: 600;
+    }
+  }
+}
+.feature-widget-6-row{
+  display: flex;
+  flex-direction: column;
+  row-gap: 40px;
+  @media (min-width:992px){
+  row-gap: 60px;
+  }
+}
+
+  
+/* ========== widget : Feature Style 1============= */
+.feature-widget-7 {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  column-gap: 20px;
+  row-gap: 17px;
+  @media (min-width:1400px){
+  column-gap: 24px;
+  }
+  @media (min-width:992px) {
+    flex-direction: row;
+    justify-content: initial;
+    align-items: initial;
+    text-align: initial;
+  }
+    &__title{
+      @include heading-24;
+      font-family: $font-family-base;
+      margin-bottom: 10px;
+      @media (min-width:992px){
+      margin-bottom: 15px;
+      }
+    }
+
+}

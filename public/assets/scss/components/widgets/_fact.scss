@@ -1,0 +1,63 @@
+@use "../../abstract/" as *;
+/* ========== Component : Fact Widget   ============= */
+.fact-widget {
+
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    text-align: center;
+    gap: 16px;
+    position: relative;
+  
+    @media (min-width: 768px) {
+       
+        flex-direction: row;
+        align-items: flex-start;
+        text-align: initial;
+    }
+
+    @media (min-width: 992px) {
+        justify-content: center;
+    }
+    @media (min-width:1200px){
+        gap: 24px;
+    }
+  @media (min-width:1200px){
+  max-width: 307px;
+  }
+    &_title {
+        @include heading-24;
+        margin-bottom: 15px;
+    }
+}
+
+/* Applied on : Landing - Web Hosting*/
+.fact-widget-divider {
+    --bs-gutter-y: 30px;
+
+    @media (min-width:1400px) {
+        --bs-gutter-x: 35px;
+    }
+
+    &>* {
+        position: relative;
+        &:nth-child(-n + 2) {
+           @media (min-width:768px){
+            &:after {
+                content: '';
+                width: 2px;
+                height:50%;
+                min-height: 70px;
+                background-color: rgba(#1B1C1D, .1);
+                position: absolute;
+                top: 50%;
+                right: 0;
+                transform: translateY(-50%);
+                display: block;
+                
+            }
+           }
+        }
+        
+    }
+}

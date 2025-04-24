@@ -1,0 +1,35 @@
+@use '../../../abstract' as *;
+/* ==========  Footer Style v2  ============= */
+.footer-v2{
+  @include body-18(400);
+  &__content-block{
+    max-width: 320px;
+    .footer-brand{
+      margin-bottom: 33px;
+    }
+  }
+  &__content-text{
+    margin-bottom: 24px;
+  }
+  a{
+    &.footer-link{
+      text-decoration: underline;
+      margin-bottom: 24px;
+    }
+    
+  }
+  &__list-block{
+    @media (min-width:1400px){
+      width:893px;
+    }
+  }
+  .row--list-block{
+    justify-content: space-between;
+    --bs-gutter-y:40px;
+  }
+
+  .row--footer-main{
+    --bs-gutter-y:40px;
+    justify-content: space-between;
+  }
+}

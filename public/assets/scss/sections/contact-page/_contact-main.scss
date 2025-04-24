@@ -1,0 +1,59 @@
+@use"../../abstract" as *;
+/* ========== Contact main Section Style ============= */
+.contact{
+    &_main-section{
+        .row--cuatom{
+            --bs-gutter-y: 40px;
+            justify-content: center;
+            @media (min-width:992px) {
+                align-items: center;
+                --bs-gutter-x: 25px;
+            }
+        }
+        .content-divider{
+            margin-top: 30px;
+            @media (min-width:992px){
+            margin-top: 50px;
+            }
+        }
+    }
+    &_main-content{
+        display: flex;
+        flex-direction: column;
+        row-gap: 30px;
+        @media (min-width:992px){
+        row-gap: 40px;
+        }
+        @media (min-width:1200px){
+        row-gap: 60px;
+        }
+        @media (min-width:1400px){
+            row-gap: 100px;
+        }
+    }
+}
+
+.contact-2 {
+    &_form-section {
+        .form-box-style {
+            display: flex;
+            flex-direction: column;
+            row-gap: 24px;
+
+            &__form-wrapper {
+                border:none;
+            }
+        }
+        .form--row-custom {
+            --bs-gutter-y: 12px;
+
+            @media (min-width: 768px) {
+                --bs-gutter-y: 18px;
+            }
+
+            @media (min-width: 992px) {
+                --bs-gutter-y: 24px;
+            }
+        }
+    }
+}

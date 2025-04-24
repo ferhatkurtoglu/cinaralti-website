@@ -1,0 +1,54 @@
+{
+    "blogs": [
+        {
+            "id": "iman-hakikatleri",
+            "path": "content\/blog\/iman-hakikatleri.md",
+            "title": "\u0130man Hakikatleri ve Kalbin Huzuru",
+            "date": "2023-12-15",
+            "author": "Ahmet Y\u0131lmaz",
+            "category": "Allah'a \u0130man",
+            "image": "iman-hakikatleri.jpg",
+            "comments": []
+        },
+        {
+            "id": "kuran-mucizeleri",
+            "path": "content\/blog\/kuran-mucizeleri.md",
+            "title": "Kur'an-\u0131 Kerim'in Matematiksel Mucizeleri",
+            "date": "2024-02-05",
+            "author": "Fatma Demir",
+            "category": "Kur'an Mucizeleri",
+            "image": "kuran-mucizeleri.jpg",
+            "comments": []
+        },
+        {
+            "id": "namaz-bereket",
+            "path": "content\/blog\/namaz-bereket.md",
+            "title": "Namaz\u0131n \u0130nsan Hayat\u0131na Getirdi\u011fi Bereket ve Huzur",
+            "date": "2024-03-12",
+            "author": "Ali Kaya",
+            "category": "Namaz",
+            "image": "namaz-bereket.jpg",
+            "comments": []
+        },
+        {
+            "id": "tevekkul-sabir",
+            "path": "content\/blog\/tevekkul-sabir.md",
+            "title": "Tevekk\u00fcl ve Sab\u0131r: \u0130man\u0131n Gere\u011fi",
+            "date": "2024-04-20",
+            "author": "Zeynep Y\u0131ld\u0131z",
+            "category": "Allah'a \u0130man",
+            "image": "tevekkul-sabir.jpg",
+            "comments": []
+        },
+        {
+            "id": "ahiret-delilleri",
+            "path": "content\/blog\/ahiret-delilleri.md",
+            "title": "Ha\u015fir Hakikati: Ahiretin Varl\u0131\u011f\u0131na Dair Deliller",
+            "date": "2024-01-10",
+            "author": "Mehmet \u00d6zt\u00fcrk",
+            "category": "Ahiret Delilleri",
+            "image": "ahiret-delilleri.jpg",
+            "comments": []
+        }
+    ]
+}

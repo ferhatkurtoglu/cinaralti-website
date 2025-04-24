@@ -1,0 +1,16 @@
+@use"../../abstract" as *;
+/* ========== Home 2 : Pricing Section Style ============= */
+.home-2{
+    &_pricing-section{
+        .section-heading{
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            margin-bottom: 60px;
+            text-align: center;
+            &__title{
+                margin-bottom: 50px;
+            }
+        }
+    }
+}

@@ -1,0 +1,18 @@
+@use "../../abstract" as *;
+/* ========== about : Feature Section Style ============= */
+.about{
+    &_feature-section{
+        .feature-widget-7-row{
+            justify-content: center;
+            --bs-gutter-y: 30px;
+            --bs-gutter-x: 24px;
+            @media (min-width:1200px){
+            --bs-gutter-y: 40px;
+            }
+           @media (min-width:1400px){
+            --bs-gutter-x: 76px;
+            --bs-gutter-y: 60px;
+           }
+        }
+    }
+}

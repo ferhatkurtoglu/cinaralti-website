@@ -1,0 +1,66 @@
+@use "../../abstract/" as *;
+/* ========== Home 9 : Content Section 2 Style ============= */
+.home-9{
+    &_content-section-2{
+        .row--custom{
+            justify-content: center;
+            --bs-gutter-y: 30px;
+            @media (min-width:992px) {
+                align-items: center;
+                justify-content: space-between;
+            }
+        }
+        .content{
+            max-width: 670px;
+            @media (min-width:1400px) {
+                margin-left: 70px;
+            }
+            p{
+                color: rgba( #221F1A, 0.8);
+                @media (min-width:992px) {
+                    max-width: 620px;
+                }
+            }
+            &-widget-wrapper{
+                display: flex;
+                flex-direction: column;
+                row-gap: 20px;
+                @media (min-width:992px) {
+                    row-gap: 30px;
+                }
+            }
+     
+        }
+    }
+    &_content-image-2-block{
+        position: relative;
+        max-width: 283.1px;
+        z-index: 1;
+        display: inline-block;
+    }
+    &_content-image-2{
+        img{
+            width: 100%;
+        }
+    }
+    &_content-image-2-shape{
+        width: 179.5%;
+        &.absolute-center{
+            z-index: -1;
+        }
+        img{
+            width: 100%;
+        }
+    }
+    &_content-image-2-shape-2{
+        position: absolute;
+        top: -12%;
+        left: -23%;
+        width: 23%;
+        z-index: -1;
+        @media (min-width:768px){
+            top: -9%;
+            left: -18%;
+        }
+    }
+}

@@ -1,0 +1,122 @@
+@use '../../abstract' as *;
+
+/* ========== widget : Sidebar BLog============= */
+.sidebar-blog-widget{
+    display: flex;
+    column-gap: 16px;
+    &__image{
+       img{
+        min-width:150px;
+        border-radius: 5px;
+       }
+    }
+    &__date{
+        display: flex;
+        column-gap: 10px;
+        margin-bottom: 12px;
+        font-size: 14px;
+        line-height: 1.43;
+        color: #13111A;
+    }
+    &__title{
+        @include body-16;
+        color: #13111A;
+        font-family: $font-family-base-main;
+    }
+    a{
+        color: inherit;
+    }
+}
+
+
+
+
+/* ========== widget : Blog Comment Widget============= */
+.comment-widget{
+    &__inner{
+        display: flex;
+        column-gap: 20px;
+    }
+    &__image{
+        min-width: 80px;
+        max-width: 80px;
+        min-height: 8px;
+        max-height: 80px;
+        border-radius: 500px;
+        img{
+          width: 100%;
+          height: 100%;
+          border-radius: inherit;
+          object-fit: cover;
+          object-position: center;
+        }
+    }
+    &__body{
+        width: 100%;
+        p{
+            @include body-18(400,1.67) ;
+            color: rgba(#0A102F, 0.8);
+            padding-bottom: 24px;
+            border-bottom:  1px solid rgba(#0A102F, 0.1);
+            margin-bottom: 24px;
+            max-width: 590px;
+              
+            &:last-child{
+                padding-bottom: 40px;
+            }
+        }
+    }
+    &__meta{
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    &__user-name{
+        font-weight: 600;
+        font-size: 14px;
+        line-height: 1.43;
+        font-family: $font-family-base-main;
+        margin-bottom: 10px;
+    }
+    &__date{
+        font-weight: 400;
+        font-size: 14px;
+        line-height: 1.43;
+        margin-bottom: 15px;
+        font-family: $font-family-base-main;
+    }
+    &__button{
+       a{
+        font-weight: 700;
+        font-size: 16px;
+        color: rgba(#0A102F, 0.8);
+        &:hover{
+            color: $primary;
+        }
+       }
+    }
+    &>.comment-widget{
+        @media (min-width:576px){
+            padding-left: 100px;
+        }
+        .comment-widget__image{
+            min-width: 50px;
+            max-width: 50px;
+            min-height: 50px;
+            max-height: 50px;
+            border-radius: 500px;
+            img{
+              width: 100%;
+              height: 100%;
+              border-radius: inherit;
+              object-fit: cover;
+              object-position: center;
+            }
+      }
+      p{
+        max-width: 525px;
+      }
+
+    }
+
+}

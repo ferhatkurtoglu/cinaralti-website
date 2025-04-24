@@ -1,0 +1,35 @@
+@use "../../abstract/" as *;
+/* ========== Component : Career Widget   ============= */
+.career-details_widget{
+    display: flex;
+    column-gap: 20px;
+    &__icon{
+        background: #3147FF;
+        min-width: 50px;
+        max-width: 50px;
+        max-height: 50px;
+        min-height: 50px;
+        height: 50px;
+        width: 50px;
+        border-radius: 500px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    &__title{
+        @include heading-20;
+        font-weight: 600;
+        color: $black;
+        margin-bottom: 5px;
+        font-family: $font-family-base-main
+    }
+    span{
+        @include heading-18(400);
+        color: rgba($black, 0.8);
+    }
+}
+.career-details_widget-row{
+    display: flex;
+    flex-direction: column;
+    row-gap: 30px;
+}

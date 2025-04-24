@@ -1,0 +1,43 @@
+@use "../../abstract/" as *;
+/* ========== Home 4 : Content Section 2 Style ============= */
+.home-4 {
+    &_content-section-2 {
+
+        .row--custom{
+            justify-content: center;
+            --bs-gutter-y: 30px;
+            @media (min-width:992px) {
+                flex-direction: row-reverse;
+                align-items: center;
+                justify-content: space-between;
+            }
+        }
+        .content {
+                align-items: center;
+            
+            @media (min-width:992px) {
+                align-items: initial;
+            }
+
+            &-text-block {
+                p {
+                    @media (min-width:992px) {
+                        max-width: 585px;
+                    }
+                }
+            }
+            &-title{
+                font-weight: 700;
+                letter-spacing: -1px;
+            }
+        }
+    }
+    &_content-image-2{
+        img{
+            width: 100%;
+        }
+        @media (min-width:1200px) {
+            margin-left: 30px;
+        }
+    }
+}

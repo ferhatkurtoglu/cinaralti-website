@@ -1,0 +1,78 @@
+@use "../../abstract/" as *;
+/* ========== Home 9 : Content Section 1 Style ============= */
+.home-9{
+    &_content-section-1{
+        background: #EBDECE;
+        .row--custom{
+            justify-content: center;
+            --bs-gutter-y: 30px;
+            @media (min-width:992px) {
+                flex-direction: row-reverse;
+                justify-content: space-between;
+                align-items: center;
+            }
+        }
+        .content{
+            p{
+                color: rgba( #221F1A, 0.8);
+                @media (min-width:992px) {
+                    max-width: 600px;
+                }
+            }
+            &-link{
+                display: flex;
+                column-gap: 8px;
+                align-items: center;
+                color: $l9-primary-hex;
+                @include body-16;
+                i{
+                    color: #EBDECE;
+                    background-color:  $l9-primary-hex;
+                    width: 20px;
+                    max-width: 20px;
+                    min-height: 20px;
+                    height: 20px;
+                    max-height: 20px;
+                    min-height: 20px;
+                    border-radius: 500px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                }
+            }
+            &-title{
+                @media (min-width:992px) {
+                    max-width: 660px;
+                }
+            }
+        }
+    }
+    &_content-image-1-block{
+        position: relative;
+        max-width: 285px;
+        z-index: 1;
+        display: inline-block;
+    }
+    &_content-image-1{
+       
+        img{
+            width: 100%;
+        }
+    }
+    &_content-image-1-shape{
+        width: 178%;
+        &.absolute-center{
+            z-index: -1;
+        }
+        img{
+            width: 100%;
+        }
+    }
+    &_content-image-1-shape-2{
+        position: absolute;
+        top: -9%;
+        right: -18%;
+        width: 23%;
+
+    }
+}

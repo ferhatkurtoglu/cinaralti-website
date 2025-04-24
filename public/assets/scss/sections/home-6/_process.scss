@@ -1,0 +1,19 @@
+@use "../../abstract/" as *;
+/* ========== Home 6 : process Section Style ============= */
+.home-6_process-section{
+    position: relative;
+    background-color: $black;
+    color: $white;
+
+    .process-shape{
+        position: absolute;
+        top: 200px;
+        right: 25px;
+        display: inline;
+    }
+
+    .row--custom {
+        --bs-gutter-x: 24px;
+        --bs-gutter-y: 24px;
+    }
+}

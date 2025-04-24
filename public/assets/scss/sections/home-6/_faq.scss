@@ -1,0 +1,11 @@
+@use "../../abstract/" as *;
+/* ========== Home 6 : FAQ Section Style ============= */
+.home-6{
+    &_faq-section{
+        .section-heading{
+            @media (min-width:992px){
+            padding-right: 30px;
+            }
+        }
+    }
+}

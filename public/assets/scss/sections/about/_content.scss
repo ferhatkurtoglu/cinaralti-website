@@ -1,0 +1,97 @@
+@use "../../abstract" as *;
+
+/* ========== about : Content Section Style ============= */
+.about {
+    &_content-section {
+        .row--custom {
+            --bs-gutter-y: 30px;
+            --bs-gutter-x: 40px;
+            justify-content: center;
+
+            @media (min-width:992px) {
+                justify-content: space-between;
+            }
+        }
+
+        .content {
+            row-gap: 30px;
+
+            @media (min-width:1200px) {
+                row-gap: 50px;
+            }
+
+            p {
+                @include body-18(400, 1.67);
+                margin-bottom: 30px;
+
+                @media (min-width:1200px) {
+                    margin-bottom: 50px;
+                    max-width: 590px;
+                }
+            }
+        }
+
+        .content-testimonial {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            text-align: center;
+
+            @media (min-width:992px) {
+                text-align: initial;
+            }
+
+            &__text {
+                p {
+                    font-style: italic;
+                    margin-bottom: 24px;
+                    font-weight: 600;
+                    color: rgba(#0A102F, 0.8);
+                    font-family: $font-family-base-main;
+                }
+            }
+
+            &__user-metadata {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                row-gap: 15px;
+                column-gap: 15px;
+
+                @media (min-width:992px) {
+                    flex-direction: row;
+                    align-items: initial;
+                }
+            }
+
+            &__body {
+                span {
+                    font-size: 14px;
+                    line-height: 1.43;
+                    color: rgba($body-color-rgb, 0.8);
+                }
+            }
+
+            &__user-name {
+                @include heading-18;
+                font-family: $font-family-base-main;
+            }
+        }
+    }
+
+    &_content-image-block {
+        position: relative;
+
+        @media (min-width:1200px) {
+            margin-right: 20px;
+        }
+
+        @media (min-width:1400px) {
+            margin-right: 55px;
+        }
+
+        img {
+            width: 100%;
+        }
+    }
+}

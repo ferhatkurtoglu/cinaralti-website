@@ -1,0 +1,19 @@
+@use "../../abstract" as *;
+/* ========== Home 5 : Service Section Style ============= */
+
+.home-5{
+    &_service-section{
+        position: relative;
+        background-color: $l5-secondary-hex;
+        color:$white;
+    }
+    &_service-section-shape{
+        display: none;
+        position: absolute;
+        right: 12%;
+        top: 16%;
+        @media (min-width:992px) {
+            display: block;
+        }
+    }
+}

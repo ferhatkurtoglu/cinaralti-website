@@ -1,0 +1,32 @@
+@use "../../abstract/" as *;
+/* ========== Home 10 : Faq Section  Style ============= */
+.home-10{
+    &_faq-section{
+        background: #FFF4D9;
+        
+        
+        .row--custom{
+            justify-content: center;
+            --bs-gutter-y: 40px;
+            @media (min-width:992px) {
+                justify-content: space-between;
+            }
+        }
+        .content{
+            @media (min-width:1400px){
+            row-gap: 45px;
+            }
+            p{
+                color: rgba( #221F1A, 0.8);
+            }
+        }
+        .accordion-style-5{
+            @media (min-width:1200px){
+            margin-left: 20px;
+            }
+            @media (min-width:1400px){
+            margin-left: 55px;
+            }
+        }
+    }
+}

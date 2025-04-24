@@ -1,0 +1,80 @@
+@use "../abstract" as *;
+/*======= Base Class ========*/
+:root{
+  @each $k,$v in $css-color-vars{
+    --#{$k}:#{$v};
+    --#{$k}-rgb:#{to-rgb($v)};
+  }
+  @each $k,$v in $css-other-vars{
+    --#{$k}:#{$v};
+  }
+}
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+body {
+  font-family:$font-family-base;
+  font-size: 1rem;
+  line-height: 1.56;
+}
+span,
+a {
+  display: inline-block;
+}
+a {
+  text-decoration: none;
+}
+
+ul{
+  list-style: none;
+  padding-left: initial;
+}
+img{
+  display: block;
+}
+
+.h1, .h2, .h3, .h4, .h5, .h6, h1, h2, h3, h4, h5, h6{
+  font-weight: $font-weight-heading;
+  font-family: $font-family-heading;
+}
+
+p{
+  font-size: 16px;
+  line-height: 1.67;
+  margin-bottom: initial;
+  color: rgba($black, 0.8);
+  @media (min-width:576px){
+    font-size: 18px;
+  }
+}
+.position-relative{
+  position: relative;
+}
+.list-style-bullet{
+  li{
+    display: flex;
+    column-gap: 8px;
+    &::before{
+      content: "";
+      width: 8px;
+      height: 8px;
+      min-width: 8px;
+      min-width: 8px;
+      min-height: 8px;
+      max-height: 8px;
+      border-radius: 500px;
+      background-color: $black;
+      top: 10px;
+      position: relative;
+    }
+  }
+}
+
+.inner-block-title{
+  line-height: 1.5;
+  letter-spacing: 0em;
+  @include heading-24;
+  font-family: var(--font-family-base);
+}

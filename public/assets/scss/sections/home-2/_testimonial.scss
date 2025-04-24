@@ -1,0 +1,10 @@
+/* ========== Home 2 : Testimonial Section Style ============= */
+.home-2{
+  &_testimonial-section{
+    // background-color: rgba(162, 89, 255, 0.03);
+    .row--testimonial-widget{
+      --bs-gutter-y:40px;
+      justify-content: center;
+    }
+  }
+}

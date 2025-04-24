@@ -1,0 +1,235 @@
+@use '../../abstract' as *;
+/* ========== Component : Pricing Card Style 1============= */
+.pricing-card{
+   
+  border: 2px solid #0A102F;
+  border-radius: 10px;
+  padding: 40px;
+  &__head{
+      text-align: center;
+      padding-bottom: 25px;
+      margin-bottom: 40px;
+      border-bottom: 1px solid rgba(#0A102F, 0.1);
+  }
+  &__plan{
+      font-weight: 700;
+      font-size: 20px;
+      line-height: 1.4;
+      margin-bottom: 20px;
+  }
+  &__price-block{
+      font-weight: 400;
+      font-size: 28px;
+      line-height: 2.86;
+      span{
+          font-weight: 700;
+          font-size: 58px;
+          line-height: 1.38;
+          font-family: $font-family-base;
+      }
+  }
+  p{
+      font-weight: 400;
+      font-size: 14px;
+      line-height: 1.43;
+      color: rgba(#0A102F, 0.7);
+  }
+  &__body{
+      display: flex;
+      flex-direction: column;
+      row-gap: 20px;
+      @media (min-width:992px) {
+          row-gap: 35px;
+      }
+  }
+  &__list{
+      display: flex;
+      justify-content: center;
+      flex-direction: column;
+      row-gap: 20px;
+      li{
+          display: flex;
+          column-gap: 12px;
+          padding-left: 20px;
+          padding-right: 20px;
+          font-weight: 600;
+          font-size: 16px;
+          line-height: 1.5;
+          &::before{
+              font-family: "Font Awesome 6 Free"; 
+              font-weight: 900; 
+              content: "\f005";
+          }
+          &.disabled{
+              opacity: 0.2;
+          }
+      }
+  }
+    &.active{
+      box-shadow: 10px 10px rgba($body-color-rgb);
+      border-radius: 10px;
+    }
+}
+
+/* ========== Component : Pricing Card Style 2 ============= */
+.pricing-card-2{
+   
+    background: #FDFBF9;
+    border-radius: 5px;
+    padding: 40px;
+    &__head{
+        padding-bottom: 25px;
+        margin-bottom: 30px;
+        border-bottom: 1px solid rgba(#1B1C1D, 0.1);
+    }
+    &__icon{
+        margin-bottom: 30px;
+    }
+    &__plan{
+        font-weight: 700;
+        font-size: 20px;
+        line-height: 1.4;
+        margin-bottom: 10px;
+    }
+    &__price{
+        font-weight: 600;
+        font-size: 30px;
+        line-height: 1.18;
+        color: #1B1C1D;
+        letter-spacing: -3px;
+        font-family: $font-family-heading;
+        @media (min-width:768px) {
+            font-size: 37px;
+        }
+        @media (min-width:992px) {
+            font-size: 38px;
+        }
+        @media (min-width:1200px) {
+            font-size: 52px;
+        }
+        @media (min-width:1400px) {
+            font-size: 62px;
+        }
+    }
+    &__time{
+        font-weight: 400;
+        font-size: 18px;
+        line-height: 1.67;
+        font-family: 'Inter', sans-serif;
+        color: rgba(#1B1C1D,0.8);
+    }
+    p{
+        font-weight: 400;
+        font-size: 14px;
+        line-height: 1.43;
+        color: rgba(#0A102F, 0.7);
+    }
+    &__body{
+        display: flex;
+        flex-direction: column;
+        @media (min-width:992px) {
+            row-gap: 13px;
+        }
+    }
+    &__list{
+        display: flex;
+        justify-content: center;
+        flex-direction: column;
+        row-gap: 12px;
+        li{
+            display: flex;
+            column-gap: 5px;
+            font-weight: 600;
+            font-size: 18px;
+            line-height: 1.67;
+            color: rgba(#1B1C1D, 0.8);
+        }
+    }
+}
+
+
+
+
+/* ========== Component : Pricing Card Style 4 ============= */
+.pricing-card-4{
+    display: flex;
+    flex-direction: column;
+    row-gap: 30px;
+    border-radius: 20px;
+    padding: 40px;
+    @media (min-width:992px) {
+        row-gap: 40px;
+    }
+    &__head{
+        color: #FFFFFF;
+    }
+    &__plan{
+        @include heading-24(700);
+        margin-bottom: 10px;
+    }
+    &__price{
+        font-weight: 700;
+        font-size: 32px;
+        line-height: 1.38;
+        font-family: $font-family-base;
+        @media (min-width:768px) {
+            font-size: 36px;
+        }
+        @media (min-width:992px) {
+            font-size: 44px;
+        }
+        @media (min-width:1200px) {
+            font-size: 52px;
+        }
+        @media (min-width:1400px) {
+            font-size: 58px;
+        }
+    }
+    &__time{
+        @include heading-20;
+        font-weight: 400;
+        line-height: 1.6;
+        font-family: 'Inter', sans-serif;
+    }
+    p{
+        font-weight: 400;
+        font-size: 14px;
+        line-height: 1.43;
+        color: rgba(#0A102F, 0.7);
+    }
+    &__list{
+        display: flex;
+        justify-content: center;
+        flex-direction: column;
+        row-gap: 12px;
+        li{
+            display: flex;
+            column-gap: 12px;
+            @include heading-20;
+            line-height: 1.4;
+            color: #FFFFFF;
+            &::before{
+                content: "";
+                min-width: 6px;
+                max-width: 6px;
+                min-height: 6px;
+                max-height: 6px;
+                border-radius: 500px;
+                position: relative;
+                top: 12px;
+                background-color: #FFFFFF;
+            }
+        }
+    }
+    &__button{
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        row-gap: 12px;
+        &-bottom-text{
+            font-size: 16px;
+            line-height: 1.5;
+            color: rgba(#FFFFFF,0.8);
+        }
+    }
+}

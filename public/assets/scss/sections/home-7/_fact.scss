@@ -1,0 +1,72 @@
+@use "../../abstract/" as *;
+
+/* ========== Home 7 : Fact Section ============= */
+.home-7 {
+    &_fact-section {
+        padding-top: 40px;
+        padding-bottom: 40px;
+
+        @media (min-width: 992px) {
+            padding-top: 70px;
+            padding-bottom: 70px;
+        }
+
+        .row--custom {
+            --bs-gutter-y: 30px;
+            --bs-gutter-x: 40px;
+            justify-content: center;
+            @media (min-width:768px){
+            justify-content: initial;
+            }
+            @media (min-width:992px){
+            align-items: center;
+            justify-content: space-between;
+            }
+            @media (min-width:1400px){
+                --bs-gutter-x: 60px;
+            }
+        }
+
+        .row--custom-inner {
+            --bs-gutter-x: 35px;
+            --bs-gutter-y: 35px;
+        }
+    }
+
+
+    &_fact-navigation-image {
+        position: relative;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 170px;
+        width: 160px;
+        @media (min-width:768px){
+            right: -30%;
+            top: -5%;
+        }
+        @media (min-width:992px){
+        right: 0;
+        top: 0;
+        }
+
+        .fact-round-image {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            animation: rotate 20s linear infinite;
+        }
+    }
+}
+
+@keyframes rotate {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}

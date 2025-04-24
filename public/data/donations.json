@@ -1,0 +1,82 @@
+[
+    {
+        "id": 1,
+        "title": "Genel Bağış",
+        "image": "../public/assets/image/donate/donate1.jpg",
+        "categories": [
+            "genel",
+            "acil-yardim"
+        ],
+        "url": "donate-details?type=Genel Bağış"
+    },
+    {
+        "id": 2,
+        "title": "Zekat",
+        "image": "../public/assets/image/donate/donate1.jpg",
+        "categories": [
+            "genel",
+            "acil-yardim"
+        ],
+        "url": "donate-details?type=Zekat"
+    },
+    {
+        "id": 3,
+        "title": "Bina Satın Alma",
+        "image": "../public/assets/image/donate/donate1.jpg",
+        "categories": [
+            "projeler",
+            "genel"
+        ],
+        "url": "donate-details?type=Bina Satın Alma"
+    },
+    {
+        "id": 4,
+        "title": "Kuran Talebelerinin İhtiyaçları",
+        "image": "../public/assets/image/donate/donate1.jpg",
+        "categories": [
+            "egitim",
+            "genel"
+        ],
+        "url": "donate-details?type=Eğitim Bağışı"
+    },
+    {
+        "id": 5,
+        "title": "Afrika Bağışı",
+        "image": "../public/assets/image/donate/donate1.jpg",
+        "categories": [
+            "acil-yardim",
+            "genel"
+        ],
+        "url": "donate-details?type=Sağlık Bağışı"
+    },
+    {
+        "id": 6,
+        "title": "Filistin Yardımı",
+        "image": "../public/assets/image/donate/donate1.jpg",
+        "categories": [
+            "acil-yardim",
+            "genel"
+        ],
+        "url": "donate-details?type=İftar Bağışı"
+    },
+    {
+        "id": 7,
+        "title": "Yetim Projesi",
+        "image": "../public/assets/image/donate/donate1.jpg",
+        "categories": [
+            "yetim",
+            "genel"
+        ],
+        "url": "donate-details?type=Yetim Projesi"
+    },
+    {
+        "id": 8,
+        "title": "Kurban Bağışı",
+        "image": "../public/assets/image/donate/donate1.jpg",
+        "categories": [
+            "kurban",
+            "genel"
+        ],
+        "url": "donate-details?type=Kurban Bağışı"
+    }
+]

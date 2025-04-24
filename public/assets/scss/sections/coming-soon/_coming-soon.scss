@@ -1,0 +1,124 @@
+@use "../../abstract/" as *;
+
+.coming-soon {
+    &-section {
+        padding-top: 60px;
+        padding-bottom: 60px;
+
+        @media (min-width: 768px) {
+            padding-top: 80px;
+            padding-bottom: 80px;
+        }
+
+        @media (min-width: 992px) {
+            padding-top: 100px;
+            padding-bottom: 100px;
+        }
+
+        @media (min-width: 1200px) {
+            padding-top: 100px;
+            padding-bottom: 120px;
+        }
+
+        .row {
+            justify-content: center;
+        }
+
+        text-align: center;
+    }
+
+    &_content-wrapper {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+
+        .logo {
+            max-width: 110px;
+            margin-bottom: 100px;
+        }
+    }
+
+    &_newsletter {
+        position: relative;
+        max-width: 550px;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        margin-top: 40px;
+
+        @media (max-width: 991px) {
+            gap: 30px;
+        }
+
+        .newsletter-form-1 {
+            .form-control{
+                font-weight: 400;
+                font-size: 18px;
+                border-color: rgba($body-color-rgb,.5);
+                &::placeholder{
+                    color: rgba($body-color-rgb,.5);
+                    font-weight: 400;
+                }
+            }
+            button {
+                padding-left: 42px;
+                padding-right: 42px;
+            }
+        }
+
+        &-bottom-text {
+            font-size: 16px;
+            opacity: 0.8;
+        }
+    }
+}
+
+#clock {
+    color: $primary;
+    font-size: 16px;
+    line-height: 1.13;
+    font-weight: 700;
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+
+    @media (min-width: 768px) {
+        font-size: 32px;
+        gap: 20px;
+    }
+
+    @media (min-width: 992px) {
+        font-size: 48px;
+        gap: 30px;
+        margin-bottom: 40px;
+    }
+
+    @media (min-width: 1200px) {
+        font-size: 62px;
+        gap: 40px;
+        margin-bottom: 60px;
+    }
+
+    .counter {
+        &-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        &-postfixer {
+            font-size: 14px;
+            line-height: 1.2;
+            font-weight: 500;
+            margin-top: 10px;
+
+            @media (min-width: 768px) {
+                font-size: 16px;
+            }
+
+            @media (min-width: 992px) {
+                font-size: 20px;
+            }
+        }
+    }
+}

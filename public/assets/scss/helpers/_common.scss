@@ -1,0 +1,70 @@
+
+@use "../abstract" as *;
+/* Common: Background Colors */
+.bg-primary-l2{
+  background-color: $l2-primary;
+}
+
+/* Common: Background Image */ 
+.bg-image{
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
+}
+.object-image{
+  object-fit: cover;
+  object-position: center;
+  height: 100%;
+  width: 100%;
+}
+
+/* Common: Positioning */ 
+.absolute-center {
+  position: absolute;
+  z-index: 1;
+  top: 50%;
+  left: 50%;
+  transform: translateX(-50%) translateY(-50%);
+}
+
+.link-box{
+  @include py(18px);
+  @include px(42px);
+  text-align: center;
+  color: $white;
+  display: inline-block;
+  border-radius: 3px;
+  font-weight: 700;
+  font-size: 16px;
+  a{
+    color: $white;
+    text-decoration: underline;
+  }
+}
+
+.section-divider{
+  position: relative;
+  z-index: -99;
+  img{
+    width: 100%;
+    margin-top: -1px;
+  }
+}
+
+.border-bottom-dark{
+  border-bottom: 1px solid rgba(#FFFFFF,.1);
+}
+
+
+/* ========== Section Button   ============= */
+.section-button {
+  display: flex;
+  justify-content: center;
+  margin-top: 40px;
+  @media (min-width:576px){
+  margin-top: 60px;
+  }
+  @media (min-width:992px){
+  margin-top: 80px;
+  }
+}

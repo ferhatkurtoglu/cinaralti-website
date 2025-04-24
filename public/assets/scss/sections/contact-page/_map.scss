@@ -1,0 +1,20 @@
+/* ========== Contact location Style ============= */
+@use "../../abstract/" as *;
+
+.contact {
+    &_location-image {
+        height: 600px;
+        @media (max-width: 991px) {
+            height: 300px;
+        }
+
+        @media (max-width: 567px) {
+            height: 260px;
+        }
+    }
+
+    &_location-image {
+        width: 100%;
+        object-fit: cover;
+    }
+}

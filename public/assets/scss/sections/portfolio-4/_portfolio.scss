@@ -1,0 +1,22 @@
+@use "../../abstract/" as *;
+
+.portfolio {
+    &-v4 {
+        .row--custom {
+            --bs-gutter-x: 34px;
+            --bs-gutter-y: 30px;
+        }
+
+        justify-content: space-between;
+
+        .portfolio-widget {
+            border-bottom: 1px solid #E5E5E5;
+            padding-bottom: 30px;
+
+            &__text {
+                max-width: 650px;
+            }
+        }
+    }
+
+}

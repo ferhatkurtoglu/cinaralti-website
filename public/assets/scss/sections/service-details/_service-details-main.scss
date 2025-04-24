@@ -1,0 +1,52 @@
+@use"../../abstract" as *;
+/* ========== service Details Main Section Style ============= */
+.service-details{
+    &_main-section{
+
+    }
+    &_main-image{
+        margin-bottom: 25px;
+        @media (min-width:992px){
+        margin-bottom: 40px;
+        }
+    }
+    &_main-single{
+        margin-bottom: 20px;
+        @media (min-width:992px){
+        margin-bottom: 30px;
+        }
+        p{
+            margin-bottom: 20px;
+            &:last-child{
+                margin-bottom: 0px;
+            }
+        }
+        ul{
+            display: flex;
+            flex-direction: column;
+            row-gap: 16px
+        }
+        li{
+            display: flex;
+            column-gap: 12px;
+            @include heading-18;
+            img{
+                max-width: 26px;
+                max-height: 26px;
+                position: relative;
+                top: 5px
+            }
+        }
+    }
+    &_main-title{
+        @include heading-24;
+        font-family: var(--font-family-base);
+        margin-bottom: 15px;
+    }
+    &_main-image-row{
+        margin-bottom: 20px;
+        @media (min-width:992px){
+        margin-bottom: 30px;
+        }
+    }
+}

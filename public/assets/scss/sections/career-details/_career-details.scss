@@ -1,0 +1,60 @@
+@use "../../abstract" as *;
+/* ========== Career Details Main Style ============= */
+.career-details{
+    margin-bottom: 40px;
+    @media (min-width:992px){
+    margin-bottom: 60px;
+    &:last-child{
+        margin-bottom: 0;
+    }
+    }
+    &_main-section{
+        .row--custom{
+            --bs-gutter-y: 40px;
+            @media (min-width:992px){
+                --bs-gutter-y: 60px;
+            }
+        }
+   }
+    &_section{
+        &__title{
+            @include heading-48;
+            font-family: var(--font-family-base);
+            color: $black;
+            margin-bottom: 18px;
+        }
+    }
+    &_title{
+        line-height: 1.5;
+        letter-spacing: 0em;
+        @include heading-24;
+        font-family: var(--font-family-base);
+        color: $black;
+        margin-bottom: 18px;
+    }
+    &_job-info{
+        display: flex;
+        flex-wrap: wrap;
+        column-gap: 24px;
+        row-gap: 15px;
+        span{
+            display: flex;
+            column-gap: 5px;
+            @include  body-18(400,1.67);
+            color: $black;
+        }
+    }
+    p{
+        max-width: 636px;
+        margin-bottom: 30px;
+    }
+    ul{
+        margin-bottom: 0;
+        display: flex;
+        flex-direction: column;
+        row-gap: 18px;
+        li{
+            @include heading-18(400);
+        }
+    }
+}

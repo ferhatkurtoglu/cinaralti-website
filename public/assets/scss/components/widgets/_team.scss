@@ -1,0 +1,28 @@
+@use '../../abstract' as *;
+/* ========== Component  :Team Widget =========== */
+.team-widget{
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+    &__image-block{
+        margin-bottom: 24px;
+        overflow: hidden;
+        img{
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position:center;
+        }
+    }
+    &__user-name{
+        @include heading-20;
+        color: #0A102F;
+        font-family: $font-family-base-main;
+        margin-bottom: 5px;
+       
+    }
+    &__user-position{
+        @include body-18(400,1.67);
+        color: rgba(#0A102F, 0.8);
+    }
+}

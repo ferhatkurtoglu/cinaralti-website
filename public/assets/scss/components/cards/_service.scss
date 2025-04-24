@@ -1,0 +1,130 @@
+@use '../../abstract' as *;
+
+/* ========== Component : service Card Style ============= */
+.service-card {
+    padding: 40px;
+    display: flex;
+    column-gap: 40px;
+    border-radius: 10px;
+    border: 1px solid #E6E6E6;
+    transition: .3s;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    row-gap: 25px;
+    background: #FFFFFF;
+    @media (min-width:576px) {
+      flex-direction: initial;
+      align-items: initial;
+      text-align: initial;
+    }
+    @media (min-width:992px){
+    padding: 40px;
+    }
+    &__icon {
+      color: $black;
+      max-width: 100px;
+  
+      svg,
+      img {
+        width: 100%;
+  
+        path {
+          fill: currentColor;
+        }
+      }
+    }
+  
+  
+    &__title {
+      @include heading-24;
+      font-family: $font-family-base-main;
+      color: $black;
+      margin-bottom: 15px;
+    }
+  
+    p {
+      margin-bottom: 14px;
+      font-weight: 400;
+      font-size: 18px;
+      line-height: 30px;
+      color: rgba(#0A102F, 0.8);
+  
+      @media (min-width:576px) {
+        margin-bottom: 20px;
+      }
+  
+      @media (min-width:1200px) {
+        margin-bottom: 30px;
+      }
+    }
+
+  
+    &:hover{
+      .service-card__icon {
+        color: #3147FF;
+      }
+      .service-card__link {
+        color: #3147FF;
+        &:after{
+          left: 4px;
+        }
+      }
+    }
+    &.hvr-fill{
+      &:hover {
+          background: #FAF9F5;
+          border-color: #FAF9F5;
+        }
+  }
+     &.background-2{
+      background: #FFFFFF;
+      border: 0px;
+      border-radius: 10px;
+        &:hover {
+          box-shadow: 0px 4px 60px rgba(10, 16, 47, 0.06);
+        }
+      }
+  }
+  
+
+
+
+
+
+  /* ========== Component : Service Card Style ============= */
+
+.service-card-2 {
+  background: $white;
+  border: 2px solid #191919;
+  border-radius: 10px;
+  padding: 30px;
+  transition: 300ms;
+  height: 100%;
+
+  &__icon {
+    padding-bottom: 30px;
+  }
+
+  &__title {
+    margin-bottom: 15px;
+    font-family: $font-family-base;
+    @include heading-24;
+    color: $body-color;
+  }
+
+  p {
+    color: rgba($l7-primary-hex, 0.8);
+    margin-bottom: 0;
+  }
+
+  &:hover {
+    box-shadow: 10px 10px $l7-secondary-hex;
+    border-radius: 10px;
+  }
+}
+
+
+
+
+

@@ -1,0 +1,22 @@
+@use "../../abstract/" as *;
+/* ========== Home 6 : Testimonial Section Style ============= */
+.home-6_testimonial{
+    background: #FAFAFA;
+    .section-heading{
+        margin-bottom: 60px;
+        @media (min-width:992px) {
+            margin-bottom: 80px;
+        }
+        &__title{
+            font-family: 'General Sans', sans-serif;
+            font-weight: 600;
+        }
+    }
+    .row--custom{
+        justify-content: space-between;
+        align-items: center;
+        --bs-gutter-y: 30px;
+    }
+
+}
+

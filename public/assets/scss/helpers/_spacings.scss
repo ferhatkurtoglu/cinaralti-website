@@ -1,0 +1,236 @@
+@use "../abstract" as *;
+
+/* ========== Common: Spacing Combos  ============= */
+.section-padding {
+  @include section-padding();
+
+  &.has-section-heading {
+    @include section-padding-top(true);
+  }
+}
+
+.section-padding-bottom {
+  padding-bottom: 60px;
+
+  @media (min-width: 768px) {
+    padding-bottom: 80px;
+  }
+
+  @media (min-width: 992px) {
+    padding-bottom: 134px;
+  }
+}
+
+.section-padding-top {
+  &:not(.has-section-heading) {
+    @include section-padding-top();
+  }
+
+  &.has-section-heading {
+    @include section-padding-top(true);
+  }
+}
+
+
+.section-padding-95 {
+  padding-top: 60px;
+  padding-bottom: 60px;
+
+  @media (min-width: 768px) {
+    padding-top: 80px;
+    padding-bottom: 80px;
+  }
+
+  @media (min-width: 992px) {
+    padding-top: 95px;
+    padding-bottom: 95px;
+  }
+}
+
+.section-padding-100 {
+  padding-top: 60px;
+  padding-bottom: 60px;
+
+  @media (min-width: 768px) {
+    padding-top: 80px;
+    padding-bottom: 80px;
+  }
+
+  @media (min-width: 992px) {
+    padding-top: 100px;
+    padding-bottom: 100px;
+  }
+}
+
+.section-padding-120 {
+  padding-top: 60px;
+  padding-bottom: 60px;
+
+  @media (min-width:676px) {
+    padding-top: 80px;
+    padding-bottom: 80px;
+  }
+
+  @media (min-width: 992px) {
+    padding-top: 100px;
+    padding-bottom: 100px;
+  }
+
+  @media (min-width: 1200px) {
+    padding-top: 120px;
+    padding-bottom: 120px;
+  }
+}
+
+.section-padding-top-120 {
+  padding-top: 60px;
+
+  @media (min-width:676px) {
+    padding-top: 80px;
+  }
+
+  @media (min-width: 992px) {
+    padding-top: 100px;
+  }
+
+  @media (min-width: 1200px) {
+    padding-top: 120px;
+  }
+}
+
+.section-padding-bottom-95 {
+  padding-bottom: 60px;
+
+  @media (min-width: 768px) {
+    padding-bottom: 80px;
+  }
+
+  @media (min-width: 992px) {
+    padding-bottom: 95px;
+  }
+}
+
+.padding-top-100 {
+  padding-top: 40px;
+
+  @media (min-width:576px) {
+    padding-top: 60px;
+  }
+
+  @media (min-width:992px) {
+    padding-top: 100px;
+  }
+}
+
+.padding-bottom-100 {
+  padding-bottom: 40px;
+
+  @media (min-width:576px) {
+    padding-bottom: 60px;
+  }
+
+  @media (min-width:992px) {
+    padding-bottom: 100px;
+  }
+}
+
+.padding-top-120 {
+  padding-top: 60px;
+
+  @media (min-width:576px) {
+    padding-top: 80px;
+  }
+
+  @media (min-width:992px) {
+    padding-top: 120px;
+  }
+}
+
+.padding-bottom-120 {
+  padding-bottom: 60px;
+
+  @media (min-width:576px) {
+    padding-bottom: 80px;
+  }
+
+  @media (min-width:992px) {
+    padding-bottom: 120px;
+  }
+}
+.padding-bottom-150 {
+  padding-bottom: 60px;
+
+  @media (min-width:576px) {
+    padding-bottom: 80px;
+  }
+
+  @media (min-width:992px) {
+    padding-bottom: 120px;
+  }
+  @media (min-width:1200px) {
+    padding-bottom: 150px;
+  }
+}
+
+
+/* ----------------------------
+Common: Spacing Utilities
+-------------------------------*/
+.mb-30 {
+  margin-bottom: 30px;
+}
+
+.mb-20 {
+  margin-bottom: 30px;
+}
+.mb-40 {
+  margin-bottom: 40px;
+}
+
+/* ----------------------------
+Common: Responsive Spacer
+-------------------------------*/
+.spacer-top-80 {
+  margin-top: 40px;
+
+  @media (min-width:576px) {
+    margin-top: 60px;
+  }
+
+  @media (min-width:1200px) {
+    margin-top: 80px;
+  }
+}
+
+.spacer-bottom-80 {
+  margin-bottom: 40px;
+
+  @media (min-width:576px) {
+    margin-bottom: 60px;
+  }
+
+  @media (min-width:1200px) {
+    margin-bottom: 80px;
+  }
+}
+
+/* ----------------------------
+Common: Spacing Gutters
+-------------------------------*/
+.gutter-y-20 {
+  --bs-gutter-y: 20px;
+}
+.gutter-y-30 {
+  --bs-gutter-y: 30px;
+}
+
+.gutter-y-40 {
+  --bs-gutter-y: 40px;
+}
+.gutter-y-50 {
+  --bs-gutter-y: 50px;
+}
+
+.gutter-y-default {
+  --bs-gutter-y: 24px;
+}

@@ -1,0 +1,94 @@
+@use "../../../abstract" as *;
+/*=========== Common : CTA Section styles ==========*/
+.cta-style-9 {
+  background: $l9-secondary;
+  position: relative;
+
+  .cta-style-9-wrapper {
+    padding-bottom: 60px;
+
+
+    @media (min-width: 576px) {
+      padding-bottom: 80px;
+    }
+  }
+
+  &-shape {
+    img {
+      position: absolute;
+      right: 0;
+      bottom: 0;
+      z-index: 1;
+      width: 16%;
+    }
+  }
+
+  .row--custom {
+    justify-content: center;
+    row-gap: 30px;
+    @media (min-width: 768px) {
+      align-items: center;
+    }
+    @media (min-width: 1200px) {
+      justify-content: space-between;
+    }
+  }
+  .cta-text-block {
+    text-align: center;
+
+    @media (min-width: 768px) {
+      text-align: initial;
+    }
+
+    p {
+      max-width: 576px;
+    }
+  }
+
+  &-title {
+    font-weight: 700;
+    font-size: 40px;
+    line-height: 1.12;
+    margin-bottom: 20px;
+
+    @media (min-width:576px) {
+      font-size: 46px;
+    }
+
+    @media (min-width:768px) {
+      font-size: 50px;
+    }
+
+    @media (min-width:992px) {
+      font-size: 56px;
+    }
+  }
+
+  .cta-style-9-button {
+    display: flex;
+    justify-content: center;
+    position: relative;
+    column-gap: 20px;
+
+    a {
+      display: flex;
+      align-items: stretch;
+
+      img {
+        width: 100%;
+      }
+    }
+
+    &__shape {
+      display: none;
+      position: absolute;
+      right: -40%;
+      bottom: 100%;
+      width: 37.6%;
+
+      @media (min-width:768px) {
+        display: block;
+      }
+    }
+  }
+}

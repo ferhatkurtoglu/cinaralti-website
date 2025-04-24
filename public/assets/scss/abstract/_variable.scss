@@ -1,0 +1,77 @@
+//****** Variable Import ***********//
+// Customize Theme Colors here 
+$primary-hex: #3147FF;
+$l2-primary-hex: #A259FF;
+$l2-secondary-hex: #0A102F;
+$l3-primary-hex: #FFC900;
+$l4-primary-hex: #4B2AAD;
+$l4-secondary-hex: #F5EFEB;
+$l5-primary-hex: #FF9966;
+$l5-secondary-hex: #1B1C1D;
+$l6-primary-hex: #3147FF;
+$l7-primary-hex: #191919;
+$l7-secondary-hex: #A259FF;
+$l8-primary-hex: #C1FF00;
+$l9-primary-hex: #324438;
+$l9-secondary-hex: #F4B905;
+$l10-primary-hex: #2D2B92;
+$l10-secondary-hex: #FFD874;
+$black: #0A102F;
+$black-2-hex: #121212;
+$black-3-hex: #1B1C1D;
+$black-4-hex: #191919;
+$white: #FFFFFF;
+$cream-hex: #FDFBF9;
+$offwhite-hex: #FAF9F5;
+$font-family-base-main: 'Inter', sans-serif;
+$font-family-heading-main: 'Plus Jakarta Sans', sans-serif;
+$font-weight-heading-main: 800;
+$font-family-dm-sans: 'DM Sans', sans-serif;
+$font-family-general-sans: 'General Sans', sans-serif;
+$font-family-cabin-sans: 'Cabin', sans-serif;
+$font-family-clash-display: 'Clash Display', sans-serif;
+$font-family-public-sans: 'Public Sans', sans-serif;
+$font-family-syne-sans: 'Syne', sans-serif;
+
+
+
+
+// Optional
+$primary: var(--bs-primary);
+$primary-rgb: var(--bs-primary-rgb);
+$l2-primary: var(--l2-primary);
+$l2-primary-rgb: var(--l2-primary-rgb);
+$l2-secondary: var(--l2-secondary);
+$l3-primary: var(--l3-primary);
+$l4-primary: var(--l4-primary);
+$l5-primary: var(--l5-primary);
+$l6-primary: var(--l6-primary);
+$l7-primary: var(--l7-primary);
+$l7-secondary: var(--l7-secondary);
+$l8-primary: var(--l8-primary);
+$l9-primary: var(--l9-primary);
+$l9-secondary: var(--l9-secondary);
+$l10-primary: var(--l10-primary);
+$l10-secondary: var(--l10-secondary);
+$body-color: var(--body-color);
+$body-color-rgb: var(--body-color-rgb);
+$offwhite: var(--offwhite);
+$black-2: var(--black-2);
+$black-2-rgb: var(--black-2-rgb);
+$black-3: var(--black-3);
+$black-3-rgb: var(--black-3-rgb);
+$black-3: var(--black-3);
+$black-4: var(--black-4);
+$black-4-rgb: var(--black-4-rgb);
+$cream: var(--cream);
+$cream-rgb: var(--cream-rgb);
+
+$font-family-base: var(--font-family-base);
+$font-family-heading: var(--font-family-heading);
+$font-weight-heading: var(--font-weight-heading);
+$font-dm-sans: var(--font-dm-sans);
+$font-general-sans: var(--font-general-sans);
+$font-cabin-sans: var(--font-cabin-sans);
+$font-clash-display: var(--font-clash-display);
+$font-public-sans: var(--font-public-sans);
+$font-syne-sans: var(--font-syne-sans);

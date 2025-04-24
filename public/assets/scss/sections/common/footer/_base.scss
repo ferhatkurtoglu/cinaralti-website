@@ -1,0 +1,280 @@
+@use '../../../abstract' as *;
+
+// .footer{
+//   p{
+    
+//     font-weight: 400;
+//   }
+// }
+/* Footer Title Common */
+.footer-title {
+  font-family: $font-family-base;
+  margin-bottom: 30px;
+  @include heading-20;
+}
+
+.copyright-border {
+  border-top-width: 1px;
+  border-top-style: solid;
+  border-color: rgba($body-color-rgb , .1);
+}
+
+.copyright-inner {
+  @include py(18px);
+  margin-top: 40px;
+
+  @media (min-width:576px) {
+    margin-top: 60px;
+  }
+
+  @media (min-width:992px) {
+    margin-top: 80px;
+  }
+
+  p {
+    font-size: 16px;
+    margin-bottom: 0;
+  }
+}
+
+.footer-list {
+  display: flex;
+  flex-direction: column;
+  row-gap: 17px;
+  margin-bottom: 0;
+  @include body-18;
+  font-weight: 400;
+
+  a {
+    color: $body-color;
+  }
+}
+
+.footer-store-buttons {
+  display: flex;
+  flex-direction: column;
+  row-gap: 13px;
+}
+
+/* Footer Dark and Light Global */
+[class*="footer--dark"] {
+  color: rgba($white , .8);
+
+  p {
+    color: inherit;
+  }
+
+  .footer-title {
+    color: $white;
+  }
+
+  a {
+    color: rgba($white , .8);
+  }
+
+  .copyright-border {
+    border-color: rgba($white , .1);
+  }
+}
+
+[class*="footer--light"] {
+  color: rgba($body-color-rgb , .8);
+
+  .footer-title {
+    color: $body-color;
+  }
+
+  a {
+    color: rgba($body-color-rgb , .8);
+
+    &.footer-link {
+      text-decoration: underline;
+      margin-bottom: 24px;
+    }
+
+    &:hover {
+      color: $primary;
+    }
+  }
+
+  .copyright-border {
+    border-color: rgba($body-color-rgb , .1);
+  }
+}
+
+/* Footer Section Padding */
+.footer-padding-default {
+  padding-top: 60px;
+
+  @media (min-width:576px) {
+    padding-top: 80px;
+  }
+}
+
+/* Footer Variations By Color */
+.footer--dark-v1 {
+  background: #0A102F;
+
+  .list-social {
+    --color: #{$white};
+    --backgroundColor: #{rgba($white,.1)};
+    --hovBackground: #{$primary-hex};
+    --hovColor: #{$white};
+  }
+
+  .copyright-inner {
+    border: 0;
+  }
+
+  .copyright-block {
+    background: rgba(#fff, 0.05);
+  }
+}
+
+/* Footer Variations By Color */
+.footer--dark-v2 {
+  background: $black-2;
+
+  .list-social {
+    --color: #{$white};
+    --backgroundColor: #{rgba($white,.1)};
+    --hovBackground: #{$primary-hex};
+    --hovColor: #{$white};
+  }
+
+  .copyright-inner {
+    border: 0;
+  }
+
+  .copyright-block {
+    background: rgba(#fff, 0.05);
+  }
+}
+
+.footer-l01 {
+  a {
+    &:hover {
+      color: $primary;
+    }
+  }
+}
+
+.footer-l02 {
+  background-color: #F5F5F5;
+  .footer-title {
+    color: $black;
+  }
+  .footer-list a {
+    color: rgba($black, 0.8);
+  }
+  .list-social li a {
+    &:hover {
+      background-color: $black-2;
+      color: $white;
+    }
+  }
+
+  a {
+    &:hover {
+      color: $l2-primary;
+    }
+  }
+}
+
+.footer-l03 {
+  .copyright-border {
+    border-color: transparent;
+  }
+  li{
+    line-height: 1.67;
+  }
+  .copyright-block {
+    background-color: #FAF9F5;
+
+  }
+
+  .list-social li a {
+    &:hover {
+      background-color: $l3-primary;
+      color: $black;
+    }
+  }
+
+  a {
+    &:hover {
+      color: $l3-primary;
+    }
+  }
+}
+
+.footer-l04 {
+  background-color: #F5EFEB;
+  line-height: 1.67;
+
+  .list-social li a {
+    &:hover {
+      background-color: $l4-primary;
+      color: $white;
+    }
+  }
+
+  a {
+    &:hover {
+      color: $l4-primary;
+    }
+  }
+}
+
+.footer-l05 {
+  .footer-title{
+    color: #FDFBF9;
+  }
+  color: rgba($cream-rgb, 0.8);
+
+  a {
+    color: rgba($cream-rgb, 0.8);
+
+    &:hover {
+      color: $l5-primary;
+    }
+  }
+}
+
+.footer-l08 {
+
+  padding-top: 60px;
+
+  @media (min-width:992px) {
+    padding-top: 100px;
+  }
+
+  .list-social li a {
+    &:hover {
+      background-color: $l8-primary;
+      color: $black-2;
+    }
+  }
+
+  a {
+    &:hover {
+      color: $l8-primary;
+    }
+  }
+}
+
+.footer-l10 {
+  background-color: $l10-primary;
+
+  .list-social li a {
+    &:hover {
+      background-color: $l10-secondary;
+      color: $l10-primary;
+    }
+  }
+
+  a {
+    &:hover {
+      color: $l10-secondary;
+    }
+  }
+}

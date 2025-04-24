@@ -1,0 +1,67 @@
+@use "../../abstract/" as *;
+/* ========== Component : Content Widget   ============= */
+.content-widget{
+    display: flex;
+    column-gap: 15px;
+    @media (min-width:992px) {
+        max-width: 630px;
+    }
+    &__icon{
+        position: relative;
+        top: 5px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 40px;
+        min-width: 40px;
+        max-width: 40px;
+        height: 40px;
+        min-height: 40px;
+        max-height: 40px;
+        border-radius: 500px;
+        background: #324438;
+    }
+    &__title{
+        font-family: $font-family-cabin-sans;
+        @include heading-24(700,0em);
+        line-height: 1.25;
+        color: #221F1A;
+        margin-bottom: 12px;
+    }
+   }
+
+
+
+   .content-widget-2__wrapper{
+    display: flex;
+    flex-direction: column;
+    row-gap: 20px;
+}
+.content-widget-2{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    @media (min-width:992px) {
+        align-items: initial;
+    }
+    &__title{
+        display: flex;
+        column-gap: 8px;
+        @include heading-24(600,0em);
+        font-family: $font-family-general-sans;
+        color: $black;
+        margin-bottom: 15px;
+    }
+    img{
+        position: relative;
+        top: 3px;
+        max-width: 24px;
+        max-height: 24px;
+        @media (max-width:991px) {
+            display: none;
+        }
+    }
+    p{
+        max-width: 505px;
+    }
+}

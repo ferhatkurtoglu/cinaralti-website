@@ -1,0 +1,52 @@
+@use "../../abstract/" as *;
+/* ========== Home 7 : Content Section 1 Style ============= */
+.home-7 {
+    &_content-section-1 {
+        .row--custom{
+            justify-content: center;
+            --bs-gutter-y: 30px;
+            @media (min-width:992px) {
+                --bs-gutter-x: 30px;
+                align-items: center;
+                justify-content: space-between;
+            }
+            @media (min-width:1400px) {
+                --bs-gutter-x: 55px;
+            }
+        }
+        .content {
+            @media (max-width:991px) {
+                align-items: center;
+                text-align: center;
+            }
+            &-text-block {
+                .content-title{
+                    font-family: 'Cabin', sans-serif;
+                    font-weight: 700;
+                }
+                p {
+                    color: rgba($l7-primary-hex, 0.8);
+                    @media (min-width:992px) {
+                        max-width: 592px;
+                    }
+                }
+            }
+        }
+
+    }
+    &_content-image-1{
+        @media (min-width:992px) {
+            margin-right: 30px;
+        }
+        
+        @media (min-width:1200px) {
+            margin-right: 45px;
+        }
+        @media (min-width:1400px) {
+            margin-right: 70px;
+        }
+        img{
+            width: 100%;
+        }
+    }
+}

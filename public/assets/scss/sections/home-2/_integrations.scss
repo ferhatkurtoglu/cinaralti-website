@@ -1,0 +1,35 @@
+@use"../../abstract" as *;
+/* ========== Home 2 : Integration Section Style ============= */
+.home-2{
+    &_integration-section{
+        .row--custom{
+            --bs-gutter-y: 40px;
+            justify-content: center;
+            @media (min-width:992px) {
+                --bs-gutter-x: 24px;
+                align-items: center;
+                flex-direction: row-reverse;
+            }
+        }
+        .content{
+            text-align: center;
+            @media (min-width:992px) {
+                text-align: initial;
+            }
+        }
+        p{
+            @media (min-width:992px) {
+                max-width: 506px;
+                color: rgba($l2-secondary-hex, 0.8);
+            }
+        }
+    }
+    &_integration-image{
+        @media (min-width:992px) {
+            max-width: 472px;
+        }
+        img{
+            width: 100%;
+        }
+    }
+}

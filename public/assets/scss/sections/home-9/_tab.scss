@@ -1,0 +1,151 @@
+@use "../../abstract/" as *;
+/* ========== Home 9 : Tab Section Style ============= */
+.tab-section{
+    position: relative;
+    z-index: 1;
+    .section-heading{
+        margin-bottom: 30px;
+        @media (min-width:992px){
+        margin-bottom: 50px;
+        }
+    }
+    &::before{
+        content: "";
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: $l9-primary-hex;
+        z-index: -1;
+        @media (min-width:576px) {
+            left: 30px;
+            right: 30px;
+            border-radius: 50px;
+        }
+        @media (min-width:992px) {
+            left: 50px;
+            right: 50px;
+            border-radius: 50px;
+        }
+    }
+    .tab-shape-1{
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 22%;
+        @media (min-width:576px) {
+            right: 30px;
+        }
+        @media (min-width:992px) {
+            right: 50px;
+            border-radius: 50px;
+        }
+        img{
+            width: 100%;
+        }
+    }
+    .tab-shape-2{
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 22%;
+        @media (min-width:576px) {
+            left: 30px;
+        }
+        @media (min-width:992px) {
+            left: 50px;
+            border-radius: 50px;
+        }
+        img{
+            width: 100%;
+        }
+    }
+    .section-image{
+        position: relative;
+        z-index: 1;
+        img{
+            width: 100%;
+        }
+    }
+    
+}
+
+.tab{
+    &__nav{
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: center;
+        max-width: 905px;
+        margin: 0 auto;
+        column-gap:15px;
+        row-gap: 15px;
+        
+        margin-bottom: 30px;
+        @media (min-width:576px){
+          margin-bottom: 40px;
+        }
+        @media (min-width:992px){
+          margin-bottom: 60px;
+          column-gap:25px;
+        }
+          @media (min-width:1400px){
+            column-gap:0px;
+            justify-content: space-between;
+          }
+        .nav-link{
+            position: relative;
+            display: flex;
+            flex-wrap: wrap;
+            column-gap:10px ;
+            @include body-16;
+            color: $white;
+            padding: 13px 24px;
+            border-radius: 500px;
+                &:hover{
+                    color: $l9-primary-hex;
+                      background: $l9-secondary-hex;
+                  }
+            &.active{
+                    content: "";
+                    color: $l9-primary-hex;
+                  background: $l9-secondary-hex;
+                  svg{
+                    fill: #FFF;
+                    stroke: $l9-primary-hex;
+                    path{
+                        fill: $l9-primary-hex;
+                    }
+                  }
+              }
+        }
+            .tab-icon{
+                fill: #FFF;
+                &:hover{
+                    fill: $l9-primary-hex;
+                      background: $l9-secondary-hex;
+                  }
+            }
+    }
+}
+.tab-content{
+    .tab-pane{
+        
+        &:not(.show){
+                transform: translateY(50px);
+        }
+        &.show{
+            animation: fadeUp 1s;
+        }
+    }
+}
+
+@keyframes fadeUp {
+    from{
+        transform: translateY(250px);
+    }
+    to{
+        transform: translateY(0px);
+    }
+}

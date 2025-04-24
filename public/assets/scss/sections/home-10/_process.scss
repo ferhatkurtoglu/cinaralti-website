@@ -1,0 +1,23 @@
+@use"../../abstract" as *;
+/* ========== Home 10 : Process Section Style ============= */
+@import url("https://fonts.cdnfonts.com/css/clash-display");
+.home-10{
+    &_process-section{
+        background: #FFF4D9;
+            
+    }
+    &_section-heading{
+        margin-bottom: 60px;
+        @media (min-width:992px) {
+            margin-bottom: 80px;
+        }
+        &__title{
+            @include heading-60;
+            font-family: $font-family-clash-display;
+            letter-spacing: -1px;
+            color: #221F1A;
+        }
+    }
+}
+
+

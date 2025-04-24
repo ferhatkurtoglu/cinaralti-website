@@ -1,0 +1,24 @@
+@use"../../abstract" as *;
+/* ========== Home 2 : Content Section 2 Style ============= */
+.home-2{
+    &_content-section-2{
+        .row--custom{
+            --bs-gutter-y: 40px;
+            justify-content: center;
+            @media (min-width:992px) {
+                align-items: center;
+                --bs-gutter-x: 24px;
+                justify-content: space-between;
+                flex-direction: row-reverse;
+            }
+        }
+    }
+    &_content-image-2{
+        @media (min-width:992px) {
+            max-width: 451.46px;
+        }
+        img{
+            width: 100%;
+        }
+    }
+}

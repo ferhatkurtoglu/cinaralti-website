@@ -1,0 +1,17 @@
+@use "../../abstract" as *;
+/*=========== Home 9 : feature section style ==========*/
+.home-9{
+    &_feature-section{
+        position: relative;
+        background: #EBDECE;
+    }
+    &_feature-shape{
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 18%;
+        img{
+            width: 100%;
+        }
+    }
+}

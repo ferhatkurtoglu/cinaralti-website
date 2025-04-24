@@ -1,0 +1,41 @@
+@use"../../abstract" as *;
+/* ========== Component   : Video Widget ============= */
+.video-widget{
+    &__thumbnail{
+       position: relative;
+       margin-bottom: 23px;
+       border-radius: 10px;
+       img{
+        width: 100%;
+        border-radius: inherit;
+       }
+       &::before{
+        content: "";
+        position: absolute;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background: $body-color;
+        mix-blend-mode: multiply;
+        opacity: 0.4;
+        border-radius: inherit;
+       }
+       
+    }
+
+    &__title{
+        @include heading-24;
+        margin-bottom: 17px;
+        font-family: $font-family-base;
+        color: $black;
+    }
+    p{
+        @include body-18(400,1.67);
+        color: rgba($body-color-rgb,.8);
+        @media (min-width:1400px){
+        max-width: 350px;
+        }
+    }
+    }
+   
+    

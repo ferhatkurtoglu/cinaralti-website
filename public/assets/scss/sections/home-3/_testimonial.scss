@@ -1,0 +1,23 @@
+@use "../../abstract/" as *;
+/* ========== Home 3 : Testimonial Section Style ============= */
+.home-3_testimonial{
+    background: $offwhite;
+    .section-heading{
+        margin-bottom: 60px;
+        @media (min-width:992px) {
+            margin-bottom: 80px;
+        }
+        &__title{
+            max-width: 608px;
+        }
+    }
+    .row--custom{
+        justify-content: space-between;
+        align-items: center;
+        --bs-gutter-y: 30px;
+    }
+
+}
+
+
+

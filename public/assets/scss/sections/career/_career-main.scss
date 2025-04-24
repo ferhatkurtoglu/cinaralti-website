@@ -1,0 +1,38 @@
+@use "../../abstract/" as *;
+/* ========== Career Main Style ============= */
+.career{
+    &_main-image{
+        margin-bottom: 60px;
+        @media (min-width:992px){
+        margin-bottom: 80px;
+        }
+        @media (min-width:1200px){
+        margin-bottom: 100px;
+        }
+        img{
+            width: 100%;
+        }
+    }
+    &-main__section-heading{
+        .navigation-list{
+            gap: 15px;
+            .btn{
+                background-color: #0A102F0A;
+                color: rgba(10, 16, 47, 0.6);
+                font-weight: 700;
+                font-size: 16px;
+                line-height: 1.5;
+            }
+                li{
+                    &.active{
+                       .btn{
+                        color: #FFFF !important;
+                       }
+
+                    }
+                }
+            
+        }
+    }
+    
+}

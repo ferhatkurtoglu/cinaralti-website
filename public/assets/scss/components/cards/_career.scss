@@ -1,0 +1,64 @@
+@use '../../abstract' as *;
+
+/* ========== Component : Career Card Style ============= */
+.career-card {
+  padding: 30px;
+  display: flex;
+  border-radius: 10px;
+  border: 1px solid #E6E6E6;
+  transition: .3s;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  row-gap: 25px;
+  background: #FFFFFF;
+
+  @media (min-width:576px) {
+    align-items: initial;
+    text-align: initial;
+  }
+
+  @media (min-width:992px) {
+    padding: 40px;
+    row-gap: 30px;
+  }
+
+  &__title {
+    @include heading-24;
+    font-family: $font-family-base-main;
+    color: $black;
+    margin-bottom: 15px;
+  }
+
+  &__job-info {
+    display: flex;
+    flex-wrap: wrap;
+    column-gap: 24px;
+    row-gap: 15px;
+
+    span {
+      display: flex;
+      column-gap: 5px;
+      @include body-18(400, 1.67);
+      color: $black;
+    }
+  }
+
+  &:hover {
+    background: #FAF9F5;
+
+    .career-card__link {
+      color: #3147FF;
+    }
+  }
+}
+
+.career-card-row {
+  display: flex;
+  flex-wrap: wrap;
+  --bs-gutter-y: 18px;
+
+  @media (min-width: 992px) {
+    --bs-gutter-y: 24px;
+  }
+}

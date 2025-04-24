@@ -1,0 +1,164 @@
+
+@use '../../abstract' as *;
+/* ============Component  : Process Widget ============== */
+.process-widget-row{
+    --bs-gutter-y: 30px;
+    justify-content: center;
+    @media (min-width:992px){
+    justify-content: space-between;
+    }
+    &>*{
+        position: relative;
+        z-index: 1;
+        &::before{
+            content: "";
+            border: 2px dashed $l5-secondary-hex;
+            width: 80%;
+            position: absolute;
+            top: 16%;
+            transform: translateX(71.5%);
+            z-index: -1;
+            display: none;
+        }
+        @media (min-width:992px){
+            &:not(:last-child){
+              &:before{
+                display: block;
+              }
+            }
+          }
+    }
+    .process-widget{
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        row-gap: 30px;
+        @media (min-width:1400px) {
+            padding-left: 40px;
+            padding-right: 40px; 
+        }
+        &__count{
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 60px;
+            height: 60px;
+            border-radius: 500px;
+            background: #FDFBF9;
+            border: 1px solid $l5-secondary-hex;
+            font-weight: 600;
+            font-size: 34px;
+            line-height: 1.2;
+            color: $l5-secondary-hex;
+            @media (min-width:768px) {
+                width: 70px;
+            height: 70px;}
+            @media (min-width:992px) {
+                width: 80px;
+            height: 80px;
+            }
+            &:hover{
+                background: $l5-primary-hex;
+            }
+        }
+        &__title{
+    
+            @include heading-30;
+            color: #1B1C1D;
+            font-family: $font-family-general-sans;
+            margin-bottom: 15px;
+        }
+        p{
+            font-weight: 400;
+            font-size: 20px;
+            line-height: 1.5;
+            color: rgba($l5-secondary-hex, 0.8);
+            @media (min-width:1400px){
+            max-width: 336px;
+            }
+        }
+    }
+}
+
+
+
+
+/* ============ Process Widget 2 ============== */
+.process-widget-2-row{
+    --bs-gutter-y: 30px;
+    justify-content: center;
+    &>*{
+        position: relative;
+        z-index: 1;
+        &::before{
+            content: "";
+            border: 2px dashed #221F1A;
+            width: 90%;
+            position: absolute;
+            top: 40px;
+            transform: translateX(50%);
+            z-index: -1;
+            display: none;
+        }
+        @media (min-width:992px){
+            &:not(:last-child){
+              &:before{
+                display: block;
+              }
+            }
+          }
+    }
+}
+.process-widget-2{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    row-gap: 30px;
+    max-width: 336px;
+    &__count{
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: #FFF4D9;
+        border: 1px solid rgba(34, 31, 26, 0.1);
+        width: 60px;
+        height: 60px;
+        border-radius: 500px;
+        @include heading-34;
+        color: #221F1A;
+        @media (min-width:768px) {
+            width: 70px;
+        height: 70px;}
+        @media (min-width:992px) {
+            width: 80px;
+        height: 80px;
+        }
+        &:hover{
+            background: #F65510;
+            color: #FFF4D9;
+        }
+    }
+    &__title{
+        font-weight: 500;
+        font-size: 26px;
+        @media (min-width:768px){
+          font-size: 28px;
+        }
+        @media (min-width:992px){
+          font-size: 30px;
+        }
+        letter-spacing: 1px;
+        color: #221F1A;
+        font-family: 'Clash Display', sans-serif;
+        margin-bottom: 15px;
+    }
+    p{
+        font-weight: 400;
+        font-size: 20px;
+        line-height: 1.6;
+        color: rgba( #221F1A, 0.8);
+        letter-spacing: -0.5px;
+    }
+}

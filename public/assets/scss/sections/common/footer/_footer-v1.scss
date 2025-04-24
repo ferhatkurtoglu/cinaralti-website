@@ -1,0 +1,28 @@
+@use '../../../abstract' as *;
+/* ==========  Footer Style v1  ============= */
+.footer{
+  @include body-18(400);
+  &__content-block{
+    max-width: 416px;
+    .footer-brand{
+      margin-bottom: 33px;
+    }
+  }
+  &__content-text{
+    margin-bottom: 24px;
+  }
+  a{
+    &.footer-link{
+      text-decoration: underline;
+      margin-bottom: 24px;
+    }
+    
+  }
+  .row--list-block{
+    justify-content: space-between;
+    --bs-gutter-y:40px
+  }
+  .row--footer-main{
+    --bs-gutter-y:40px
+  }
+}

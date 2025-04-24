@@ -1,0 +1,27 @@
+@use "../../abstract/" as *;
+/* ========== Home 8 : Content Section 3 Style ============= */
+.home-8 {
+    &_content-section-3 {
+        .row--custom{
+            justify-content: center;
+            --bs-gutter-y: 30px;
+            @media (min-width:992px) {
+                --bs-gutter-x: 40px;
+                justify-content: space-between;
+                align-items: center;
+                flex-direction: row-reverse;
+            }
+        }
+        .content {
+            @media (max-width:991px) {
+                align-items: center;
+                text-align: center;
+            }
+        }
+    }
+    &_content-image-3{
+        img{
+            width: 100%;
+        }
+    }
+}

@@ -1,0 +1,17 @@
+@use "../../abstract/" as *;
+/* ========== Home 4 : FAQ Section Style ============= */
+.home-4 {
+    &_faq-section {
+        .section-heading{
+            text-align: center;
+            @media (min-width:992px){
+            text-align: initial;
+            }
+            p{
+                @media (min-width:992px){
+                    max-width: 545px;
+                }
+            }
+        }
+    }
+}

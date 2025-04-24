@@ -1,0 +1,16 @@
+@use"../../abstract" as *;
+/* ========== Home 3 : Video Section Style ============= */
+.home-3{
+    &_video-section{
+        position: relative;
+    }
+    &_video-shape{
+       position: absolute;
+       left: 0;
+       top: 14%;
+       display: none;
+       @media (min-width:992px){
+       display: block;
+       }
+    }
+}

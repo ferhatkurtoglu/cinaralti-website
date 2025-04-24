@@ -1,0 +1,21 @@
+@use '../../abstract' as *;
+/* ========= Home 1  : Portfolio Section Style ============= */
+.about{
+    &_portfolio-section{
+        .row--custom{
+            --bs-gutter-x:20px;
+            --bs-gutter-y:30px;
+            justify-content: center;
+            @media (min-width:768px){
+                --bs-gutter-x:30px;
+            }
+            @media (min-width:992px){
+                --bs-gutter-x:45px;
+            }
+            @media (min-width:1200px){
+                --bs-gutter-x:61px;
+            }
+        }
+     
+    }
+}

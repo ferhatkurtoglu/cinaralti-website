@@ -1,0 +1,89 @@
+@use "../../abstract/" as *;
+/* ========== Home 6 : Content Section 1 Style ============= */
+.home-6 {
+    &_content-section-1 {
+        .row--custom{
+            justify-content: center;
+            --bs-gutter-y: 30px;
+            @media (min-width:992px) {
+                --bs-gutter-x: 35px;
+                justify-content: space-between;
+            }
+            @media (min-width:1200px) {
+                align-items: center;
+            }
+        }
+        .content {
+                align-items: center;
+                text-align: center;
+            
+            @media (min-width:992px){
+                align-items: initial;
+                text-align: initial;
+            padding-left: 30px;
+            }
+            @media (min-width:1200px){
+            padding-left: initial;
+            }
+            &-text-block {
+                .content-title{
+                    font-family: $font-family-general-sans;
+                    font-weight: 600;
+                }
+                p {
+                    @media (min-width:992px) {
+                        max-width: 592px;
+                    }
+                }
+            }
+            &__stats-block{
+             display: flex;
+             justify-content: center;
+             column-gap: 32px;
+             @media (min-width:992px) {
+                justify-content: initial;
+             }
+             .stat-single{
+                display: flex;
+                flex-direction: column;
+                row-gap: 5px;
+                &__count{
+                    color: $l6-primary-hex;
+                    font-family: $font-family-general-sans;
+                    @include heading-66;
+                }
+                &__text{
+                    font-weight: 400;
+                    font-size: 18px;
+                    line-height: 1.67;
+                }
+             }
+            }
+        }
+
+    }
+    &_content-image-1-block{
+        position: relative;
+    }
+    &_content-image-1{
+        @media (min-width:992px) {
+            max-width: 561px;
+        }
+        img{
+            width: 100%;
+        }
+        &-card{
+            position: absolute;
+            width: 41%;
+            left: -6%;
+            bottom: -4%;
+            box-shadow: 0px 0.890836px 2.67251px 0.890836px rgba(60, 64, 67, 0.15);
+            filter: drop-shadow(3.20816px 3.20816px 16.0408px rgba(0, 0, 0, 0.05)) drop-shadow(0px 0.890836px 1.78167px rgba(60, 64, 67, 0.3));
+            
+            img{
+                width: 100%;
+                border-radius: 5px;
+            }
+        }
+    }
+}

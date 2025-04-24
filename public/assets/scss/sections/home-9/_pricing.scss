@@ -1,0 +1,52 @@
+@use"../../abstract" as *;
+/* ========== Home 9 : Pricing Section Style ============= */
+.home-9{
+    &_pricing-section{
+        position: relative;
+        z-index: 1;
+        .pricing-section-heading{
+            max-width: 690px;
+            margin: 0 auto;
+            text-align: center;
+            color: #221F1A;
+        }
+        .row--custom{
+            justify-content: center;
+            --bs-gutter-y: 30px;
+        }
+        
+    }
+    &_pricing-shape{
+        position: absolute;
+        left: 0;
+        top: -9%;
+        z-index: -1;
+        width: 22%;
+        img{
+            width: 100%;
+        }
+   }
+    &_pricing-control-block{
+        position: relative;
+        margin-top: 30px;
+        margin-bottom: 40px;
+        @media (min-width:992px) {
+            margin-top: 50px;
+            margin-bottom: 60px;
+        }
+    }
+    &_pricing-control-shape{
+       display: none;
+        position: absolute;
+        right: 17.8%;
+        bottom: -24%;
+        width: 15%;
+    
+    @media (min-width:992px) {
+        display: block;
+    }
+    img{
+        width: 100%;
+    }
+    }
+}

@@ -1,0 +1,34 @@
+@use"../../abstract" as *;
+/* ========== Home 5 : Process Section Style ============= */
+.home-5{
+    &_process-section{
+        .section-heading{
+           @media (min-width:1200px) {
+            padding: 0 22px;
+           }
+        }
+        .section-heading__title{
+            font-family: 'General Sans', sans-serif;
+            font-weight: 600;
+        }
+    }
+    &_process-devider{
+        border-top: 1px solid rgba($black-2-hex, 0.1);
+        padding-top: 60px;
+        padding-bottom: 60px;
+        @media (min-width:576px) {
+            padding-top: 80px;
+            padding-bottom: 80px;
+        }
+        @media (min-width:992px) {
+            padding-top: 100px;
+            padding-bottom: 100px;
+        }
+        @media (min-width:1200px) {
+            padding-top: 120px;
+            padding-bottom: 120px;
+        }
+    }
+}
+
+

@@ -1,0 +1,85 @@
+@use "../../abstract/" as *;
+/* ========== Home 9 : Stats Section Style ============= */
+.home-9{
+    &_stats-section{
+        background: $l9-secondary-hex;
+        position: relative;
+        z-index: 1;
+        .row--custom{
+            justify-content: center;
+            --bs-gutter-y: 40px;
+            @media (min-width:992px) {
+                align-items: center;
+                justify-content: space-between;
+            }
+        }
+    }
+    &_stats-text-block{
+        text-align: center;
+        @media (min-width:992px) {
+            text-align: initial;
+        }
+        p{
+            color: rgba(#221F1A, 0.8);
+            @media (min-width:992px) {
+                max-width: 490px;
+            }
+        }
+    }
+    &_stats-title{
+        color: #221F1A;
+        text-align: center;
+        @media (min-width:992px) {
+            text-align: initial;
+        }
+    }
+    &_stats-wrapper{
+        display: flex;
+        
+    }
+    &_stats-single{
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        text-align: center;
+        row-gap: 12px;
+        position: relative;
+        &::before {
+            content: "";
+            width: 2px;
+            height: 80%;
+            background-color: rgba(#221F1A, 0.1);
+            position: absolute;
+            right: 0%;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+        &:first-child{
+            padding-right: 30px;
+        @media (min-width:1200px) {
+        padding-right: 50px;
+        }
+        }
+        &:last-child{
+            padding-left: 30px;
+            @media (min-width:1200px) {
+            padding-left: 50px;
+            }
+            &::before{
+                display: none;
+            }
+        }
+        span{
+            @include heading-20;
+            color: #221F1A;
+
+        }
+    }
+    &_stats-single__count{
+        font-family: $font-family-base-main;
+        color: #221F1A;
+        @include heading-45;
+        color: #221F1A;
+        margin-bottom: 8px;
+    }
+}

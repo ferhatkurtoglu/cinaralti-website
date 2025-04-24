@@ -1,0 +1,16 @@
+@use "../../abstract/" as *;
+/* ========== Home 6 : process Section Style ============= */
+.home-6{
+    &_service-section{
+        background: #FAFAFA;
+        .section-heading__title{
+            font-family: $font-family-general-sans;
+            font-weight: 600;
+        }
+        .service-card{
+            &:hover{
+                box-shadow: 0px 4px 80px rgba(0, 0, 0, 0.06);
+            }
+        }
+    }
+}

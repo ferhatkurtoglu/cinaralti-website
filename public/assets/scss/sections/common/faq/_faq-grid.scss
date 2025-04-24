@@ -1,0 +1,45 @@
+@use '../../../abstract' as *;
+.faq-grid-layout{
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  column-gap: 25px;
+  @media (min-width:992px){
+    justify-content: space-between;
+  }
+  &>*{
+      border-bottom: 1px solid #0A102F;
+      margin-bottom: 40px;
+      padding-bottom: 40px;
+      &:last-child{
+        margin-bottom: 0px;
+        padding-bottom: 0px;
+        border-bottom: 0px;
+      }
+      @media (min-width:992px){
+        max-width: 440px;
+        &:nth-last-child(-n+2){
+          border-bottom: 0px;
+          margin-bottom: 0px;
+          padding-bottom: 0px;
+        }
+      }
+      @media (min-width:1200px){
+        max-width: 526px;
+      }
+      @media (min-width:1400px){
+        max-width: 578px;
+      }
+    }
+ }
+
+ .faq-grid-single{
+  .faq-grid__title{
+    @include heading-20;
+    margin-bottom: 15px;
+    font-family: var(--font-family-base);
+   }
+   p{
+    @include body-18(400,1.67);
+   }
+ }

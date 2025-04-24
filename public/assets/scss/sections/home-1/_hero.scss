@@ -1,0 +1,115 @@
+@use "../../abstract" as *;
+/* ========== Home 1 : Hero Section Style ============= */
+
+.home-1 {
+  &_hero-section {
+    background-color: $offwhite-hex;
+    position: relative;
+    z-index: 1;
+    padding-top: 110px;
+    padding-bottom: 60px;
+    @media (min-width:768px){
+        padding-top: 140px;
+        padding-bottom: 80px;
+    }
+    @media (min-width:992px){
+        padding-top: 150px;
+        padding-bottom: 100px;
+    }
+    @media (min-width:1400px){
+        padding-top:185px;
+        padding-bottom: 120px;
+    }
+    .row--hero-content{
+      --bs-gutter-x: 35px;
+      --bs-gutter-y: 35px;
+      justify-content: center;
+      align-items: center;
+      @media (min-width: 992px) {
+        flex-direction: row-reverse;
+      }
+    }
+  }
+
+  &_hero-shape-1 {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: -1;
+  }
+
+  &_hero-shape-2 {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    z-index: -1;
+  }
+
+  &_hero-image-block {
+    position: relative;
+    max-width: 660px;
+  }
+
+  &_hero-image {
+    img {
+      width: 100%;
+      border-radius: 10px;
+    }
+  }
+
+  &_hero-content {
+    max-width: 660px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    row-gap: 30px;
+    text-align: center;
+
+    @media (min-width: 992px) {
+      text-align: initial;
+      align-items: initial;
+      row-gap: 50px;
+    }
+
+    p {
+      max-width: 607px;
+      color: rgba($black, 0.8);
+    }
+  }
+
+  &_hero-newsletter {
+    position: relative;
+    max-width: 450px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    row-gap: 6px;
+    &__bottom-text {
+      display: flex;
+      justify-content: center;
+      column-gap: 5px;
+      font-weight: 400;
+      font-size: 14px;
+      line-height: 1.43;
+      margin-top: 15px;
+      color: rgba($black, 0.5);
+      text-align: initial;
+  
+      @media (min-width: 480px) {
+        justify-content: center;
+        margin-top: 0;
+      }
+  
+      @media (min-width: 992px) {
+        justify-content: initial;
+      }
+  
+      img {
+        height: 16px;
+        width: 16px;
+      }
+    }
+  }
+
+  
+}

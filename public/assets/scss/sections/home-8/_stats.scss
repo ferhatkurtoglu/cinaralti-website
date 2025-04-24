@@ -1,0 +1,81 @@
+@use "../../abstract/" as *;
+/* ========== Home 8 : Service Section Style ============= */
+.home-8{
+    &_stats-section{
+        position: relative;
+        bottom: 1px;
+        background: #121212;
+        .row--custom{
+            justify-content: center;
+            --gutter-y: 40px;
+            @media (min-width:992px) {
+                align-items: center;
+            }
+        }
+        .stats-wrapper{
+            .stats-single-row{
+                --bs-gutter-y: 30px;
+                justify-content: center;
+            }
+            .stats-single{
+                position: relative;
+                padding-right: 15px;
+                padding-left: 15px;
+                @media (min-width:1200px) {
+                padding-right: 22px;
+                padding-left: 22px;
+                @media (min-width:1400px){
+                padding-right: 40px;
+                padding-left: 40px;
+                }
+                }
+                    &::after {
+                        content: "";
+                        width: 2px;
+                        height: 39%;
+                        background-color: $l7-secondary-hex;
+                        position: absolute;
+                        right: 0%;
+                        top: 55%;
+                        transform: translateY(-50%);
+                        display: none;
+                        @media (min-width:576px){
+                        display: block;
+                        }
+                    }
+                    &:first-child{
+                        left: 0px;
+                    }
+                    &:last-child{
+                        padding-right: 0px;
+                        &::after{
+                            display: none;
+                        }
+                    }
+                &__count{
+                    color: $cream-hex;
+                    @include heading-56;
+                    margin-bottom: 8px;
+                }
+                p{
+                    color: rgba($cream-hex, 0.6);
+                    font-size: 14px;
+                    @media (min-width:576px){
+                    font-size: 16px;
+                    }
+                    @media (min-width:1200px){
+                    font-size: 18px;
+                    }
+                }
+            }
+        }
+    }
+    &_stats-title{
+        color: $cream-hex;
+        text-align: center;
+        @media (min-width:992px) {
+            text-align: initial;
+        }
+    }
+   
+}

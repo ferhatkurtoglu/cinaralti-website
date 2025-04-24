@@ -1,0 +1,134 @@
+@use "../../abstract" as *;
+/*=========== Home 10 : Cta ==========*/
+
+.cta-home-10 {
+ 
+  
+  padding-top: 80px;
+  
+  background: #FFF4D9;
+        position: relative;
+        z-index: 1;
+        &::before{
+            content: "";
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: $l10-primary;
+            z-index: -1;
+            @media (min-width:768px){
+              border-radius: 30px 30px 0 0;
+            }
+        }
+
+  .cta-home-10-wrapper {
+    border-radius: 5px;
+    padding-top: 50px;
+    padding-bottom: 0;
+    position: relative;
+
+    @media (min-width: 576px) {
+      padding-top: 100px;
+      padding-bottom: 100px;
+    }
+  }
+
+  .cta-content-block {
+    padding-bottom: 80px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    row-gap: 30px;
+    position: relative;
+    z-index: 2;
+    border-bottom: 1px solid rgba($white, 0.1);
+
+    @media (min-width: 576px) {
+      padding-bottom: 100px;
+    }
+
+    @media (min-width:992px) {
+      row-gap: 50px;
+    }
+
+    .cta-text-block {
+      margin-right: auto;
+      margin-left: auto;
+      max-width: 425px;
+     @media (min-width:576px){
+      max-width: 540px;
+     }
+      @media (min-width:992px){
+        max-width: 620px;
+      }
+      @media (min-width:1200px){
+        max-width: 720px;
+       
+      }
+    }
+  }
+
+
+  .cta-form {
+    &-wrapper {
+      max-width: 450px;
+      width: 100%;
+      margin: auto;
+    }
+
+    &__input-block {
+      position: relative;
+      font-size: 18px;
+      display: flex;
+      justify-content: space-between;
+      flex-direction: column;
+      padding: 3px;
+      border-radius: 500px;
+      width: 100%;
+      row-gap: 10px;
+
+      @media (min-width:576px) {
+        flex-direction: row;
+        background-color: $white;
+      }
+
+      input {
+        padding: 12px;
+        border-radius: 500px;
+        border: none;
+        outline: none;
+        width: 100%;
+
+        @media (min-width:576px) {
+          background: none;
+          border-radius: 500px 0 0 500px;
+        }
+      }
+
+      .btn {
+        white-space: nowrap;
+      }
+    }
+  }
+
+  .cta-button-group {
+    display: flex;
+    gap: 10px;
+
+    @media (min-width: 576px) {
+      gap: 20px;
+    }
+
+    a {
+      display: flex;
+      align-items: stretch;
+
+      img {
+        width: 100%;
+      }
+    }
+  }
+}

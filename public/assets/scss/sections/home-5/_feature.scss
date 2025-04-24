@@ -1,0 +1,17 @@
+@use "../../abstract/" as *;
+/* ========== Home 5 : Content Section 1 Style ============= */
+.home-5{
+    &_feature-section-wrapper{
+        border-top: 1px solid rgba($l5-secondary-hex, 0.1);
+        padding-top: 60px;
+        @media (min-width:576px){
+        padding-top: 80px;
+        }
+        @media (min-width:992px){
+        padding-top: 100px;
+        }
+        @media (min-width:1200px){
+        padding-top: 120px;
+        }
+    }
+}

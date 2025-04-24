@@ -1,0 +1,29 @@
+@use"../../abstract" as *;
+/* ========== Home 7 : Pricing Section Style ============= */
+.home-7{
+    &_pricing-section{
+        background: $l7-primary-hex;
+        @media (min-width:768px){
+            border-radius: 30px;
+        }
+        .row--custom{
+            --bs-gutter-y: 30px;
+        }
+        .section-heading{
+            margin-bottom: 40px;
+            @media (min-width:992px){
+            margin-bottom: 60px;
+            }
+            &__title{
+                margin-bottom: 30px;
+                @media (min-width:992px){
+                margin-bottom: 50px;
+                }
+            }
+        }
+    }
+    &_pricing-control-block{
+        text-align: center;
+    }
+}
+

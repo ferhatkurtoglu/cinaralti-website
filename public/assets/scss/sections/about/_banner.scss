@@ -1,0 +1,17 @@
+@use "../../abstract" as *;
+/* ========== about : Banner Section Style ============= */
+
+.banner_image-row{
+    justify-content: center;
+    row-gap: 10px;
+    img{
+        width: 100%;
+    }
+    .single-image-2{
+        @media (min-width:479px) {
+            margin-top: 10%;
+        }
+    }
+}
+
+

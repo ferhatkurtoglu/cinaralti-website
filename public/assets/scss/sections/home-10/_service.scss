@@ -1,0 +1,24 @@
+@use"../../abstract" as *;
+/* ========== Home 10 : Service Section Style ============= */
+.home-10{
+    &_service-section{
+        background: #FFF4D9;
+        .section-heading--row{
+        >.row{
+            justify-content: center;
+            text-align: center;
+            @media (min-width:992px) {
+                text-align: initial;
+                justify-content: space-between;
+                align-items: center; 
+            }
+            
+        }
+        }
+        .row--custom{
+            --bs-gutter-y: 5rem;
+            justify-content: center;
+        }
+    }
+    
+}

@@ -1,0 +1,19 @@
+/* ========== Home 4 : Feature Section Style ============= */
+.home-4 {
+    &_feature-section {
+        &__shape {
+            position: absolute;
+            left: 1%;
+            top: -8%;
+            width: 17%;
+            z-index: -1;
+            display: none;
+            @media (min-width:992px){
+            display: block;
+            }
+            img {
+                width: 100%;
+            }
+        }
+    }
+}

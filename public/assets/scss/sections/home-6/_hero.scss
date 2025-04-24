@@ -1,0 +1,199 @@
+@use "../../abstract" as *;
+/* ========== Home 6 : Hero Section  Style ============= */
+.home-6 {
+    &_hero-section {
+        padding-top: 100px;
+        position: relative;
+        overflow: hidden;
+
+        @media (min-width:576px) {
+            padding-top: 120px;
+        }
+
+        @media (min-width:992px) {
+            padding-top: 150px;
+        }
+
+        @media (min-width:1200px) {
+            padding-top: 180px;
+        }
+
+        .row--custom {
+            justify-content: center;
+            --bs-gutter-y: 40px;
+            text-align: center;
+
+            @media (min-width: 768px) {
+                --bs-gutter-y: 60px;
+            }
+
+            @media (min-width:992px) {
+                --bs-gutter-y: 80px;
+            }
+        }
+
+        .hero-shape-1 {
+            position: absolute;
+            top: 14%;
+            right: 10%;
+            z-index: -1;
+            width: 3.5%;
+
+            @media (min-width:992px) {
+                top: 22%;
+            }
+        }
+
+        .hero-shape-2 {
+            position: absolute;
+            top: 43%;
+            left: 10%;
+            z-index: -1;
+            width: 4.25%;
+        }
+
+        .hero-shape-3 {
+            position: absolute;
+            bottom: 5%;
+            right: 10%;
+            z-index: -1;
+            width: 3.25%;
+        }
+
+
+    }
+
+    &_hero-shape {
+        display: none;
+
+        @media (min-width:768px) {
+            display: block;
+        }
+    }
+
+    &_hero-content {
+        &__button-text {
+            font-size: 16px;
+            line-height: 1.3;
+            margin-top: 28px;
+
+            @media (min-width:992px) {
+                margin-top: 37px;
+
+            }
+
+            .dot {
+                width: 6px;
+                height: 6px;
+                border-radius: 500px;
+                // background-color: $neutral-02;
+                margin-left: 15px;
+                margin-right: 15px;
+                margin-bottom: 3px;
+
+                @media (max-width:479px) {
+                    display: block;
+                    background-color: transparent;
+                }
+            }
+        }
+    }
+
+    &_hero-content-block {
+        max-width: 930px;
+        margin-right: auto;
+        margin-left: auto;
+        display: flex;
+        flex-direction: column;
+        row-gap: 30px;
+
+        @media (min-width:768px) {
+            row-gap: 40px;
+        }
+
+        @media (min-width:992px) {
+            row-gap: 54px;
+        }
+
+        p {
+            color: rgba($black, 0.8);
+            @media (min-width:992px) {
+                padding-left: 60px;
+                padding-right: 60px;
+            }
+
+            @media (min-width:1200px) {
+                padding-left: 110px;
+                padding-right: 110px;
+            }
+        }
+
+        .hero-content__title {
+            &-color-bg {
+                background-color: #BEF8FC;
+                border-radius: 5px;
+                padding-left: 10px;
+                padding-right: 10px;
+            }
+
+            // color: $white;
+            @media (min-width:992px) {
+                margin-bottom: 26px;
+            }
+
+            &>span {
+                position: relative;
+
+                &::after {
+                    position: absolute;
+                    content: "";
+                    top: -18%;
+                    left: 0;
+                    width: 104%;
+                    background-image: url(/image/home-6/shape.svg);
+                    height: 100%;
+                    background-repeat: no-repeat;
+                    background-size: 5%;
+                    background-position: 100% 23%;
+                    display: none;
+
+                    @media (min-width: 480px) {
+                        display: block;
+                    }
+
+                    @media (min-width:1400px) {
+                        background-position: 97% 23%;
+                    }
+                }
+            }
+        }
+    }
+
+    &_hero-button-block {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 20px;
+        flex-direction: column;
+
+        .btn {
+            width: 100%;
+        }
+
+        @media (min-width:480px) {
+            flex-direction: row;
+
+            .btn {
+                width: initial;
+            }
+        }
+
+
+    }
+
+    &_hero-image-block {
+        img {
+            width: 100%;
+        }
+    }
+}

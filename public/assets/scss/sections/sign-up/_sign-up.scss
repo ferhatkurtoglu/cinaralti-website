@@ -1,0 +1,89 @@
+@use"../../abstract" as *;
+/* ========== Contact main Section Style ============= */
+.account-section{
+    min-height: 100vh;
+    .account-heading-block{
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        row-gap: 40px;
+        margin-bottom: 40px;
+        @media (min-width:992px){
+        margin-bottom: 60px;
+        row-gap: 60px;
+        }
+        @media (min-width:1400px){
+        row-gap: 100px;
+        }
+        .heading-md{
+            margin-bottom: 15px;
+        }
+        p{
+            color: rgba(#0A102F, 0.8);
+        }
+    }
+    .account_comment-box{
+        background: #FFFFFF;
+        border: 2px solid #0A102F;
+        border-radius: 10px;
+        padding: 40px;
+        
+        &__form-inner{
+            display: flex;
+            flex-direction: column;
+            row-gap: 24px;
+        }
+        .form-control {
+            border: 1px solid rgba(10, 16, 47, 0.5);
+            border-radius: 500px;
+            padding: 15px 30px;
+            width: 100%;
+            color: rgba(#0A102F, 0.5);
+            box-shadow: none;
+            // &.textarea{
+            //     height: 150px;
+            //     border-radius: 30px;
+            // }
+        }
+        .account-title{
+            @include heading-18;
+            font-family: var(--font-family-base);
+            margin-bottom: 10px;
+        }
+        .account-condition-block{
+            display: flex;
+            flex-wrap: wrap;
+            row-gap: 8px;
+            justify-content: space-between;
+            a{
+                color: rgba(#0A102F, 0.8);
+            }
+        }
+        .account-condition{
+            display: flex;
+            flex-wrap: wrap;
+            column-gap: 10px;
+            @include body-16(400);
+            color: rgba(#0A102F, 0.8);
+            span{
+                @include body-16(600);
+                color: rgba(#3147FF, 0.8);
+            }
+           
+        }
+        &__form-input-button{
+            text-align: center;
+            .button-bottom-text{
+                @include body-16(400);
+                color: rgba(#0A102F, 0.8);
+                margin-top: 15px;
+                a{
+                    @include body-16(600);
+                color: rgba(#3147FF, 0.8);
+                }
+            }
+        }
+    }
+}

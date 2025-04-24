@@ -1,0 +1,329 @@
+@use"./abstract" as *;
+/* ========== Preview page Style ============= */
+.preview-page{
+    .btn-primary-l05 {
+        --btn-border-width: 2px;
+       &:hover{
+        background-color: transparent !important;
+        border-color: #FFFFFF !important;
+        color: #FFFFFF !important;
+        --btn-border-width: 2px;
+       }
+    }
+    .btn-outline-l08 {
+        --btn-border-color: #fff;
+        --btn-color: #fff;
+    }
+   &_header{
+    position: fixed !important;
+    background-color: rgba(#121212, 0.8) !important;
+    &-wrapper{
+        display: flex;
+        justify-content: space-between;
+       align-items: center;
+    }
+    .brand-logo{
+        display: block;
+    }
+    .header-block{
+        display: inline-flex;
+        column-gap: 50px;
+        ul{
+            display: flex;
+            column-gap: 30px;
+            align-items: center;
+            margin-bottom: 0;
+            li{
+                a{
+                    @include body-16(500);
+                    color: #FFFFFF;
+                }
+            }
+        }
+        &__button{
+            display: none;
+            @media (min-width:576px){
+            display: block;
+            }
+        }
+        .btn-primary-l05 {
+            padding: 12px 33.5px;
+        }
+    }
+    &.site-header{
+        padding-top: 20px !important;
+        padding-bottom: 20px !important;
+    }
+   }
+    &_wrapper{
+        background: #000000;
+        button{
+            background: #000000;
+            border-width: 0px;
+        }
+    }
+    &_hero{
+        &-section{
+            background-image: url(../image/demo/header.png);
+            width: 100%;
+            background-color: #1B1C1D;
+            background-blend-mode: multiply;
+            inset: 0;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-size: cover;
+            padding-top: 80px;
+            padding-bottom: 60px;
+            @media (min-width:576px){
+            padding-top: 100px;
+            padding-bottom: 80px;
+            }
+            @media (min-width:992px){
+            padding-top: 135px;
+            padding-bottom: 100px;
+            }
+            @media (min-width:1200px){
+            padding-top: 170px;
+            padding-bottom: 120px;
+            }
+        }
+    }
+    &_hero-content {
+        &-text-block{
+            margin-left: auto;
+            margin-right: auto;
+            text-align: center;
+            @media (min-width:768px){
+                max-width: 660px;
+            }
+           
+            @media (min-width:992px){
+                max-width: 856px;
+            }
+        }
+        .header-title{
+            @include heading-70(700);
+            font-family: $font-family-base;
+            line-height: 1.4;
+            letter-spacing: 0em;
+            margin-bottom: 20px;
+        }
+        p{
+            @include heading-20(500);
+            color: rgba($white, 0.8);
+            max-width: 746px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+    }
+    &_hero-button-group{
+        
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+        row-gap: 15px;
+        column-gap: 15px;
+        margin-top: 30px;
+        @media (min-width:992px){
+        margin-top: 50px;
+        }
+        .btn-primary-l05 {
+            padding-left: 60px;
+    padding-right: 60px;
+        }
+        .btn-outline-l08 {
+            --btn-border-color: #fff;
+            --btn-color: #fff;
+        }
+    }
+
+    &_home{
+        border-bottom: 1px solid rgba($white, 0.1);
+    }
+    &_section-heading{
+        margin-left: auto;
+        margin-right: auto;
+        text-align: center;
+        max-width: 602px;
+        margin-bottom: 40px;
+        @media (min-width:576px){
+        margin-bottom: 60px;
+        @media (min-width:992px){
+        margin-bottom: 80px;
+        }
+        }
+        .section-title{
+            @include heading-50;
+            font-weight: 600;
+            margin-bottom: 20px;
+            font-family: $font-family-base;
+        }
+        p{
+            @include body-18(400,1.44);
+            color: rgba($white, 0.8);
+        }
+    }
+    &_image{
+        position: relative;
+        &:hover{
+            .preview-page-hover{
+                opacity: 1;
+                background-color: rgba(#121212, 0.8);
+        background-blend-mode: multiply;
+        inset:0;
+            }
+        }
+    }
+    &-hover{
+
+        position: absolute;
+        inset: 0;
+    opacity: 0;
+    transition: 0.4s;
+    // &:hover{
+    //     opacity: 1;
+    //     background-color: rgba(#121212, 0.8);
+    //     background-blend-mode: multiply;
+    //     inset:0;
+    // }
+       &_button-group{
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        column-gap: 15px;
+        width: 100%;
+        height: 100%;
+        .btn-masco{
+            transition: transform 0.3s ease-in-out;
+            transform:  translateY(0);
+            
+            &:hover{
+                transform:  translateY(-10px);
+            }
+        }
+       }
+    }
+    &_name{
+        @include heading-24;
+        text-align: center;
+        margin-top: 30px;
+    }
+    &_inner{
+        border-bottom: 1px solid rgba($white, 0.1);
+        .preview-page_section-heading{
+            max-width: 575px
+        }
+        span{
+            @include heading-50;
+            font-weight: 600;
+            font-family: $font-family-base;
+            text-align: center;
+            color: #13111A;
+            text-align: center;
+            margin-top: 30px;
+            display: flex;
+            justify-content: center;
+        }
+    }
+    &_inner-bottom{
+        .preview-page_section-heading{
+            margin-left: auto;
+            margin-right: auto;
+            text-align: center;
+            max-width: 750px;
+            margin-bottom: 40px;
+            @media (min-width:576px){
+            margin-bottom: 60px;
+            @media (min-width:992px){
+            margin-bottom: 80px;
+            }
+            }
+            .section-title{
+                @include heading-50;
+                font-weight: 600;
+                margin-bottom: 20px;
+                font-family: $font-family-base;
+            }
+            p{
+                @include body-18(400,1.44);
+                color: rgba($white, 0.8);
+                max-width: 600px;
+                margin-left: auto;
+                margin-right: auto;
+            }
+        }
+    }
+    &_card{
+        background: #13111A;
+        border-radius: 10px;
+        padding: 30px;
+        display: flex;
+        column-gap: 30px;
+        max-width: 500px;
+        &__title{
+        font-family: $font-family-base;
+        font-weight: 700;
+        font-size: 30px;
+        line-height: 1.4;
+        letter-spacing: -0.033333333em;
+        color: #FFFFFF;
+        margin-bottom: 15px;
+        }
+        p{
+            @include heading-24;
+            color: #FFFFFF;
+        }
+        &-row{
+            display: flex;
+            flex-wrap: wrap;
+            row-gap: 30px;
+            justify-content: center;
+            max-width: 1092px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+    }
+    &_cta{
+        background: #13111A;
+        position: relative;
+        &-image{
+            position: absolute;
+            transform: rotate(8.89deg);
+            left: -1%;
+            top: 3%;
+            img{
+                width: 100%;
+                object-fit: cover;
+                object-position: center;
+            }
+        }
+        .preview-page_section-heading{
+            margin-left: auto;
+            margin-right: auto;
+            text-align: center;
+            max-width: 895px;
+            margin-bottom: 40px;
+            @media (min-width:576px){
+            margin-bottom: 60px;
+            @media (min-width:992px){
+            margin-bottom: 80px;
+            }
+            }
+            p{
+                max-width: 620px;
+                margin-left: auto;
+                margin-right: auto;
+            }
+        }
+        &-button{
+            .btn-primary-l05 {
+                padding-left: 60px;
+        padding-right: 60px;
+            }
+            margin-top: 30px;
+            @media (min-width:992px){
+            margin-top: 50px;
+            }
+        }
+    }
+}

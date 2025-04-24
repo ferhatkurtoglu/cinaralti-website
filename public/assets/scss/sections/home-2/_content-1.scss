@@ -1,0 +1,35 @@
+@use"../../abstract" as *;
+/* ========== Home 2 : Content Section 1 Style ============= */
+.home-2{
+    &_content-section-1{
+        @media (min-width:1400px) {
+            padding-bottom: 150px;
+        }
+        .row--custom{
+            --bs-gutter-y: 40px;
+            justify-content: center;
+            @media (min-width:992px) {
+                align-items: center;
+                --bs-gutter-x: 25px;
+            }
+        }
+        .content{
+            .content_text-block{
+                p{
+                    @media (min-width:992px) {
+                        max-width: 635px;
+                    }
+                }
+            }
+            .content-list-item{
+                font-family: $font-family-base-main;
+            }
+        }
+        
+    }
+    &_content-image-1{
+        img{
+            width: 100%;
+        }
+    }
+}

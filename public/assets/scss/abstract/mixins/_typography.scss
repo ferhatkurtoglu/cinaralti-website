@@ -1,0 +1,368 @@
+
+// letter-spacing: -0.01em;
+
+
+
+@mixin heading-100($lh:1.05) {
+  line-height: $lh;
+  font-size: 42px;
+  font-weight: 800;
+  letter-spacing: -1px;
+
+  @media (min-width: 480px) {
+    font-size: 46px;
+  }
+
+  @media (min-width: 576px) {
+    font-size: 50px;
+  }
+
+  @media (min-width: 992px) {
+    font-size: 68px;
+  }
+
+  @media (min-width: 1200px) {
+    font-size: 80px;
+  }
+
+  @media (min-width: 1400px) {
+    font-size: 100px;
+  }
+}
+
+@mixin heading-90($weight:700) {
+  line-height: 1.11;
+  font-size: 38px;
+  font-weight: $weight;
+  letter-spacing: -0.0111111111111111em;
+
+  @media (min-width: 480px) {
+    font-size: 42px;
+  }
+
+  @media (min-width: 576px) {
+    font-size: 48px;
+  }
+
+  @media (min-width: 992px) {
+    font-size: 64px;
+  }
+
+  @media (min-width: 1200px) {
+    font-size: 76px;
+  }
+
+  @media (min-width: 1400px) {
+    font-size: 90px;
+  }
+}
+
+@mixin heading-70($weight:800) {
+  line-height: 1.2;
+  font-size: 38px;
+  font-weight: $weight;
+  letter-spacing: -0.0142857em;
+
+  @media (min-width: 480px) {
+    font-size: 42px;
+  }
+
+  @media (min-width: 576px) {
+    font-size: 48px;
+  }
+
+  @media (min-width: 992px) {
+    font-size: 64px;
+  }
+
+  @media (min-width: 1200px) {
+    font-size: 70px;
+  }
+}
+
+@mixin heading-72 {
+  font-weight: 600;
+  font-size: 32px;
+  line-height: 1.18;
+  @media (min-width:768px) {
+      font-size: 37px;
+  }
+  @media (min-width:992px) {
+      font-size: 44px;
+  }
+  @media (min-width:1200px) {
+      font-size: 56px;
+  }
+  @media (min-width:1400px) {
+      font-size: 72px;
+  }
+}
+@mixin heading-66 {
+  font-size: 32px;
+  font-weight: 600;
+  line-height: .94;
+  @media (min-width:576px) {
+    font-size: 42px;
+  }
+
+  @media (min-width:992px) {
+    font-size: 52px;
+  }
+
+  @media (min-width:1200px) {
+    font-size: 66px;
+  }
+}
+@mixin heading-60 {
+  font-size: 32px;
+  font-weight: 500;
+  line-height: .94;
+  @media (min-width:576px) {
+    font-size: 40px;
+  }
+
+  @media (min-width:992px) {
+    font-size: 46px;
+  }
+
+  @media (min-width:1200px) {
+    font-size: 60px;
+  }
+}
+@mixin heading-56($lh:1.14) {
+  font-size: 32px;
+  line-height: $lh;
+  font-weight: 700;
+
+  @media (min-width:576px) {
+    font-size: 42px;
+  }
+
+  @media (min-width:992px) {
+    font-size: 52px;
+  }
+
+  @media (min-width:1200px) {
+    font-size: 56px;
+  }
+}
+@mixin heading-50 {
+  font-size: 34px;
+  line-height: 1.20;
+  font-weight: 800;
+
+  @media (min-width:576px) {
+    font-size: 38px;
+  }
+
+  @media (min-width:992px) {
+    font-size: 44px;
+  }
+
+  @media (min-width:1200px) {
+    font-size: 50px;
+  }
+}
+
+@mixin heading-48 {
+  font-size: 32px;
+  line-height: 1.2;
+  font-weight: 700;
+
+  @media (min-width:576px) {
+    font-size: 38px;
+  }
+
+  @media (min-width:992px) {
+    font-size: 42px;
+  }
+
+  @media (min-width:1200px) {
+    font-size: 48px;
+  }
+}
+
+
+@mixin heading-46 {
+  font-size: 32px;
+  line-height: 1.26;
+  font-weight: 800;
+
+  @media (min-width:576px) {
+    font-size: 38px;
+  }
+
+  @media (min-width:992px) {
+    font-size: 42px;
+  }
+
+  @media (min-width:1200px) {
+    font-size: 46px;
+  }
+}
+@mixin heading-46-dm {
+  font-size: 32px;
+  line-height: 1.26;
+  @media (min-width:576px) {
+    font-size: 38px;
+  }
+
+  @media (min-width:992px) {
+    font-size: 42px;
+  }
+
+  @media (min-width:1200px) {
+    font-size: 46px;
+  }
+}
+@mixin heading-45 {
+  font-size: 32px;
+  line-height: 1.2;
+  letter-spacing: -1px;
+  font-weight: 700;
+
+  @media (min-width:576px) {
+    font-size: 38px;
+  }
+
+  @media (min-width:992px) {
+    font-size: 42px;
+  }
+
+  @media (min-width:1200px) {
+    font-size: 45px;
+  }
+}
+@mixin heading-40 {
+  font-weight: 700;
+  font-size: 32px;
+  line-height: 1.2;
+  letter-spacing: -0.025em;
+  font-family: var(--font-family-base);
+  @media (min-width:576px) {
+    font-size: 36px;
+  }
+
+  @media (min-width:992px) {
+    font-size: 38px;
+  }
+
+  @media (min-width:1200px) {
+    font-size: 40px;
+  }
+}
+@mixin heading-34{
+  font-weight: 600;
+  font-family: 'General Sans', sans-serif;
+  line-height: 1.2;
+  font-size: 26px;
+  @media (min-width:768px){
+    font-size: 30px;
+  }
+  @media (min-width:992px){
+    font-size: 34px;
+  }
+}
+@mixin heading-30($fw:600,$lsp:0em){
+  font-weight: $fw;
+  letter-spacing:$lsp ;
+  font-family:  'General Sans', sans-serif;
+  line-height: 1.4;
+  font-size: 24px;
+  @media (min-width:768px){
+    font-size: 26px;
+  }
+  @media (min-width:992px){
+    font-size: 28px;
+  }
+  @media (min-width:1200px){
+    font-size: 30px;
+  }
+}
+@mixin heading-28($fw:600){
+  font-weight: $fw;
+  font-family: 'Public Sans', sans-serif;
+  line-height: 1.36;
+  font-size: 22px;
+  @media (min-width:768px){
+    font-size: 26px;
+  }
+  @media (min-width:992px){
+    font-size: 28px;
+  }
+}
+@mixin heading-26($fw:700,$lsp:0em){
+  font-weight: $fw;
+  letter-spacing: $lsp;
+  font-family: 'Public Sans', sans-serif;
+  line-height: 1.23;
+  font-size: 18px;
+  @media (min-width:768px){
+    font-size: 22px;
+  }
+  @media (min-width:1200px){
+    font-size: 26px;
+  }
+}
+@mixin heading-24($fw:600,$lsp:-0.0208333333em){
+  font-weight: $fw;
+  line-height: 1.33;
+  letter-spacing: $lsp;
+  font-size: 20px;
+  @media (min-width:768px){
+    font-size: 22px;
+  }
+  @media (min-width:992px){
+    font-size: 24px;
+  }
+}
+@mixin heading-20 ($fw:600,$lsp:0em,$lh:1.40){
+  font-size: 18px;
+  font-weight: $fw;
+  line-height: $lh;
+  letter-spacing: $lsp;
+
+  @media (min-width:576px) {
+    font-size: 20px;
+  }
+}
+
+@mixin body-20 {
+  font-size: 18px;
+  line-height: 1.40;
+  
+
+  @media (min-width:576px) {
+    font-size: 20px;
+  }
+}
+@mixin heading-18($fw:600) {
+  font-size: 16px;
+  font-weight: $fw;
+  line-height: 1.67;
+  @media (min-width:576px){
+    font-size: 18px;
+  }
+}
+
+
+@mixin body-18($fw:600,$lh:1.40) {
+  font-size: 16px;
+  line-height: $lh;
+  font-weight: $fw;
+
+  @media (min-width:576px) {
+    font-size: 18px;
+  }
+}
+@mixin body-16($fw:600){
+  font-weight: $fw;
+font-size: 16px;
+line-height: 1.5;
+}
+@mixin body-14{
+  font-weight: 400;
+font-size: 14px;
+line-height: 1.43;
+}
+

@@ -1,0 +1,51 @@
+@use "../../abstract" as *;
+/*=========== Home 5 : Cta ==========*/
+
+.cta-home-5 {
+    background: #1B1C1D;
+
+    .cta-home-5-wrapper {
+        background-color: $l5-primary-hex;
+        border-radius: 5px;
+        padding: 30px;
+
+        @media (min-width: 992px) {
+            padding: 50px;
+        }
+    }
+
+    .row--custom {
+        justify-content: center;
+        row-gap: 30px;
+
+        @media (min-width: 768px) {
+            align-items: center;
+        }
+
+        @media (min-width: 1200px) {
+            justify-content: space-between;
+        }
+    }
+
+    .cta-text-block {
+        color: #1B1C1D;
+        text-align: center;
+
+        @media (min-width: 992px) {
+            text-align: initial;
+        }
+
+        .heading-md {
+            margin-bottom: 0;
+        }
+    }
+
+    .cta-home-5-button {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        @media (min-width:1200px){
+        justify-content: end;
+        }
+    }
+}

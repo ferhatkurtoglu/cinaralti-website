@@ -1,0 +1,68 @@
+@use "../../abstract/" as *;
+/* ========== Home 8 : Content Section 2 Style ============= */
+.home-8 {
+    &_content-section-2 {
+        position: relative;
+        .row--custom{
+            justify-content: center;
+            --bs-gutter-y: 30px;
+            @media (min-width:992px) {
+                --bs-gutter-x: 25px;
+                flex-direction: row-reverse;
+                justify-content: space-between;
+                align-items: center;
+            }
+        }
+        .content {
+            @media (max-width:991px) {
+                align-items: center;
+                text-align: center;
+            }
+            &-text-block {
+                p{
+                    @media (min-width:992px) {
+                        max-width: 500px;
+                    }
+                }
+            }
+            .content-list{
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: center;
+                flex-direction: row;
+                @media (min-width:992px) {
+                    justify-content: initial;
+                }
+                img{
+                    display: none;
+                    @media (min-width:576px){
+                    display: block;
+                    }
+                }
+            }
+        }
+
+    }
+    &_content-image-2-block{
+        position: relative;
+        @media (min-width:992px) {
+            max-width: 561px;
+        }
+    }
+    &_content-image-2{
+        img{
+            width: 100%;
+        }
+        &-card{
+            position: absolute;
+            width: 54%;
+            left: -25%;
+            bottom: 5%;
+            box-shadow: 0px 4px 80px rgba(0, 0, 0, 0.06);
+            img{
+                width: 100%;
+                border-radius: 5px;
+            }
+        }
+    }
+}

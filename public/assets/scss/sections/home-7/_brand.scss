@@ -1,0 +1,64 @@
+@use '../../abstract' as *;
+/* ========== Home 7 : Brand Section Style ============= */
+.home-7{
+  &_brands-wrapper-inner{
+    padding-top: 60px;
+    padding-bottom: 60px;
+    @media (min-width:576px){
+      padding-top: 80px;
+      padding-bottom: 80px;
+    }
+    @media (min-width:992px){
+      padding-top: 100px;
+      padding-bottom: 100px;
+    }
+  }
+  &_brand-title{
+    text-align: center;
+    margin-bottom: 30px;
+    @include body-20;
+    color: rgba(#0A102F, 0.7);
+    font-family: $font-family-base;
+    @media (min-width:992px){
+      margin-bottom: 40px;
+    }
+    @media (min-width:1200px){
+      margin-bottom: 60px;
+    }
+    @media (min-width:1400px){
+      margin-bottom: 80px;
+    }
+  }
+  &_brands-wrapper{
+    display: flex;
+    flex-wrap: wrap;
+    row-gap: 20px;
+    @include mx(-15px);
+    justify-content: center;
+    @media (min-width:992px){
+      justify-content: space-between;
+    }
+  }
+  &_single-brand{
+    @include px(15px);
+    width: 50%;
+    @media (min-width:480px){
+      width: 33.333%;
+    }
+    @media (min-width:992px){
+      width: 20%;
+    }
+    @media (min-width:1200px){
+      width: auto;
+    }
+    img{
+      width: 100%;
+      max-width: auto;
+      filter: grayscale(100%);
+      @media (min-width:1200px){
+        width: auto;
+        max-width: 100%;
+      }
+    }
+  }
+}

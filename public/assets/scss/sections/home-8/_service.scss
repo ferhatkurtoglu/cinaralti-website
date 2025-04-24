@@ -1,0 +1,92 @@
+@use "../../abstract/" as *;
+/* ========== Home 8 : Service Section Style ============= */
+.home-8{
+    &_service-section{
+        position: relative;
+        background: $black-2;
+        z-index: 1;
+        .service-shape{
+            z-index: -1;
+            position: absolute;
+            width: 100%;
+            top: 0;
+            left: 0;
+        }
+        .particles{
+            display: none;
+            @media (min-width:992px){
+            display: block;
+            }
+            img{
+                position: absolute;z-index: -1;
+            }
+        }
+        .particle-1{
+            left: 26%;
+            top: 26%;
+        }
+        .particle-2{
+            left: 16%;
+            top: 19%;
+        }.particle-3{
+            left: 13%;
+            top: 41%;
+        }
+        .section-heading{
+
+            p{
+                color: rgba($cream-hex, 0.8);
+                line-height: 1.67;
+                @media (min-width:992px) {
+                    max-width: 595px;
+                    margin: 0 auto;
+                }
+            }
+        }
+        .row--service-list{
+            justify-content: center;
+            @media (min-width:992px) {
+                --bs-gutter-x: 50px;
+                justify-content: space-between;
+            }
+            @media (min-width:1200px){
+                --bs-gutter-x: 80px;
+            }
+            @media (min-width:1400px){
+                --bs-gutter-x: 140px;
+            }
+        }
+    }
+    &_service-list{
+        color: $cream-hex;
+        margin-bottom: 0;
+       li{
+            // @include py(15px);
+            border-bottom: 1px solid rgba(253, 251, 249, 0.1);
+            @include py(25px);
+            // @media (min-width:992px) {
+            // }
+        &:last-of-type{
+            @media (min-width:992px){
+                border-bottom:0;
+                padding-bottom: 0;
+            }
+        }
+       }
+       &__item{
+        a{
+            display: flex;
+            justify-content: space-between;
+            @include heading-26;
+            color: $cream-hex;
+            &:hover{
+                color: $l8-primary-hex;
+               }
+               i{
+                transform: rotate(335deg);
+            }
+        }
+       }
+       
+    }
+}

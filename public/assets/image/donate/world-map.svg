@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="1920" height="1080" viewBox="0 0 1920 1080" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M1920 0H0V1080H1920V0Z" fill="#F5F5F5"/>
+  <path d="M1815.5 236.5C1815.5 236.5 1789 247 1774.5 247C1760 247 1745.5 239 1731 239C1716.5 239 1702 247 1687.5 247C1673 247 1658.5 239 1644 239C1629.5 239 1615 247 1600.5 247C1586 247 1571.5 239 1557 239" stroke="#E0E0E0" stroke-width="2"/>
+  <!-- Add more path elements for the world map outline -->
+</svg> 

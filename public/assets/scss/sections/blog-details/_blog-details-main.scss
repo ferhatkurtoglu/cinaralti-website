@@ -1,0 +1,191 @@
+@use "../../abstract/" as *;
+/* ========== Blog Main Style ============= */
+.blog-details{
+    &_main-section{
+        .comment-widget{
+            padding-left: 10px;
+            &__wrapper{
+                display: flex;
+                flex-direction: column;
+                row-gap: 24px;
+                padding-left: 30px;
+                padding-right: 30px;
+            }
+        
+        }
+        .inner_banner{
+            &-title{
+                letter-spacing: -0.02em;
+                font-size: 32px;
+                @media (min-width:576px){
+                    font-size: 38px;
+                    }
+                @media (min-width:992px){
+                    font-size: 44px;
+                }
+                @media (min-width:1200px){
+                    font-size: 50px;
+                }
+                @media (min-width:1200px){
+                    max-width: 1076px;
+                }
+                
+            }
+        }
+       
+    }
+}
+
+.blog-content{
+    &-wrapper{
+        padding-left: 30px;
+        padding-right: 30px;
+        p{
+            color: rgba($l2-secondary-hex, 0.8);
+            margin-bottom: 24px;
+        }
+        h3{
+            @include heading-18;
+            font-family: $font-family-base-main;
+        }
+        span{
+            @include heading-20;
+            line-height: 1.67;
+            color: #0A102F;
+            font-family: $font-family-base-main;
+            margin-bottom: 25px;
+            @media (min-width:992px){
+            margin-bottom: 40px;
+            }
+        }
+    }
+    &-meta{
+        display: flex;
+        flex-wrap: wrap;
+        row-gap: 15px;
+        column-gap: 24px;
+        align-items: center;
+        margin-bottom: 30px;
+        padding-left: 30px;
+        padding-right: 30px;
+        a{
+            color: #0A102F;
+        }
+        span{
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            column-gap: 10px;
+        }
+    }
+    &__user{
+        @include body-16(700); 
+        img{
+            height: 45px
+        }
+    }
+    &__time{
+        @include body-16(700);  
+    }
+    &__category{
+        padding: 5.5px 26px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border-radius: 500px;
+        background: rgba(10, 16, 47, 0.05);
+        color: rgba(10, 16, 47, 0.6);
+        @include body-16(400);
+    }
+ 
+    &__social-options{
+        display: flex;
+        justify-content: space-between;
+        border-bottom: 1px solid rgba($l2-secondary-hex, 0.1);
+        margin-top: 20px;
+        margin-bottom: 25px;
+        @media (min-width:992px){
+        margin-top: 30px;
+        margin-bottom: 40px;
+
+        }
+        span{
+            display: flex;
+            column-gap: 5px;
+            @include body-16(400);
+        }
+        .social-options-left{
+            display: flex;
+            column-gap: 24px;
+        }
+        .social-options-right{
+            display: flex;
+            column-gap: 24px;
+        }
+    }
+    &__reply-form{
+        position: relative;
+        display: flex;
+        
+        row-gap: 15px;
+        column-gap: 20px;
+        @media (max-width:576px){
+            flex-wrap: wrap;
+        }
+        .form-control {
+        background: #FFFFFF;
+       
+        border-radius: 10px;
+        padding: 15px ;
+        width: 100%;
+        color: rgba($l2-secondary-hex, 0.5);
+        box-shadow: none;
+        @include body-18(400,1.67);
+        &.textarea{
+            height: 150px;
+            border: 1px solid $l2-secondary-hex;
+            border-radius: 10px;
+
+        }
+        }
+        &-image{
+        min-width: 60px;
+        max-width: 60px;
+        min-height: 60px;
+        max-height: 60px;
+        border-radius: 500px;
+        img{
+          width: 100%;
+          height: 100%;
+          border-radius: inherit;
+          object-fit: cover;
+          object-position: center;
+        }
+        }
+        &__button-group{
+            position: absolute;
+            column-gap: 24px;
+            max-width: 200px;
+            display: flex;
+            align-items: center;
+            right: 8%;
+            bottom: 11%;
+            button{
+                @include body-16(400);
+                color: rgba($l2-secondary-hex, 0.8);
+                padding: 5.5px 32.5px;
+                background: rgba(10, 16, 47, 0.05);
+                border-radius: 500px;
+                border-width: 0px;
+            }
+        }
+    }
+    &__reply-button{
+        padding: 5.5px 32.5px;
+        border-radius: 500px;
+        background: rgba(10, 16, 47, 0.05);
+        font-size: 16px;
+        line-height: 1.5;
+        color: rgba(10, 16, 47, 0.6);
+    }
+}

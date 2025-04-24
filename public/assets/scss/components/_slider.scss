@@ -1,0 +1,115 @@
+.home-7 {
+    &_testimonial-card-wrapper {
+        .slick-dots {
+            bottom: -10%;
+            width: 95%;
+
+            @media (min-width: 992px) {
+                bottom: -16%;
+            }
+
+            li {
+                button {
+                    &::before {
+                        content: '•';
+                        font-size: 10px;
+                    }
+                }
+            }
+
+            .slick-active {
+                width: 20px;
+
+                button {
+                    &::before {
+                        content: '•';
+                        font-size: 10px;
+                    }
+                }
+            }
+
+        }
+    }
+}
+
+.home-10 {
+    &_testimonial-widget-wrapper {
+        position: relative;
+
+        .slick-prev {
+            width: fit-content;
+            left: 89%;
+            top: 79%;
+            z-index: 1;
+            position: absolute;
+
+            &::before {
+                font-family: "Font Awesome 5 Free";
+                content: "\f104";
+                display: inline-block;
+                padding-right: 3px;
+                vertical-align: middle;
+                font-weight: 900;
+                width: 50px;
+                height: 50px;
+                min-width: 50px;
+                max-width: 50px;
+                min-height: 50px;
+                max-height: 50px;
+                border-radius: 500px;
+                background: #FFF4D9;
+                border: 1px solid #221F1A;
+                color: #2D2B92;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                z-index: -1;
+            }
+
+            &:hover {
+                &::before {
+                    color: #FFD874;
+                    background: #2D2B92;
+                }
+            }
+        }
+
+        .slick-next {
+            width: fit-content;
+            left: 94.5%;
+            top: 79%;
+            position: absolute;
+            z-index: 1;
+
+            &::before {
+                font-family: "Font Awesome 5 Free";
+                content: "\f105";
+                display: inline-block;
+                padding-right: 3px;
+                vertical-align: middle;
+                font-weight: 900;
+                width: 50px;
+                height: 50px;
+                min-width: 50px;
+                max-width: 50px;
+                min-height: 50px;
+                max-height: 50px;
+                border-radius: 500px;
+                background: #FFF4D9;
+                border: 1px solid #221F1A;
+                color: #2D2B92;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                z-index: -1;
+            }
+
+            &:hover {
+                &::before {
+                    color: #FFD874;
+                    background: #2D2B92;
+                }
+            }
+        }
+    }
+}

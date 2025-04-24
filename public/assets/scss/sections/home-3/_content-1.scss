@@ -1,0 +1,46 @@
+@use "../../abstract/" as *;
+/* ========== Home 3 : Content Section 1 Style ============= */
+.home-3 {
+    &_content-section-1 {
+        .row--custom{
+            justify-content: center;
+            --bs-gutter-y: 30px;
+            @media (min-width:992px) {
+                align-items: center;
+                justify-content: space-between;
+            }
+        }
+        .content {
+            @media (max-width:991px) {
+                align-items: center;
+            }
+            &-text-block {
+                p {
+                    @media (min-width:992px) {
+                        max-width: 598px;
+                    }
+                }
+            }
+        }
+    }
+    &_content-image-1-block{
+        position: relative;
+        max-width: 282.64px;
+        z-index: 1;
+        display: inline-block;
+    }
+    &_content-image-1{
+        img{
+            width: 100%;
+        }
+    }
+    &_content-image-1-shape{
+        width: 180%;
+        &.absolute-center{
+            z-index: -1;
+        }
+        img{
+            width: 100%;
+        }
+    }
+}

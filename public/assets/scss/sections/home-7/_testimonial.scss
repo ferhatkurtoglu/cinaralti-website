@@ -1,0 +1,28 @@
+@use"../../abstract" as *;
+/* ========== Home 7 : Testimonial Section Style ============= */
+.home-7{
+    &_testimonial-section{
+        background-color: $offwhite-hex;
+        .row--custom{
+            justify-content: center;
+            --bs-gutter-y: 40px;
+            @media (min-width:992px) {
+                --bs-gutter-x: 30px;
+                align-items: center;
+            }
+        }
+        .testimonial-content{
+           text-align: center;
+           @media (min-width:992px){
+            padding-left: 30px;
+           text-align: initial;
+           }
+           @media (min-width:1200px){
+            padding-left: initial;
+            }
+           p{
+            color: rgba($l7-primary-hex, 0.8);
+           }
+        }
+    }
+}

@@ -1,0 +1,29 @@
+@use"../../abstract" as *;
+/* ========== Home 5 : Pricing Section Style ============= */
+.home-5{
+    &_pricing-section{
+        .pricing-section-heading{
+            max-width: 636px;
+            margin-left: auto;
+            margin-right: auto;
+            margin-bottom: 40px;
+            text-align: center;
+            @media (min-width:992px) {
+                margin-bottom: 60px;
+            }
+            .section-title{
+                margin-bottom: 30px;
+                @media (min-width:992px) {
+                    margin-bottom: 50px;
+                }
+            }
+        }
+        .row--custom{
+            --bs-gutter-y: 30px;
+        }
+        .pricing-control{
+            height: 50px;
+        }
+    }
+}
+

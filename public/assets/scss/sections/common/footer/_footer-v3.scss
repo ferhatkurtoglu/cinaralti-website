@@ -1,0 +1,53 @@
+@use '../../../abstract' as *;
+/* ==========  Footer Style v2  ============= */
+.footer-v3{
+  @include body-18;
+  &__content-block{
+    max-width: 320px;
+    .footer-brand{
+      margin-bottom: 33px;
+    }
+  }
+  &__content-text{
+    margin-bottom: 24px;
+  }
+  a{
+    &.footer-link{
+      text-decoration: underline;
+      margin-bottom: 24px;
+    }
+    
+  }
+  &__list-block{
+    @media (min-width:1400px){
+      width:893px;
+    }
+  }
+  .row--list-block{
+    justify-content: space-between;
+    --bs-gutter-y:40px;
+  }
+
+  .row--footer-main{
+    --bs-gutter-y:40px;
+    --bs-gutter-x:40px;
+    justify-content: space-between;
+  }
+  &__copyright-section{
+    display: flex;
+    column-gap: 30px;
+    row-gap: 30px;
+    flex-wrap: wrap;
+    padding-top: 34px;
+    padding-bottom: 34px;
+    margin-top: 80px;
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
+    @media (min-width:992px){
+      text-align: initial;
+      justify-content: space-between;
+      flex-direction: row;
+    }
+  }
+}
