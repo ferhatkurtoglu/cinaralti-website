@@ -13,25 +13,25 @@ export async function GET(request: Request, { params }: Params) {
     
     if (isNaN(id)) {
       return NextResponse.json(
-        { error: 'Geçersiz bağış türü ID' },
+        { error: 'Geçersiz bağış seçeneği ID' },
         { status: 400 }
       );
     }
     
-    const donationType = await getDonationTypeById(id);
+    const donationOption = await getDonationTypeById(id);
     
-    if (!donationType) {
+    if (!donationOption) {
       return NextResponse.json(
-        { error: 'Bağış türü bulunamadı' },
+        { error: 'Bağış seçeneği bulunamadı' },
         { status: 404 }
       );
     }
     
-    return NextResponse.json(donationType);
+    return NextResponse.json(donationOption);
   } catch (error) {
-    console.error('Bağış türü alınırken hata oluştu:', error);
+    console.error('Bağış seçeneği alınırken hata oluştu:', error);
     return NextResponse.json(
-      { error: 'Bağış türü alınırken bir hata oluştu' },
+      { error: 'Bağış seçeneği alınırken bir hata oluştu' },
       { status: 500 }
     );
   }
@@ -43,19 +43,19 @@ export async function PUT(request: Request, { params }: Params) {
     
     if (isNaN(id)) {
       return NextResponse.json(
-        { error: 'Geçersiz bağış türü ID' },
+        { error: 'Geçersiz bağış seçeneği ID' },
         { status: 400 }
       );
     }
     
     const data = await request.json();
     
-    // Bağış türünün var olduğunu kontrol et
-    const existingDonationType = await getDonationTypeById(id);
+    // Bağış seçeneğinin var olduğunu kontrol et
+    const existingDonationOption = await getDonationTypeById(id);
     
-    if (!existingDonationType) {
+    if (!existingDonationOption) {
       return NextResponse.json(
-        { error: 'Bağış türü bulunamadı' },
+        { error: 'Bağış seçeneği bulunamadı' },
         { status: 404 }
       );
     }
@@ -64,9 +64,9 @@ export async function PUT(request: Request, { params }: Params) {
     
     return NextResponse.json(result);
   } catch (error) {
-    console.error('Bağış türü güncellenirken hata oluştu:', error);
+    console.error('Bağış seçeneği güncellenirken hata oluştu:', error);
     return NextResponse.json(
-      { error: 'Bağış türü güncellenirken bir hata oluştu' },
+      { error: 'Bağış seçeneği güncellenirken bir hata oluştu' },
       { status: 500 }
     );
   }
@@ -78,17 +78,17 @@ export async function DELETE(request: Request, { params }: Params) {
     
     if (isNaN(id)) {
       return NextResponse.json(
-        { error: 'Geçersiz bağış türü ID' },
+        { error: 'Geçersiz bağış seçeneği ID' },
         { status: 400 }
       );
     }
     
-    // Bağış türünün var olduğunu kontrol et
-    const existingDonationType = await getDonationTypeById(id);
+    // Bağış seçeneğinin var olduğunu kontrol et
+    const existingDonationOption = await getDonationTypeById(id);
     
-    if (!existingDonationType) {
+    if (!existingDonationOption) {
       return NextResponse.json(
-        { error: 'Bağış türü bulunamadı' },
+        { error: 'Bağış seçeneği bulunamadı' },
         { status: 404 }
       );
     }
@@ -97,9 +97,9 @@ export async function DELETE(request: Request, { params }: Params) {
     
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Bağış türü silinirken hata oluştu:', error);
+    console.error('Bağış seçeneği silinirken hata oluştu:', error);
     return NextResponse.json(
-      { error: 'Bağış türü silinirken bir hata oluştu' },
+      { error: 'Bağış seçeneği silinirken bir hata oluştu' },
       { status: 500 }
     );
   }

@@ -1,7 +1,39 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { FaEdit, FaPlus, FaSearch, FaTrash } from 'react-icons/fa';
+import ImageUploader from '@/components/ImageUploader';
+import { useEffect, useRef, useState } from 'react';
+import { FaArrowDown, FaArrowUp, FaEdit, FaPlus, FaSearch, FaTrash } from 'react-icons/fa';
+
+// Özel scrollbar stili
+const scrollbarStyles = `
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #a0aec0;
+    border-radius: 4px;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #718096;
+  }
+  
+  @keyframes pulseScrollbar {
+    0% { box-shadow: 0 0 0 0px rgba(59, 130, 246, 0.5); }
+    100% { box-shadow: 0 0 0 10px rgba(59, 130, 246, 0); }
+  }
+  
+  .highlight-scrollbar::-webkit-scrollbar-thumb {
+    background: #3b82f6;
+    animation: pulseScrollbar 2s infinite;
+  }
+`;
 
 interface Category {
   id: number;
@@ -11,15 +43,20 @@ interface Category {
 
 interface DonationType {
   id: number;
-  name: string;
+  title: string;
   slug: string;
-  image: string;
   description: string;
   categories: Category[];
-  is_active: boolean;
+  active: boolean;
+  category_id?: number;
+  target_amount?: number;
+  collected_amount?: number;
+  position?: number;
+  cover_image?: string;
+  gallery_images?: string[];
 }
 
-export default function DonationTypes() {
+export default function DonationOptions() {
   const [donationTypes, setDonationTypes] = useState<DonationType[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [showModal, setShowModal] = useState<boolean>(false);
@@ -27,100 +64,56 @@ export default function DonationTypes() {
   const [currentDonationType, setCurrentDonationType] = useState<DonationType | null>(null);
   const [search, setSearch] = useState<string>('');
   const [categories, setCategories] = useState<Category[]>([]);
-
-  // Örnek kategoriler
-  const exampleCategories: Category[] = [
-    { id: 1, name: 'Acil Yardım', slug: 'acil-yardim' },
-    { id: 2, name: 'Yetim', slug: 'yetim' },
-    { id: 3, name: 'Genel', slug: 'genel' },
-    { id: 4, name: 'Projeler', slug: 'projeler' },
-    { id: 5, name: 'Eğitim', slug: 'egitim' },
-    { id: 6, name: 'Kurban', slug: 'kurban' }
-  ];
-
-  // Örnek bağış seçenekleri
-  const exampleDonationTypes: DonationType[] = [
-    {
-      id: 1,
-      name: 'Genel Bağış',
-      slug: 'genel-bagis',
-      image: 'donate1.jpg',
-      description: 'Genel amaçlı bağış',
-      categories: [exampleCategories[2], exampleCategories[0]],
-      is_active: true
-    },
-    {
-      id: 2,
-      name: 'Zekat',
-      slug: 'zekat',
-      image: 'donate1.jpg',
-      description: 'Zekat bağışları',
-      categories: [exampleCategories[2], exampleCategories[0]],
-      is_active: true
-    },
-    {
-      id: 3,
-      name: 'Bina Satın Alma',
-      slug: 'bina-satin-alma',
-      image: 'donate1.jpg',
-      description: 'Bina satın alma projesi için bağış',
-      categories: [exampleCategories[3], exampleCategories[2]],
-      is_active: true
-    },
-    {
-      id: 4,
-      name: 'Kuran Talebelerinin İhtiyaçları',
-      slug: 'kuran-talebelerinin-ihtiyaclari',
-      image: 'donate1.jpg',
-      description: 'Kuran talebelerinin eğitim ihtiyaçları için bağış',
-      categories: [exampleCategories[4], exampleCategories[2]],
-      is_active: true
-    },
-    {
-      id: 5,
-      name: 'Afrika Bağışı',
-      slug: 'afrika-bagisi',
-      image: 'donate1.jpg',
-      description: 'Afrika yardım projesi için bağış',
-      categories: [exampleCategories[0], exampleCategories[2]],
-      is_active: true
-    },
-    {
-      id: 6,
-      name: 'Filistin Yardımı',
-      slug: 'filistin-yardimi',
-      image: 'donate1.jpg',
-      description: 'Filistin için acil yardım',
-      categories: [exampleCategories[0], exampleCategories[2]],
-      is_active: true
-    },
-    {
-      id: 7,
-      name: 'Yetim Projesi',
-      slug: 'yetim-projesi',
-      image: 'donate1.jpg',
-      description: 'Yetim çocuklara destek projesi',
-      categories: [exampleCategories[1], exampleCategories[2]],
-      is_active: true
-    },
-    {
-      id: 8,
-      name: 'Kurban Bağışı',
-      slug: 'kurban-bagisi',
-      image: 'donate1.jpg',
-      description: 'Kurban bağışı',
-      categories: [exampleCategories[5], exampleCategories[2]],
-      is_active: true
-    }
-  ];
+  const [coverImage, setCoverImage] = useState<string>('');
+  const [galleryImages, setGalleryImages] = useState<string[]>([]);
+  const [highlightScrollbar, setHighlightScrollbar] = useState<boolean>(false);
+  const [apiError, setApiError] = useState<string | null>(null);
+  const formContentRef = useRef<HTMLDivElement>(null);
+  const [submitting, setSubmitting] = useState<boolean>(false);
 
   useEffect(() => {
-    // Mock veri yükleme (gerçek uygulamada API'dan çekilecek)
-    setTimeout(() => {
-      setDonationTypes(exampleDonationTypes);
-      setCategories(exampleCategories);
-      setLoading(false);
-    }, 500);
+    // API'den bağış seçeneklerini ve kategorileri çek
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        
+        // Bağış seçeneklerini çek
+        const donationResponse = await fetch('/api/donation-types');
+        
+        if (!donationResponse.ok) {
+          throw new Error('Bağış seçenekleri alınamadı');
+        }
+        
+        const donationData = await donationResponse.json();
+        // API'den gelen verilerde categories dizisi olmayabilir, kontrol edelim
+        const processedData = donationData.map((item: any) => ({
+          ...item,
+          categories: item.categories || [] // Eğer categories yoksa boş dizi atayalım
+        }));
+        setDonationTypes(processedData);
+        
+        // Kategorileri çek
+        const categoriesResponse = await fetch('/api/categories');
+        
+        if (!categoriesResponse.ok) {
+          throw new Error('Kategoriler alınamadı');
+        }
+        
+        const categoriesData = await categoriesResponse.json();
+        setCategories(categoriesData);
+        
+        setApiError(null);
+      } catch (error) {
+        console.error('Veriler yüklenirken hata:', error);
+        setApiError('Veriler yüklenirken bir hata oluştu. Lütfen sayfayı yenileyip tekrar deneyin.');
+        // Hata durumunda boş dizi göster
+        setDonationTypes([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
   }, []);
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -128,7 +121,7 @@ export default function DonationTypes() {
   };
 
   const filteredDonationTypes = donationTypes.filter((type: DonationType) =>
-    type.name.toLowerCase().includes(search.toLowerCase()) ||
+    type.title.toLowerCase().includes(search.toLowerCase()) ||
     type.description.toLowerCase().includes(search.toLowerCase())
   );
 
@@ -136,73 +129,238 @@ export default function DonationTypes() {
     setCurrentDonationType(donationType);
     setModalMode('edit');
     setShowModal(true);
+    setCoverImage(donationType.cover_image || '');
+    setGalleryImages(Array.isArray(donationType.gallery_images) ? donationType.gallery_images : []);
+    setHighlightScrollbar(true);
+    
+    // Scrollbar vurgulamasını 3 saniye sonra kapat
+    setTimeout(() => {
+      setHighlightScrollbar(false);
+    }, 3000);
+    
+    // Modal açıldıktan sonra çok kısa bir süre bekleyip kaydırmayı göster
+    setTimeout(() => {
+      formContentRef.current?.scrollBy({
+        top: 50,
+        behavior: 'smooth'
+      });
+      // 1 saniye sonra tekrar yukarı kaydır
+      setTimeout(() => {
+        formContentRef.current?.scrollBy({
+          top: -50,
+          behavior: 'smooth'
+        });
+      }, 1000);
+    }, 500);
   };
 
   const handleAdd = () => {
     setCurrentDonationType(null);
     setModalMode('add');
     setShowModal(true);
+    setCoverImage('');
+    setGalleryImages([]);
+    setHighlightScrollbar(true);
+    
+    // Scrollbar vurgulamasını 3 saniye sonra kapat
+    setTimeout(() => {
+      setHighlightScrollbar(false);
+    }, 3000);
+    
+    // Modal açıldıktan sonra çok kısa bir süre bekleyip kaydırmayı göster
+    setTimeout(() => {
+      formContentRef.current?.scrollBy({
+        top: 50,
+        behavior: 'smooth'
+      });
+      // 1 saniye sonra tekrar yukarı kaydır
+      setTimeout(() => {
+        formContentRef.current?.scrollBy({
+          top: -50,
+          behavior: 'smooth'
+        });
+      }, 1000);
+    }, 500);
   };
 
-  const handleDelete = (id: number) => {
+  const handleDelete = async (id: number) => {
     if (confirm('Bu bağış seçeneğini silmek istediğinizden emin misiniz?')) {
-      setDonationTypes(donationTypes.filter((type: DonationType) => type.id !== id));
-      alert('Bağış seçeneği silindi');
+      try {
+        const response = await fetch(`/api/donation-types/${id}`, {
+          method: 'DELETE',
+        });
+        
+        if (!response.ok) {
+          throw new Error('Silme işlemi başarısız oldu');
+        }
+        
+        // UI'dan sil
+        setDonationTypes(donationTypes.filter((option: DonationType) => option.id !== id));
+        alert('Bağış seçeneği başarıyla silindi');
+      } catch (error) {
+        console.error('Bağış seçeneği silinirken hata:', error);
+        alert('Bağış seçeneği silinirken bir hata oluştu. Lütfen tekrar deneyin.');
+      }
     }
   };
 
-  const handleSave = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     
-    const form = e.currentTarget;
-    const name = (form.elements.namedItem('name') as HTMLInputElement).value;
-    const description = (form.elements.namedItem('description') as HTMLTextAreaElement).value;
-    const isActive = (form.elements.namedItem('is_active') as HTMLInputElement).checked;
-    
-    // Seçilen kategorileri al
-    const selectedCategoryIds = Array.from(form.elements)
-      .filter(element => element.nodeName === 'INPUT' && (element as HTMLInputElement).type === 'checkbox' && (element as HTMLInputElement).name.startsWith('category-') && (element as HTMLInputElement).checked)
-      .map(element => parseInt((element as HTMLInputElement).value));
-
-    const selectedCategories = categories.filter((category: Category) => selectedCategoryIds.includes(category.id));
-    
-    if (modalMode === 'add') {
-      const newType: DonationType = {
-        id: Math.max(...donationTypes.map((t: DonationType) => t.id), 0) + 1,
-        name,
-        slug: name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''),
-        image: 'donate1.jpg',
-        description,
-        categories: selectedCategories,
-        is_active: isActive
-      };
+    try {
+      setSubmitting(true);
       
-      setDonationTypes([...donationTypes, newType]);
-      alert('Yeni bağış seçeneği eklendi');
-    } else if (modalMode === 'edit' && currentDonationType) {
-      const updatedType: DonationType = {
-        ...currentDonationType,
-        name,
-        description,
-        categories: selectedCategories,
-        is_active: isActive
-      };
+      const form = e.currentTarget;
+      const title = (form.elements.namedItem('title') as HTMLInputElement).value;
+      const description = (form.elements.namedItem('description') as HTMLTextAreaElement).value;
+      const active = (form.elements.namedItem('active') as HTMLInputElement).checked;
+      const targetAmount = (form.elements.namedItem('target_amount') as HTMLInputElement).value;
+      const collectedAmount = (form.elements.namedItem('collected_amount') as HTMLInputElement).value;
+      const position = (form.elements.namedItem('position') as HTMLInputElement).value;
       
-      setDonationTypes(donationTypes.map((type: DonationType) => type.id === updatedType.id ? updatedType : type));
-      alert('Bağış seçeneği güncellendi');
+      // Seçilen kategorileri al
+      const selectedCategoryIds: number[] = [];
+      const selectedCategories: Category[] = [];
+      
+      document.querySelectorAll('input[name="categories"]:checked').forEach((checkbox) => {
+        const id = parseInt((checkbox as HTMLInputElement).value);
+        selectedCategoryIds.push(id);
+        
+        const category = categories.find(c => c.id === id);
+        if (category) {
+          selectedCategories.push(category);
+        }
+      });
+      
+      try {
+        if (modalMode === 'add') {
+          // Yeni bağış seçeneği için API isteği
+          const newTypeData = {
+            title,
+            slug: title.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''),
+            description,
+            categories: selectedCategoryIds,
+            active,
+            category_id: selectedCategoryIds.length > 0 ? selectedCategoryIds[0] : null,
+            target_amount: parseFloat(targetAmount) || 0,
+            collected_amount: parseFloat(collectedAmount) || 0,
+            position: parseInt(position) || 0,
+            cover_image: coverImage,
+            gallery_images: galleryImages
+          };
+          
+          console.log('Gönderilen veri:', newTypeData);
+          
+          const response = await fetch('/api/donation-types', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(newTypeData),
+          });
+          
+          if (!response.ok) {
+            const errorData = await response.json().catch(() => null);
+            console.error('API hata yanıtı:', errorData);
+            throw new Error(`Bağış seçeneği eklenirken bir hata oluştu: ${errorData?.error || response.statusText}`);
+          }
+          
+          const addedType = await response.json();
+          
+          // UI'ı güncelle
+          setDonationTypes([...donationTypes, {
+            ...addedType, 
+            categories: selectedCategories
+          }]);
+          alert('Yeni bağış seçeneği başarıyla eklendi');
+        } else if (modalMode === 'edit' && currentDonationType) {
+          // Mevcut bağış seçeneğini güncelle
+          const updatedTypeData = {
+            title,
+            slug: title.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''),
+            description,
+            categories: selectedCategoryIds,
+            active,
+            category_id: selectedCategoryIds.length > 0 ? selectedCategoryIds[0] : null,
+            target_amount: parseFloat(targetAmount) || 0,
+            collected_amount: parseFloat(collectedAmount) || 0,
+            position: parseInt(position) || 0,
+            cover_image: coverImage,
+            gallery_images: galleryImages
+          };
+          
+          console.log('Güncellenen veri:', updatedTypeData);
+          
+          const response = await fetch(`/api/donation-types/${currentDonationType.id}`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(updatedTypeData),
+          });
+          
+          if (!response.ok) {
+            const errorData = await response.json().catch(() => null);
+            console.error('API hata yanıtı:', errorData);
+            throw new Error(`Bağış seçeneği güncellenirken bir hata oluştu: ${errorData?.error || response.statusText}`);
+          }
+          
+          const updatedType = await response.json();
+          
+          // UI'ı güncelle
+          setDonationTypes(donationTypes.map((type: DonationType) => 
+            type.id === currentDonationType.id ? {
+              ...updatedType, 
+              categories: selectedCategories
+            } : type
+          ));
+          alert('Bağış seçeneği başarıyla güncellendi');
+        }
+        
+        // Formu kapat
+        setShowModal(false);
+      } catch (error) {
+        console.error('API hatası:', error);
+        alert('İşlem sırasında bir hata oluştu. Lütfen tekrar deneyin.');
+      }
+    } catch (error) {
+      console.error('Form gönderme hatası:', error);
+      alert('Form gönderilirken bir hata oluştu. Lütfen tekrar deneyin.');
+    } finally {
+      setSubmitting(false);
     }
-    
-    setShowModal(false);
   };
+
+  // Galeri görsellerini ekle/kaldır
+  const handleAddGalleryImage = (imageUrl: string) => {
+    if (imageUrl) {
+      setGalleryImages([...galleryImages, imageUrl]);
+    }
+  };
+
+  const handleRemoveGalleryImage = (index: number) => {
+    setGalleryImages(galleryImages.filter((_, i) => i !== index));
+  };
+
+  // Benzersiz klasörleri çıkar
+  const folders = Array.from(new Set(galleryImages.map(img => img.split('/').slice(0, -1).join('/'))));
 
   return (
     <div>
+      <style jsx>{scrollbarStyles}</style>
+      
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-gray-800">Bağış Seçenekleri</h1>
         <button className="btn btn-primary" onClick={handleAdd}>
           <FaPlus className="mr-2" /> Yeni Ekle
         </button>
       </div>
+
+      {apiError && (
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+          <p>{apiError}</p>
+        </div>
+      )}
 
       <div className="card">
         <div className="p-4 border-b border-gray-200">
@@ -231,65 +389,85 @@ export default function DonationTypes() {
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Adı</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Kategoriler</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Açıklama</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Durum</th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">İşlemler</th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Bağış Seçeneği
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Kategori
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Hedef / Toplanan
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Pozisyon
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Durum
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    İşlemler
+                  </th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {filteredDonationTypes.map(donationType => (
-                  <tr key={donationType.id}>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">#{donationType.id}</div>
-                    </td>
+                {filteredDonationTypes.map((donationType) => (
+                  <tr key={donationType.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
-                        <div className="flex-shrink-0 h-10 w-10">
-                          <img className="h-10 w-10 rounded-md object-cover" src={`/assets/image/donate/${donationType.image}`} alt={donationType.name} />
-                        </div>
                         <div className="ml-4">
-                          <div className="text-sm font-medium text-gray-900">{donationType.name}</div>
+                          <div className="text-sm font-medium text-gray-900">{donationType.title}</div>
                           <div className="text-sm text-gray-500">{donationType.slug}</div>
                         </div>
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex flex-wrap gap-1">
-                        {donationType.categories.map(category => (
-                          <span
-                            key={category.id}
-                            className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800"
-                          >
-                            {category.name}
-                          </span>
-                        ))}
+                      <div className="text-sm text-gray-900">
+                        {categories.find(c => c.id === donationType.category_id)?.name || '-'}
                       </div>
                     </td>
-                    <td className="px-6 py-4">
-                      <div className="text-sm text-gray-900 line-clamp-2">{donationType.description}</div>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-900">
+                        {donationType.target_amount ? (
+                          <>
+                            <span>{donationType.collected_amount || 0} / {donationType.target_amount}</span>
+                            <div className="w-full bg-gray-200 rounded-full h-2.5 mt-1">
+                              <div 
+                                className="bg-blue-600 h-2.5 rounded-full" 
+                                style={{ 
+                                  width: `${Math.min(100, ((donationType.collected_amount || 0) / donationType.target_amount) * 100)}%` 
+                                }}
+                              ></div>
+                            </div>
+                          </>
+                        ) : (
+                          '-'
+                        )}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-900">
+                        {donationType.position || 0}
+                      </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                        donationType.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                        donationType.active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
                       }`}>
-                        {donationType.is_active ? 'Aktif' : 'Pasif'}
+                        {donationType.active ? 'Aktif' : 'Pasif'}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <button
                         onClick={() => handleEdit(donationType)}
                         className="text-indigo-600 hover:text-indigo-900 mr-3"
-                        aria-label={`${donationType.name} düzenle`}
+                        aria-label={`${donationType.title} düzenle`}
                       >
                         <FaEdit />
                       </button>
                       <button
                         onClick={() => handleDelete(donationType.id)}
                         className="text-red-600 hover:text-red-900"
-                        aria-label={`${donationType.name} sil`}
+                        aria-label={`${donationType.title} sil`}
                       >
                         <FaTrash />
                       </button>
@@ -311,8 +489,8 @@ export default function DonationTypes() {
       {/* Bağış Seçeneği Ekleme/Düzenleme Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl overflow-hidden">
-            <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[80vh]">
+            <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center shrink-0">
               <h3 className="text-lg font-semibold text-gray-900">
                 {modalMode === 'add' ? 'Yeni Bağış Seçeneği Ekle' : 'Bağış Seçeneğini Düzenle'}
               </h3>
@@ -327,17 +505,83 @@ export default function DonationTypes() {
               </button>
             </div>
             
-            <form onSubmit={handleSave}>
-              <div className="p-6">
+            <form onSubmit={handleSubmit} className="flex flex-col flex-1 overflow-hidden">
+              <div 
+                ref={formContentRef}
+                className={`p-6 overflow-y-auto flex-1 custom-scrollbar ${highlightScrollbar ? 'highlight-scrollbar' : ''}`} 
+                style={{ 
+                  scrollbarWidth: 'thin', 
+                  scrollbarColor: highlightScrollbar ? '#3b82f6 #edf2f7' : '#a0aec0 #edf2f7',
+                  WebkitOverflowScrolling: 'touch'
+                }}
+              >
+                <div className="mb-4 bg-blue-50 p-3 rounded-md text-sm text-blue-700 flex flex-col items-center">
+                  <div className="flex items-center mb-2">
+                    <FaArrowDown className="animate-bounce h-5 w-5 mr-2" />
+                    <span className="font-medium">Aşağıda daha fazla alan var</span>
+                  </div>
+                  <p className="text-xs text-blue-600">Form ekrandan taşabilir, aşağı kaydırarak tüm alanları görebilirsiniz</p>
+                </div>
+
+                <div id="form-top"></div>
+
                 <div className="mb-4">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Adı</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Bağış Seçeneği Adı
+                  </label>
                   <input
                     type="text"
-                    name="name"
+                    name="title"
                     className="input-field"
                     placeholder="Bağış seçeneği adı"
-                    defaultValue={currentDonationType?.name || ''}
+                    defaultValue={currentDonationType?.title || ''}
                     required
+                  />
+                </div>
+
+
+
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Hedef Miktar
+                  </label>
+                  <input
+                    type="number"
+                    name="target_amount"
+                    className="input-field"
+                    placeholder="Hedef miktar"
+                    defaultValue={currentDonationType?.target_amount || 0}
+                    step="0.01"
+                    min="0"
+                  />
+                </div>
+
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Toplanan Miktar
+                  </label>
+                  <input
+                    type="number"
+                    name="collected_amount"
+                    className="input-field"
+                    placeholder="Toplanan miktar"
+                    defaultValue={currentDonationType?.collected_amount || 0}
+                    step="0.01"
+                    min="0"
+                  />
+                </div>
+
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Sıralama Pozisyonu
+                  </label>
+                  <input
+                    type="number"
+                    name="position"
+                    className="input-field"
+                    placeholder="Sıralama pozisyonu"
+                    defaultValue={currentDonationType?.position || 0}
+                    min="0"
                   />
                 </div>
                 
@@ -354,6 +598,48 @@ export default function DonationTypes() {
                 </div>
                 
                 <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Kapak Görseli</label>
+                  <ImageUploader 
+                    onImageUpload={(url) => setCoverImage(url)}
+                    defaultImage={currentDonationType?.cover_image || ''}
+                    label="Kapak Görseli Seç"
+                    isCoverImage={true}
+                  />
+                </div>
+                
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Bağış Görselleri</label>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 my-3">
+                    {galleryImages.map((image, index) => (
+                      <div key={index} className="relative border rounded-lg overflow-hidden">
+                        <img 
+                          src={image}
+                          alt={`Bağış Görseli ${index + 1}`} 
+                          className="w-full h-32 object-cover"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveGalleryImage(index)}
+                          className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full hover:bg-red-600 focus:outline-none"
+                          title="Görseli Kaldır"
+                          aria-label="Görseli Kaldır"
+                        >
+                          <FaTrash />
+                        </button>
+                      </div>
+                    ))}
+                    
+                    <div className="border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center p-4 hover:bg-gray-50">
+                      <ImageUploader 
+                        onImageUpload={handleAddGalleryImage}
+                        label="Görsel Ekle"
+                        isCoverImage={false}
+                      />
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="mb-4">
                   <label className="block text-sm font-medium text-gray-700 mb-1">Kategoriler</label>
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                     {categories.map(category => (
@@ -361,9 +647,9 @@ export default function DonationTypes() {
                         <input
                           type="checkbox"
                           id={`category-${category.id}`}
-                          name={`category-${category.id}`}
+                          name="categories"
                           value={category.id}
-                          defaultChecked={currentDonationType?.categories.some(c => c.id === category.id)}
+                          defaultChecked={currentDonationType?.categories && currentDonationType.categories.some(c => c.id === category.id)}
                           className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
                         />
                         <label htmlFor={`category-${category.id}`} className="ml-2 block text-sm text-gray-900">
@@ -382,16 +668,43 @@ export default function DonationTypes() {
                     />
                     <button
                       type="button"
-                      onClick={() => {
+                      onClick={async () => {
                         const input = document.getElementById('new-category') as HTMLInputElement;
                         if (input.value.trim()) {
-                          const newCategory: Category = {
-                            id: Math.max(...categories.map((c: Category) => c.id), 0) + 1,
-                            name: input.value.trim(),
-                            slug: input.value.trim().toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
-                          };
-                          setCategories([...categories, newCategory]);
-                          input.value = '';
+                          try {
+                            const newCategoryName = input.value.trim();
+                            const newCategorySlug = newCategoryName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+                            
+                            // API'ye yeni kategori ekle
+                            const response = await fetch('/api/categories', {
+                              method: 'POST',
+                              headers: {
+                                'Content-Type': 'application/json',
+                              },
+                              body: JSON.stringify({
+                                name: newCategoryName,
+                                slug: newCategorySlug
+                              }),
+                            });
+                            
+                            if (!response.ok) {
+                              throw new Error('Kategori eklenirken bir hata oluştu');
+                            }
+                            
+                            const newCategory = await response.json();
+                            
+                            // UI'ı güncelle
+                            setCategories([...categories, {
+                              id: newCategory.insertId || Math.max(...categories.map((c: Category) => c.id), 0) + 1,
+                              name: newCategoryName,
+                              slug: newCategorySlug
+                            }]);
+                            
+                            input.value = '';
+                          } catch (error) {
+                            console.error('Kategori eklenirken hata:', error);
+                            alert('Kategori eklenirken bir hata oluştu. Lütfen tekrar deneyin.');
+                          }
                         }
                       }}
                       className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md shadow-sm text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
@@ -401,21 +714,34 @@ export default function DonationTypes() {
                   </div>
                 </div>
                 
-                <div className="flex items-center">
+                <div className="flex items-center mb-6">
                   <input
                     type="checkbox"
-                    id="is_active"
-                    name="is_active"
-                    defaultChecked={currentDonationType?.is_active ?? true}
+                    id="active"
+                    name="active"
+                    defaultChecked={currentDonationType?.active ?? true}
                     className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
                   />
-                  <label htmlFor="is_active" className="ml-2 block text-sm text-gray-900">
+                  <label htmlFor="active" className="ml-2 block text-sm text-gray-900">
                     Aktif
                   </label>
                 </div>
+
+                <div className="flex justify-center mt-3 mb-2">
+                  <button 
+                    type="button" 
+                    className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none flex items-center"
+                    onClick={() => {
+                      document.getElementById('form-top')?.scrollIntoView({ behavior: 'smooth' });
+                    }}
+                  >
+                    <FaArrowUp className="mr-2" />
+                    Yukarı Çık
+                  </button>
+                </div>
               </div>
               
-              <div className="px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-end">
+              <div className="px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-end shrink-0">
                 <button
                   type="button"
                   className="px-4 py-2 text-sm font-medium text-white bg-black border border-black rounded-md shadow-sm hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2 mr-2"

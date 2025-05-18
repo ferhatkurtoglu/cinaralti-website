@@ -111,12 +111,13 @@ export default function Topbar() {
   // Sayfa document'ine click event listener ekleyen useEffect
   useEffect(() => {
     const handleOutsideClick = (event: MouseEvent) => {
-      // @ts-ignore: tıklanan elementin bir parent elementi olabilir
+      // Tıklanan elementin bildirim veya profil butonlarının içinde olup olmadığını kontrol et
       const notificationContainer = document.querySelector('.notification-container');
-      // @ts-ignore: tıklanan elementin bir parent elementi olabilir
       const profileContainer = document.querySelector('.profile-container');
+      const notificationButton = document.querySelector('.notification-container button');
+      const profileButton = document.querySelector('.profile-container button');
       
-      // Eğer bildirim veya profil konteynerlerinin dışına tıklanırsa kapat
+      // Eğer bildirim veya profil konteynerlerinin dışına tıklanırsa ve butonlara tıklanmadıysa kapat
       if (notificationContainer && !notificationContainer.contains(event.target as Node) &&
           profileContainer && !profileContainer.contains(event.target as Node)) {
         closeDropdowns();
@@ -244,11 +245,12 @@ export default function Topbar() {
         {/* Bildirimler */}
         <div className="relative notification-container">
           <button
-            onClick={() => {
+            onClick={(e) => {
+              e.stopPropagation();
               setNotificationsOpen(!notificationsOpen);
               if (dropdownOpen) setDropdownOpen(false);
             }}
-            className="p-2 rounded-full hover:bg-gray-100 relative"
+            className="p-2 rounded-full hover:bg-gray-100 relative cursor-pointer"
             aria-label="Bildirimler"
           >
             <FaBell className="text-gray-600" />
@@ -260,7 +262,7 @@ export default function Topbar() {
           </button>
 
           {notificationsOpen && (
-            <div className="dropdown-menu w-80 md:w-96 right-0 mt-2">
+            <div className="dropdown-menu w-80 md:w-96 right-0 mt-2 z-50">
               <div className="py-2 px-3 bg-gray-100 border-b border-gray-200">
                 <div className="flex justify-between items-center">
                   <h3 className="text-sm font-semibold text-gray-700">Bildirimler</h3>
@@ -330,7 +332,8 @@ export default function Topbar() {
         {/* Kullanıcı Profili */}
         <div className="relative profile-container">
           <button
-            onClick={() => {
+            onClick={(e) => {
+              e.stopPropagation();
               setDropdownOpen(!dropdownOpen);
               if (notificationsOpen) setNotificationsOpen(false);
             }}
@@ -346,7 +349,7 @@ export default function Topbar() {
           </button>
 
           {dropdownOpen && (
-            <div className="dropdown-menu">
+            <div className="dropdown-menu z-50">
               <a
                 href="/dashboard/profile"
                 className="dropdown-item"

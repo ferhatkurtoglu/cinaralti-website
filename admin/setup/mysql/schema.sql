@@ -24,12 +24,14 @@ CREATE TABLE IF NOT EXISTS donation_categories (
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Bağış türleri tablosu
-CREATE TABLE IF NOT EXISTS donation_types (
+-- Bağış seçenekleri tablosu
+CREATE TABLE IF NOT EXISTS donation_options (
   id INT AUTO_INCREMENT PRIMARY KEY,
   name VARCHAR(255) NOT NULL,
   slug VARCHAR(255) NOT NULL UNIQUE,
   image VARCHAR(255) DEFAULT NULL,
+  cover_image VARCHAR(255) DEFAULT NULL COMMENT 'Bağış türü kapak görselinin yolu',
+  gallery_images JSON DEFAULT NULL COMMENT 'Bağış türü galeri görselleri (JSON dizi formatında)',
   description TEXT DEFAULT NULL,
   is_active BOOLEAN NOT NULL DEFAULT TRUE,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -47,7 +49,7 @@ CREATE TABLE IF NOT EXISTS donation_type_categories (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Bağışlar tablosu
-CREATE TABLE IF NOT EXISTS donations (
+/* CREATE TABLE IF NOT EXISTS donations (
   id INT AUTO_INCREMENT PRIMARY KEY,
   donation_type_id INT NOT NULL,
   amount DECIMAL(10, 2) NOT NULL,
@@ -63,7 +65,7 @@ CREATE TABLE IF NOT EXISTS donations (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   FOREIGN KEY (donation_type_id) REFERENCES donation_types(id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci; */
 
 -- İletişim formu gönderilen mesajlar tablosu
 CREATE TABLE IF NOT EXISTS contact_messages (
