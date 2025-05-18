@@ -189,14 +189,14 @@ export default function Sidebar() {
       )}
       
       <aside className={`w-64 h-screen bg-dark text-white shadow-lg shrink-0 z-50 ${isOpen ? 'block' : 'hidden md:block'}`}>
-        <div className="flex items-center justify-between h-16 px-4 border-b border-gray-700">
+        <div className="flex items-center justify-between h-20 px-4 border-b border-gray-700">
           <Link href="/dashboard" className="flex items-center pointer-events-auto">
             <Image 
               src="/assets/images/logo-dark.png" 
               alt="Çınaraltı Logo" 
-              width={200} 
-              height={50} 
-              className="max-h-14 w-auto"
+              width={300} 
+              height={80} 
+              className="max-h-20 w-auto"
             />
           </Link>
           
@@ -212,7 +212,7 @@ export default function Sidebar() {
           </button>
         </div>
         
-        <nav className="flex flex-col mt-2 overflow-y-auto h-[calc(100vh-4rem)]">
+        <nav className="flex flex-col mt-2 overflow-y-auto h-[calc(100vh-5rem)]">
           {menuItems.map((item, index) => renderMenuItem(item, index))}
         </nav>
 

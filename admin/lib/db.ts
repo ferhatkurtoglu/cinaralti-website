@@ -166,8 +166,8 @@ export async function deleteCategory(id: number) {
 // Bağış Türleri için CRUD işlemleri
 export async function getDonationTypes() {
   const query = `
-    SELECT * FROM donation_types
-    ORDER BY name
+    SELECT * FROM donation_options
+    ORDER BY title
   `;
   return executeQuery({ query });
 }
@@ -175,7 +175,7 @@ export async function getDonationTypes() {
 export async function getDonationTypeById(id: number) {
   const query = `
     SELECT dt.*
-    FROM donation_types dt
+    FROM donation_options dt
     WHERE dt.id = ?
   `;
   const donationType = await executeQuery({ query, values: [id] });
@@ -188,8 +188,8 @@ export async function getDonationTypeById(id: number) {
   const categoriesQuery = `
     SELECT dc.*
     FROM donation_categories dc
-    JOIN donation_type_categories dtc ON dc.id = dtc.category_id
-    WHERE dtc.donation_type_id = ?
+    JOIN donation_option_categories dtc ON dc.id = dtc.category_id
+    WHERE dtc.donation_option_id = ?
   `;
   
   const categories = await executeQuery({ query: categoriesQuery, values: [id] });
@@ -205,24 +205,40 @@ export async function createDonationType(typeData: any) {
     
     // Ana bağış türü bilgilerini ekle
     const insertQuery = `
-      INSERT INTO donation_types (name, slug, image, description, is_active)
-      VALUES (?, ?, ?, ?, ?)
+      INSERT INTO donation_options (
+        title, 
+        slug, 
+        description, 
+        active, 
+        category_id, 
+        target_amount, 
+        collected_amount, 
+        position,
+        cover_image,
+        gallery_images
+      )
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
     
     const [result] = await connection.execute(insertQuery, [
-      typeData.name,
-      typeData.slug || typeData.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''),
-      typeData.image || '',
+      typeData.title || typeData.name,
+      typeData.slug || (typeData.title || typeData.name).toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''),
       typeData.description || '',
-      typeData.is_active !== undefined ? typeData.is_active : true
+      typeData.active !== undefined ? typeData.active : true,
+      typeData.category_id || null,
+      typeData.target_amount || 0,
+      typeData.collected_amount || 0,
+      typeData.position || 0,
+      typeData.cover_image || null,
+      Array.isArray(typeData.gallery_images) ? JSON.stringify(typeData.gallery_images) : null
     ]);
     
     const typeId = (result as any).insertId;
     
-    // Kategorileri ekle
+    // Kategorileri ekle (eğer donation_option_categories tablosu hala kullanılıyorsa)
     if (typeData.categories && typeData.categories.length > 0) {
       const categoryQuery = `
-        INSERT INTO donation_type_categories (donation_type_id, category_id)
+        INSERT INTO donation_option_categories (donation_option_id, category_id)
         VALUES (?, ?)
       `;
       
@@ -249,35 +265,53 @@ export async function updateDonationType(id: number, typeData: any) {
     
     // Ana bağış türü bilgilerini güncelle
     const updateQuery = `
-      UPDATE donation_types
-      SET name = ?, slug = ?, image = ?, description = ?, is_active = ?
+      UPDATE donation_options
+      SET 
+        title = ?, 
+        slug = ?, 
+        description = ?, 
+        active = ?,
+        category_id = ?,
+        target_amount = ?,
+        collected_amount = ?,
+        position = ?,
+        cover_image = ?,
+        gallery_images = ?
       WHERE id = ?
     `;
     
     await connection.execute(updateQuery, [
-      typeData.name,
-      typeData.slug || typeData.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''),
-      typeData.image,
-      typeData.description,
-      typeData.is_active !== undefined ? typeData.is_active : true,
+      typeData.title || typeData.name,
+      typeData.slug || (typeData.title || typeData.name).toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''),
+      typeData.description || '',
+      typeData.active !== undefined ? typeData.active : true,
+      typeData.category_id || null,
+      typeData.target_amount || 0,
+      typeData.collected_amount || 0,
+      typeData.position || 0,
+      typeData.cover_image || null,
+      Array.isArray(typeData.gallery_images) ? JSON.stringify(typeData.gallery_images) : null,
       id
     ]);
     
-    // Eski kategorileri temizle
-    await connection.execute(
-      'DELETE FROM donation_type_categories WHERE donation_type_id = ?',
-      [id]
-    );
-    
-    // Yeni kategorileri ekle
-    if (typeData.categories && typeData.categories.length > 0) {
-      const categoryQuery = `
-        INSERT INTO donation_type_categories (donation_type_id, category_id)
-        VALUES (?, ?)
-      `;
+    // Eğer donation_option_categories tablosu hala kullanılıyorsa
+    if (typeData.categories !== undefined) {
+      // Eski kategorileri temizle
+      await connection.execute(
+        'DELETE FROM donation_option_categories WHERE donation_option_id = ?',
+        [id]
+      );
       
-      for (const categoryId of typeData.categories) {
-        await connection.execute(categoryQuery, [id, categoryId]);
+      // Yeni kategorileri ekle
+      if (typeData.categories && typeData.categories.length > 0) {
+        const categoryQuery = `
+          INSERT INTO donation_option_categories (donation_option_id, category_id)
+          VALUES (?, ?)
+        `;
+        
+        for (const categoryId of typeData.categories) {
+          await connection.execute(categoryQuery, [id, categoryId]);
+        }
       }
     }
     
@@ -299,13 +333,13 @@ export async function deleteDonationType(id: number) {
     
     // Önce kategorileri temizle
     await connection.execute(
-      'DELETE FROM donation_type_categories WHERE donation_type_id = ?',
+      'DELETE FROM donation_option_categories WHERE donation_option_id = ?',
       [id]
     );
     
     // Sonra ana kaydı sil
     await connection.execute(
-      'DELETE FROM donation_types WHERE id = ?',
+      'DELETE FROM donation_options WHERE id = ?',
       [id]
     );
     
@@ -324,7 +358,7 @@ export async function getDonations() {
   const query = `
     SELECT d.*, dt.name as donation_type_name
     FROM donations d
-    JOIN donation_types dt ON d.donation_type_id = dt.id
+    JOIN donation_options dt ON d.donation_option_id = dt.id
     ORDER BY d.donation_date DESC
   `;
   return executeQuery({ query });
@@ -334,7 +368,7 @@ export async function getDonationById(id: number) {
   const query = `
     SELECT d.*, dt.name as donation_type_name
     FROM donations d
-    JOIN donation_types dt ON d.donation_type_id = dt.id
+    JOIN donation_options dt ON d.donation_option_id = dt.id
     WHERE d.id = ?
   `;
   const results = await executeQuery({ query, values: [id] });
@@ -344,7 +378,7 @@ export async function getDonationById(id: number) {
 export async function createDonation(donationData: any) {
   const query = `
     INSERT INTO donations (
-      donation_type_id, amount, donor_name, donor_email, donor_phone,
+      donation_option_id, amount, donor_name, donor_email, donor_phone,
       payment_method, payment_status, donation_date, note
     )
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -353,7 +387,7 @@ export async function createDonation(donationData: any) {
   return executeQuery({
     query,
     values: [
-      donationData.donation_type_id,
+      donationData.donation_option_id,
       donationData.amount,
       donationData.donor_name || null,
       donationData.donor_email || null,
@@ -371,9 +405,9 @@ export async function updateDonation(id: number, donationData: any) {
   const values = [];
   const updateFields = [];
   
-  if (donationData.donation_type_id) {
-    updateFields.push('donation_type_id = ?');
-    values.push(donationData.donation_type_id);
+  if (donationData.donation_option_id) {
+    updateFields.push('donation_option_id = ?');
+    values.push(donationData.donation_option_id);
   }
   
   if (donationData.amount) {
@@ -536,9 +570,9 @@ export async function getDonationsByCategory(period: string) {
     FROM 
       donations d
     JOIN 
-      donation_types dt ON d.donation_type_id = dt.id
+      donation_options dt ON d.donation_option_id = dt.id
     JOIN 
-      donation_type_categories dtc ON dt.id = dtc.donation_type_id
+      donation_option_categories dtc ON dt.id = dtc.donation_option_id
     JOIN 
       donation_categories c ON dtc.category_id = c.id
     WHERE 
@@ -569,7 +603,7 @@ export async function getRecentDonations(limit = 10) {
     FROM 
       donations d
     JOIN 
-      donation_types dt ON d.donation_type_id = dt.id
+      donation_options dt ON d.donation_option_id = dt.id
     ORDER BY 
       d.donation_date DESC
     LIMIT ?

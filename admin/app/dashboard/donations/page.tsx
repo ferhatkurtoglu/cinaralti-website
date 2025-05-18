@@ -1,7 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
+import { useEffect, useRef, useState } from 'react';
 import { FaCalendarAlt, FaCheckCircle, FaDownload, FaEye, FaSearch, FaTimesCircle } from 'react-icons/fa';
+import * as XLSX from 'xlsx';
 
 interface Donation {
   id: number;
@@ -28,6 +31,8 @@ export default function Donations() {
     from: '',
     to: ''
   });
+  const [dropdownOpen, setDropdownOpen] = useState<boolean>(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Örnek bağış verileri
   const exampleDonations: Donation[] = [
@@ -152,6 +157,27 @@ export default function Donations() {
     }, 600);
   }, []);
 
+  useEffect(() => {
+    // Dropdown dışına tıklama olayını dinle
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setDropdownOpen(false);
+      }
+    }
+    
+    // Event listener'ı ekle
+    document.addEventListener("mousedown", handleClickOutside);
+    
+    // Cleanup
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  const toggleDropdown = () => {
+    setDropdownOpen(!dropdownOpen);
+  };
+
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearch(e.target.value);
   };
@@ -178,8 +204,153 @@ export default function Donations() {
   };
 
   const handleExport = (format: string) => {
-    alert(`Veriler ${format} formatında dışa aktarılacak`);
-    // TODO: Gerçek dışa aktarma işlemi eklenecek
+    // Filtrelenmemiş verileri dışa aktarma
+    const dataToExport = filteredDonations.map(d => ({
+      'ID': d.id,
+      'Ad Soyad': d.name,
+      'E-posta': d.email,
+      'Telefon': d.phone,
+      'Bağış Türü': d.type,
+      'Miktar': d.amount,
+      'Tarih': new Date(d.date).toLocaleString('tr-TR'),
+      'Durum': d.status === 'success' ? 'Başarılı' : d.status === 'pending' ? 'Beklemede' : 'Başarısız',
+      'Ödeme Yöntemi': d.payment_method,
+      'Notlar': d.notes || ''
+    }));
+
+    if (format === 'excel') {
+      try {
+        const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'Bağışlar');
+        
+        // Sütun genişliklerini ayarla
+        const maxWidth = dataToExport.reduce((w, r) => Math.max(w, r['Ad Soyad'].length), 10);
+        worksheet['!cols'] = [
+          { wch: 5 }, // ID
+          { wch: maxWidth }, // Ad Soyad
+          { wch: 25 }, // E-posta
+          { wch: 15 }, // Telefon
+          { wch: 20 }, // Bağış Türü
+          { wch: 10 }, // Miktar
+          { wch: 20 }, // Tarih
+          { wch: 10 }, // Durum
+          { wch: 15 }, // Ödeme Yöntemi
+          { wch: 30 }, // Notlar
+        ];
+        
+        // Binary string oluştur
+        const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+        
+        // Blob oluştur
+        const blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+        
+        // Dosyayı indir
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'Bağışlar.xlsx';
+        document.body.appendChild(link);
+        link.click();
+        
+        // Temizlik
+        setTimeout(() => {
+          document.body.removeChild(link);
+          URL.revokeObjectURL(url);
+        }, 100);
+      } catch (error) {
+        console.error("Excel dışa aktarma hatası:", error);
+        alert("Excel dosyası oluşturulurken bir hata oluştu.");
+      }
+    } else if (format === 'pdf') {
+      try {
+        const doc = new jsPDF();
+        
+        // Başlık
+        doc.setFontSize(16);
+        doc.text('Bağışlar Raporu', 14, 15);
+        doc.setFontSize(10);
+        doc.text(`Oluşturulma Tarihi: ${new Date().toLocaleString('tr-TR')}`, 14, 22);
+        
+        // Tablo
+        (doc as any).autoTable({
+          head: [['ID', 'Ad Soyad', 'E-posta', 'Telefon', 'Bağış Türü', 'Miktar', 'Tarih', 'Durum', 'Ödeme Yöntemi']],
+          body: dataToExport.map(item => [
+            item['ID'],
+            item['Ad Soyad'],
+            item['E-posta'],
+            item['Telefon'],
+            item['Bağış Türü'],
+            item['Miktar'],
+            item['Tarih'],
+            item['Durum'],
+            item['Ödeme Yöntemi']
+          ]),
+          startY: 25,
+          styles: { fontSize: 8, cellPadding: 2 },
+          columnStyles: {
+            0: { cellWidth: 10 },
+            1: { cellWidth: 30 },
+            2: { cellWidth: 35 },
+            3: { cellWidth: 20 },
+            4: { cellWidth: 25 },
+            5: { cellWidth: 15 },
+            6: { cellWidth: 25 },
+            7: { cellWidth: 15 },
+            8: { cellWidth: 20 }
+          },
+          headStyles: { fillColor: [76, 175, 80] }
+        });
+        
+        // Blob olarak kaydet ve indir
+        const pdfBlob = doc.output('blob');
+        const url = URL.createObjectURL(pdfBlob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'Bağışlar.pdf';
+        document.body.appendChild(link);
+        link.click();
+        
+        // Temizlik
+        setTimeout(() => {
+          document.body.removeChild(link);
+          URL.revokeObjectURL(url);
+        }, 100);
+      } catch (error) {
+        console.error("PDF dışa aktarma hatası:", error);
+        alert("PDF dosyası oluşturulurken bir hata oluştu.");
+      }
+    } else if (format === 'csv') {
+      // CSV'ye dönüştürme
+      const headers = Object.keys(dataToExport[0]).join(',');
+      const csvRows = dataToExport.map(row => {
+        return Object.values(row).map(value => {
+          // Virgülleri ve çift tırnakları kontrol et
+          if (typeof value === 'string' && (value.includes(',') || value.includes('"'))) {
+            return `"${value.replace(/"/g, '""')}"`;
+          }
+          return value;
+        }).join(',');
+      });
+      
+      const csvContent = [headers, ...csvRows].join('\n');
+      
+      // CSV indirme
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.setAttribute('href', url);
+      link.setAttribute('download', 'Bağışlar.csv');
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      
+      // Temizlik
+      setTimeout(() => {
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+      }, 100);
+    }
   };
 
   const filteredDonations = donations.filter(donation => {
@@ -216,31 +387,45 @@ export default function Donations() {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
         <h1 className="text-2xl font-bold text-gray-800 mb-4 md:mb-0">Bağışlar</h1>
         
-        <div className="dropdown relative">
-          <button className="btn btn-primary flex items-center">
+        <div className="dropdown relative" ref={dropdownRef}>
+          <button 
+            className="btn btn-primary flex items-center dropdown-toggle"
+            onClick={toggleDropdown}
+          >
             <FaDownload className="mr-2" />
             Dışa Aktar
           </button>
-          <div className="dropdown-menu absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg overflow-hidden z-20 hidden">
-            <button
-              onClick={() => handleExport('excel')}
-              className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-            >
-              Excel
-            </button>
-            <button
-              onClick={() => handleExport('pdf')}
-              className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-            >
-              PDF
-            </button>
-            <button
-              onClick={() => handleExport('csv')}
-              className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-            >
-              CSV
-            </button>
-          </div>
+          {dropdownOpen && (
+            <div className="dropdown-menu absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg overflow-hidden z-50">
+              <button
+                onClick={() => {
+                  handleExport('excel');
+                  setDropdownOpen(false);
+                }}
+                className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+              >
+                Excel
+              </button>
+              <button
+                onClick={() => {
+                  handleExport('pdf');
+                  setDropdownOpen(false);
+                }}
+                className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+              >
+                PDF
+              </button>
+              <button
+                onClick={() => {
+                  handleExport('csv');
+                  setDropdownOpen(false);
+                }}
+                className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+              >
+                CSV
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
