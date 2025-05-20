@@ -19,7 +19,8 @@ define('SITE_KEYWORDS', 'çınaraltı, vakıf, dernek, yardım');
 // Ödeme güvenliği ayarları - .env dosyasından al
 define('PAYMENT_MERCHANT_ID', getenv_var('PAYMENT_MERCHANT_ID', ''));
 define('PAYMENT_API_KEY', getenv_var('PAYMENT_API_KEY', ''));
-define('PAYMENT_DEBUG', getenv_var('PAYMENT_DEBUG', 'false') === 'true');
+// Ödeme hata ayıklamasını geçici olarak açık bırakalım (Geliştirme ortamı)
+define('PAYMENT_DEBUG', true); // getenv_var('PAYMENT_DEBUG', 'false') === 'true');
 
 // Zaman dilimi
 date_default_timezone_set('Europe/Istanbul');

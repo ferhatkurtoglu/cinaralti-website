@@ -1,0 +1,315 @@
+<!-- Donate -->
+
+<div class="inner_banner-section">
+    <h3 class="inner_banner-title">Bağış</h3>
+</div>
+
+<?php
+// Tüm bağış türlerini getir
+function getAllDonationTypes() {
+    global $db;
+    try {
+        $query = "SELECT dt.*,
+                       (SELECT GROUP_CONCAT(dc.name SEPARATOR ', ') 
+                        FROM donation_type_categories dtc
+                        JOIN donation_categories dc ON dtc.category_id = dc.id
+                        WHERE dtc.donation_type_id = dt.id) as categories
+                FROM donation_types dt
+                WHERE dt.is_active = 1
+                ORDER BY dt.name";
+        
+        $stmt = $db->prepare($query);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {
+        error_log("Bağış türleri getirme hatası: " . $e->getMessage());
+        return [];
+    }
+}
+
+// Kategoriye göre bağış türlerini getir
+function getDonationTypesByCategory($categoryId) {
+    global $db;
+    try {
+        $query = "SELECT dt.*,
+                       (SELECT GROUP_CONCAT(dc.name SEPARATOR ', ') 
+                        FROM donation_type_categories dtc
+                        JOIN donation_categories dc ON dtc.category_id = dc.id
+                        WHERE dtc.donation_type_id = dt.id) as categories
+                FROM donation_types dt
+                JOIN donation_type_categories dtc ON dt.id = dtc.donation_type_id
+                WHERE dtc.category_id = :category_id AND dt.is_active = 1
+                ORDER BY dt.name";
+        
+        $stmt = $db->prepare($query);
+        $stmt->bindParam(':category_id', $categoryId, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {
+        error_log("Kategoriye göre bağış türleri getirme hatası: " . $e->getMessage());
+        return [];
+    }
+}
+
+// Tüm kategorileri getir
+function getAllCategories() {
+    global $db;
+    try {
+        $query = "SELECT dc.*, 
+                        (SELECT COUNT(*) 
+                         FROM donation_type_categories dtc 
+                         JOIN donation_types dt ON dtc.donation_type_id = dt.id
+                         WHERE dtc.category_id = dc.id AND dt.is_active = 1) as item_count
+                 FROM donation_categories dc
+                 ORDER BY dc.name";
+        
+        $stmt = $db->prepare($query);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {
+        error_log("Kategoriler getirme hatası: " . $e->getMessage());
+        return [];
+    }
+}
+
+// Bağış verilerini görüntüle
+function displayDonationItems($donationItems) {
+    if (count($donationItems) > 0) {
+        foreach ($donationItems as $donation) {
+            // Resim kontrolü
+            $imageUrl = !empty($donation['cover_image']) ? $donation['cover_image'] : 
+                       (!empty($donation['image']) ? $donation['image'] : "../public/assets/image/donate/donate1.jpg");
+            
+            // URL oluştur
+            $url = BASE_URL . "/donate-details?id=" . urlencode($donation['id']);
+            
+            // İlerleme çubuğu hesaplama
+            $progressPercent = 0;
+            if ($donation['target_amount'] > 0) {
+                $progressPercent = min(100, ($donation['collected_amount'] / $donation['target_amount']) * 100);
+            }
+            ?>
+            <div class="donate-new-card">
+                <div class="donate-new-card-image">
+                    <img src="<?= $imageUrl ?>" alt="<?= htmlspecialchars($donation['name']) ?>">
+                    <?php if ($donation['target_amount'] > 0): ?>
+                    <div class="donation-progress-bar">
+                        <div class="donation-progress" style="width: <?= $progressPercent ?>%;"></div>
+                    </div>
+                    <div class="donation-stats">
+                        <span 
+                            class="donation-collected"><?= number_format($donation['collected_amount'], 0, ',', '.') ?>
+                            <small>₺</small>
+                        </span>
+                        <span 
+                            class="donation-target"><?= number_format($donation['target_amount'], 0, ',', '.') ?>
+                            <small>₺</small>
+                        </span>
+                    </div>
+                    <?php endif; ?>
+                </div>
+                <div class="donate-new-card-content">
+                    <h3 class="donate-new-card-title"><?= htmlspecialchars($donation['name']) ?></h3>
+                    <p class="donate-new-card-desc">
+                        <?= substr(strip_tags($donation['description']), 0, 120) ?>...
+                    </p>
+                    <div class="donate-new-card-actions">
+                        <a href="<?= $url ?>" class="btn btn-outline-primary">Detaylar</a>
+                        <button class="btn btn-primary donation-btn" 
+                            data-donation-id="<?= $donation['id'] ?>"
+                            onclick="openDonateModal('<?= htmlspecialchars($donation['name']) ?>', '<?= $donation['id'] ?>')">Bağış Yap</button>
+                    </div>
+                </div>
+            </div>
+            <?php
+        }
+    } else {
+        echo '<div class="alert alert-info">Bu kriterlere uygun bağış türü bulunamadı.</div>';
+    }
+}
+?>
+
+<!-- Bağış Kategorileri Menüsü -->
+<div class="donate-categories-menu">
+    <div class="container">
+        <div class="donate-categories-wrapper">
+            <?php
+            if (DEBUG_MODE) {
+                echo '<div style="padding: 10px; background-color: #f8d7da; color: #721c24; margin-bottom: 10px; border-radius: 5px;">Debug Modu Aktif - Veritabanı bağlantısı test ediliyor</div>';
+            }
+            
+            // Aktif kategoriyi belirle
+            $activeCategory = isset($_GET['category']) ? $_GET['category'] : 'tumu';
+            $activeCurrency = isset($_GET['currency']) ? $_GET['currency'] : '';
+            
+            // İkon haritası - Modern SVG ikonlar için
+            $modernIconMap = [
+                'tumu' => '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/></svg>',
+                'acil-yardim' => '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="cat-icon-acil" viewBox="0 0 16 16"><path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/><path d="M7.002 11a1 1 0 1 1 2 0 1 1 0 0 1-2 0zM7.1 4.995a.905.905 0 1 1 1.8 0l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 4.995z"/></svg>',
+                'zekat' => '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="cat-icon-zekat" viewBox="0 0 16 16"><path d="M4 10.781c.148 1.667 1.513 2.85 3.591 3.003V15h1.043v-1.216c2.27-.179 3.678-1.438 3.678-3.3 0-1.59-.947-2.51-2.956-3.028l-.722-.187V3.467c1.122.11 1.879.714 2.07 1.616h1.47c-.166-1.6-1.54-2.748-3.54-2.875V1H7.591v1.233c-1.939.23-3.27 1.472-3.27 3.156 0 1.454.966 2.483 2.661 2.917l.61.162v4.031c-1.149-.17-1.94-.8-2.131-1.718H4zm3.391-3.836c-1.043-.263-1.6-.825-1.6-1.616 0-.944.704-1.641 1.8-1.828v3.495l-.2-.05zm1.591 1.872c1.287.323 1.852.859 1.852 1.769 0 1.097-.826 1.828-2.2 1.939V8.73l.348.086z"/></svg>',
+                'egitim' => '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="cat-icon-egitim" viewBox="0 0 16 16"><path d="M1 2.828c.885-.37 2.154-.769 3.388-.893 1.33-.134 2.458.063 3.112.752v9.746c-.935-.53-2.12-.603-3.213-.493-1.18.12-2.37.461-3.287.811V2.828zm7.5-.141c.654-.689 1.782-.886 3.112-.752 1.234.124 2.503.523 3.388.893v9.923c-.918-.35-2.107-.692-3.287-.81-1.094-.111-2.278-.039-3.213.492V2.687zM8 1.783C7.015.936 5.587.81 4.287.94c-1.514.153-3.042.672-3.994 1.105A.5.5 0 0 0 0 2.5v11a.5.5 0 0 0 .707.455c.882-.4 2.303-.881 3.68-1.02 1.409-.142 2.59.087 3.223.877a.5.5 0 0 0 .78 0c.633-.79 1.814-1.019 3.222-.877 1.378.139 2.8.62 3.681 1.02A.5.5 0 0 0 16 13.5v-11a.5.5 0 0 0-.293-.455c-.952-.433-2.48-.952-3.994-1.105C10.413.809 8.985.936 8 1.783z"/></svg>',
+                'yetim' => '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="cat-icon-yetim" viewBox="0 0 16 16"><path d="M13 2.5a1.5 1.5 0 0 1 3 0v11a1.5 1.5 0 0 1-3 0v-.214c-2.162-1.241-4.49-1.843-6.912-2.083l.405 2.712A1 1 0 0 1 5.51 15.1h-.548a1 1 0 0 1-.916-.599l-1.85-3.49a68.14 68.14 0 0 0-.202-.003A2.014 2.014 0 0 1 0 9V7a2.02 2.02 0 0 1 1.992-2.013 74.663 74.663 0 0 0 2.483-.075c3.043-.154 6.148-.849 8.525-2.199V2.5zm1 0v11a.5.5 0 0 0 1 0v-11a.5.5 0 0 0-1 0zm-1 1.35c-2.344 1.205-5.209 1.842-8 2.033v4.233c.18.01.359.022.537.036 2.568.189 5.093.744 7.463 1.993V3.85zm-9 6.215v-4.13a95.09 95.09 0 0 1-1.992.052A1.02 1.02 0 0 0 1 7v2c0 .55.448 1.002 1.006 1.009A60.49 60.49 0 0 1 4 10.065zm-.657.975 1.609 3.037.01.024h.548l-.002-.014-.443-2.966a68.019 68.019 0 0 0-1.722-.082z"/></svg>',
+                'su-kuyusu' => '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="cat-icon-su" viewBox="0 0 16 16"><path d="M8 16a6 6 0 0 0 6-6c0-1.655-1.122-2.904-2.432-4.362C10.254 4.176 8.75 2.503 8 0c0 0-6 5.686-6 10a6 6 0 0 0 6 6ZM6.646 4.646l.708.708c-.29.29-.444.617-.51.97l.554.554c.48-.48.535-.998.535-1.232a2.5 2.5 0 0 1 5 0c0 .234.055.752.535 1.232l.554-.554c-.065-.353-.22-.68-.51-.97l.708-.708c.51.51.793 1.186.793 1.912 0 .967-.546 1.892-1.312 2.658-.766.765-1.691 1.311-2.658 1.311s-1.892-.546-2.658-1.311C5.546 8.45 5 7.525 5 6.558c0-.726.283-1.403.793-1.912Z"/></svg>',
+                'genel' => '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="cat-icon-genel" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8 1.314C12.438-3.248 23.534 4.735 8 15-7.534 4.736 3.562-3.248 8 1.314z"/></svg>',
+                'projeler' => '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="cat-icon-projeler" viewBox="0 0 16 16"><path d="M4.406 3.342A5.53 5.53 0 0 1 8 2c2.69 0 4.923 2 5.166 4.579C14.758 6.804 16 8.137 16 9.773 16 11.569 14.502 13 12.687 13H3.781C1.708 13 0 11.366 0 9.318c0-1.763 1.266-3.223 2.942-3.593.143-.863.698-1.723 1.464-2.383zm.653.757c-.757.653-1.153 1.44-1.153 2.056v.448l-.445.049C2.064 6.805 1 7.952 1 9.318 1 10.785 2.23 12 3.781 12h8.906C13.98 12 15 10.988 15 9.773c0-1.216-1.02-2.228-2.313-2.228h-.5v-.5C12.188 4.825 10.328 3 8 3a4.53 4.53 0 0 0-2.941 1.1z"/></svg>',
+                'kurban' => '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="cat-icon-kurban" viewBox="0 0 16 16"><path d="M16 3c-2.51 0-4.074 1.123-4.666 2.842a3.8 3.8 0 0 0-1.29-.307c-.769-.028-1.355.341-1.663.788-.305.44-.381.943-.178 1.329.259.5.779.8 1.438.812.243.004.499-.033.722-.111v4.994c0 .304.248.55.55.55h.05a.55.55 0 0 0 .537-.55V4.802c.645-1.628 2.002-2.5 4.5-2.5v1a.5.5 0 0 1 1 0V2a1 1 0 0 0-1-1H2a1 1 0 0 0-1 1v1a.5.5 0 0 1 1 0v.298c1.136.132 2 .715 2 1.702 0 .94-.865 1.702-2 1.702v1c1.135 0 2 .763 2 1.702 0 .897-.776 1.537-1.91 1.692-.079-.096-.18-.192-.333-.192-.083 0-.167.021-.25.042-.045.011-.088.03-.125.049L1 9.45V12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4a1 1 0 0 0-1-1h-1.5l.001-1ZM3 4.5a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0Zm11.5 7.5h-11v-1h11v1Z"/></svg>',
+                'currency' => '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="cat-icon-money" viewBox="0 0 16 16"><path d="M1.5 2A1.5 1.5 0 0 0 0 3.5v2h6a.5.5 0 0 1 .5.5c0 .253.08.644.306.958.207.288.557.542 1.194.542.637 0 .987-.254 1.194-.542.226-.314.306-.705.306-.958a.5.5 0 0 1 .5-.5h6v-2A1.5 1.5 0 0 0 14.5 2h-13z"/><path d="M16 6.5h-5.551a2.678 2.678 0 0 1-.443 1.042C9.613 8.088 8.963 8.5 8 8.5c-.963 0-1.613-.412-2.006-.958A2.679 2.679 0 0 1 5.551 6.5H0v6A1.5 1.5 0 0 0 1.5 14h13a1.5 1.5 0 0 0 1.5-1.5v-6z"/></svg>'
+            ];
+            
+            // Önce "Tümü" kategorisini göster
+            $isActive = ($activeCategory == 'tumu') ? 'active' : '';
+            echo '<a href="'. BASE_URL .'/donate?category=tumu" class="donate-category-item '. $isActive .'">';
+            echo '<div class="category-icon-container">' . $modernIconMap['tumu'] . '</div>';
+            echo '<span class="category-text">Tümü</span>';
+            echo '</a>';
+            
+            try {
+                // Veritabanı bağlantısı
+                $db = db_connect();
+                
+                if (DEBUG_MODE) {
+                    echo '<div style="padding: 10px; background-color: #d4edda; color: #155724; margin-bottom: 10px; border-radius: 5px;">Veritabanı bağlantısı başarılı</div>';
+                }
+                
+                // Kategorileri veritabanından çek (tekrarları gruplandırarak)
+                $stmt = $db->prepare("
+                    SELECT id, name, slug, position 
+                    FROM donation_categories 
+                    WHERE active = 1
+                    GROUP BY slug
+                    ORDER BY position ASC
+                ");
+                $stmt->execute();
+                $categories = $stmt->fetchAll();
+                
+                if (DEBUG_MODE) {
+                    echo '<div style="padding: 10px; background-color: #d4edda; color: #155724; margin-bottom: 10px; border-radius: 5px;">' . count($categories) . ' kategori bulundu</div>';
+                }
+                
+                // Kategorileri göster
+                foreach ($categories as $category) {
+                    $isActive = ($category['slug'] == $activeCategory) ? 'active' : '';
+                    $iconKey = isset($modernIconMap[$category['slug']]) ? $category['slug'] : 'genel';
+                    
+                    echo '<a href="'. BASE_URL .'/donate?category='. $category['slug'] .'" class="donate-category-item '. $isActive .'">';
+                    echo '<div class="category-icon-container">' . $modernIconMap[$iconKey] . '</div>';
+                    echo '<span class="category-text">'. $category['name'] .'</span>';
+                    echo '</a>';
+                }
+                
+            } catch (Exception $e) {
+                // Hata durumunda statik kategori listesi gösterilir
+                if (DEBUG_MODE) {
+                    echo '<div style="padding: 10px; background-color: #f8d7da; color: #721c24; margin-bottom: 10px; border-radius: 5px;">Veritabanı hatası: ' . $e->getMessage() . '</div>';
+                }
+                
+                $staticCategories = [
+                    'acil-yardim' => ['text' => 'Acil Yardım'],
+                    'yetim' => ['text' => 'Yetim'],
+                    'genel' => ['text' => 'Genel'],
+                    'projeler' => ['text' => 'Projeler'],
+                    'egitim' => ['text' => 'Eğitim'],
+                    'kurban' => ['text' => 'Kurban']
+                ];
+                
+                foreach ($staticCategories as $slug => $info) {
+                    $isActive = ($slug == $activeCategory) ? 'active' : '';
+                    $iconKey = isset($modernIconMap[$slug]) ? $slug : 'genel';
+                    
+                    echo '<a href="'. BASE_URL .'/donate?category='. $slug .'" class="donate-category-item '. $isActive .'">';
+                    echo '<div class="category-icon-container">' . $modernIconMap[$iconKey] . '</div>';
+                    echo '<span class="category-text">'. $info['text'] .'</span>';
+                    echo '</a>';
+                }
+                
+                if (DEBUG_MODE) {
+                    error_log("Kategori çekme hatası: " . $e->getMessage());
+                }
+            }
+            
+            // Para birimi seçeneği
+            $currencyActive = (!empty($activeCurrency)) ? 'active' : '';
+            ?>
+            <a href="#" class="donate-category-item currency-item <?= $currencyActive ?>" id="currencySettingsBtn">
+                <div class="category-icon-container"><?= $modernIconMap['currency'] ?></div>
+                <span class="category-text">₺ (Türk Lirası)</span>
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    Donate : Main Section 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<div class="donate_main-section">
+    <div class="container">
+        <div class="row justify-content-center gx-4 gy-4">
+            <?php
+            try {
+                // Kategori ID kontrolü
+                $categoryId = isset($_GET['category']) ? intval($_GET['category']) : 0;
+                
+                // Bağış kategorilerini getir
+                $categories = getAllCategories();
+                
+                // Tüm kategorilerde gösterilecek bağış sayısı
+                $totalDonations = 0;
+                foreach ($categories as $cat) {
+                    $totalDonations += $cat['item_count'];
+                }
+                
+                if ($categoryId > 0) {
+                    // Kategoriye göre bağışları getir
+                    $donationItems = getDonationTypesByCategory($categoryId);
+                    $categoryName = '';
+                    
+                    // Kategori adını bul
+                    foreach ($categories as $cat) {
+                        if ($cat['id'] == $categoryId) {
+                            $categoryName = $cat['name'];
+                            break;
+                        }
+                    }
+                    
+                    echo '<div class="alert alert-success" style="border-radius: 5px;">Kategoriye göre ' . 
+                         count($donationItems) . ' bağış türü bulundu</div>';
+                } else {
+                    // Tüm bağışları getir
+                    $donationItems = getAllDonationTypes();
+                    
+                    echo '<div class="alert alert-success" style="border-radius: 5px;">Tüm kategorilerden ' . 
+                         count($donationItems) . ' bağış türü bulundu</div>';
+                }
+                
+                // Bağış öğeleri bulunamazsa JSON dosyasından yükle
+                if (empty($donationItems)) {
+                    echo '<div class="alert alert-warning">Veritabanından bağış türleri yüklenemedi.</div>';
+                }
+                
+                // Bağış öğeleri varsa, görüntüle
+                displayDonationItems($donationItems);
+                
+            } catch (Exception $e) {
+                // Hata durumunda hata mesajını görüntüle
+                echo '<div class="alert alert-danger">Bağış verileri yüklenirken bir hata oluştu: ' . 
+                     htmlspecialchars($e->getMessage()) . '</div>';
+            }
+            ?>
+        </div>
+    </div>
+</div>
+
+<script>
+// Bağış modal işlevselliği
+function openDonateModal(title, donationId) {
+    // Modal başlığını ayarla
+    document.getElementById('donateModalLabel').textContent = title;
+    
+    // Bağış ID'sini sakla
+    document.getElementById('donationId').value = donationId;
+    
+    // Modal'ı göster
+    var donateModal = new bootstrap.Modal(document.getElementById('donateModal'));
+    donateModal.show();
+}
+</script>

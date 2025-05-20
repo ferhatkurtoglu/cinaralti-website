@@ -3,6 +3,40 @@
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
+
+// Process-donation dosyasını dahil et
+require_once __DIR__ . '/../includes/actions/process-donation.php';
+
+// Ödeme sonucunu veritabanında güncelle
+$donationId = isset($_SESSION['donation_made_id']) ? (int)$_SESSION['donation_made_id'] : 0;
+$orderId = isset($_GET['OrderId']) ? sanitize_input($_GET['OrderId']) : '';
+$authCode = isset($_GET['AuthCode']) ? sanitize_input($_GET['AuthCode']) : '';
+
+// Ödeme durumunu güncelle (eğer valid bir donation ID varsa)
+if ($donationId > 0) {
+    try {
+        // Ödeme başarılı olduğu için durumu "completed" olarak güncelle
+        $updated = update_donation_status($donationId, 'completed');
+        
+        if (DEBUG_MODE) {
+            error_log("Bağış durumu güncellendi: ID=$donationId, Status=completed, Sonuç=" . ($updated ? 'Başarılı' : 'Başarısız'));
+        }
+        
+        // Oturumdaki bağış verilerini temizle
+        unset($_SESSION['donation_made_id']);
+        unset($_SESSION['cart_total']);
+        unset($_SESSION['donation_type']);
+        unset($_SESSION['donation_id']);
+    } catch (Exception $e) {
+        error_log("Bağış durumu güncelleme hatası: " . $e->getMessage());
+    }
+}
+
+// Bağış bilgilerini getir
+$donationDetails = null;
+if ($donationId > 0) {
+    $donationDetails = get_donation_by_id($donationId);
+}
 ?>
 
 <div class="success-container">
@@ -15,19 +49,35 @@ if (session_status() === PHP_SESSION_NONE) {
             Bağışınız için teşekkür ederiz. İşleminiz başarıyla tamamlandı.
         </div>
         <div class="success-details">
-            <?php if (isset($_GET['OrderId'])) { ?>
+            <?php if (isset($donationDetails) && $donationDetails) { ?>
+            <div class="detail-item">
+                <span class="detail-label">Bağış Türü:</span>
+                <span class="detail-value"><?= htmlspecialchars($donationDetails['donation_type']) ?></span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">Bağış Miktarı:</span>
+                <span class="detail-value">₺<?= number_format($donationDetails['amount'], 2, ',', '.') ?></span>
+            </div>
+            <?php } ?>
+            
+            <?php if (!empty($orderId)) { ?>
             <div class="detail-item">
                 <span class="detail-label">Sipariş No:</span>
-                <span class="detail-value"><?= htmlspecialchars($_GET['OrderId']) ?></span>
+                <span class="detail-value"><?= htmlspecialchars($orderId) ?></span>
             </div>
             <?php } ?>
 
-            <?php if (isset($_GET['AuthCode'])) { ?>
+            <?php if (!empty($authCode)) { ?>
             <div class="detail-item">
                 <span class="detail-label">Yetkilendirme Kodu:</span>
-                <span class="detail-value"><?= htmlspecialchars($_GET['AuthCode']) ?></span>
+                <span class="detail-value"><?= htmlspecialchars($authCode) ?></span>
             </div>
             <?php } ?>
+            
+            <div class="detail-item">
+                <span class="detail-label">Tarih:</span>
+                <span class="detail-value"><?= date('d.m.Y H:i') ?></span>
+            </div>
         </div>
         <div class="success-actions">
             <a href="<?= BASE_URL ?>/" class="btn-home">Ana Sayfaya Dön</a>

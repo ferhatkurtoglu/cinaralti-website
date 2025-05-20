@@ -58,6 +58,8 @@ if (strpos($current_uri, '/donate') !== false && strpos($current_uri, '/donate-d
     $current_page = 'career-details.php';
 } elseif (strpos($current_uri, '/career') !== false) {
     $current_page = 'career.php';
+} elseif (strpos($current_uri, '/zakat-calculator') !== false) {
+    $current_page = 'zakat-calculator.php';
 } elseif (strpos($current_uri, '/home') !== false || $current_uri === '/' || $current_uri === '') {
     $current_page = 'home.php';
 }
