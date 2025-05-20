@@ -60,7 +60,8 @@ $routes = [
     '/privacy-policy' => 'privacy-policy.php',
     '/distance-selling' => 'distance-selling.php',
     '/return-policy' => 'return-policy.php',
-    '/ssl-info' => 'ssl-info.php'
+    '/ssl-info' => 'ssl-info.php',
+    '/zakat-calculator' => 'zakat-calculator.php'
 ];
 
 // Header'ı yükle

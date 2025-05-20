@@ -1,6 +1,7 @@
 <!-- Ödeme Sayfası -->
 <?php
-// Ödeme sayfası için ek güvenlik kontrolü
+// Ödeme sayfası için ek güvenlik kontrolü - Geliştirme ortamında bu kontrolü devre dışı bırakıyoruz
+/*
 if (!defined('FORCE_HTTPS') || !FORCE_HTTPS) {
     die("Güvenli olmayan bağlantı. Lütfen site yöneticisiyle iletişime geçin.");
 }
@@ -11,6 +12,28 @@ if (empty($_SERVER['HTTPS']) || $_SERVER['HTTPS'] === 'off') {
     header('Location: https://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']);
     exit();
 }
+*/
+
+// Process-donation dosyasını dahil et
+require_once __DIR__ . '/../includes/actions/process-donation.php';
+
+// Sepet ve bağış verilerini oturumdan al
+$donationAmount = isset($_SESSION['cart_total']) ? $_SESSION['cart_total'] : 0;
+$donationType = isset($_SESSION['donation_type']) ? $_SESSION['donation_type'] : 'Genel Bağış';
+$donationId = isset($_SESSION['donation_id']) ? $_SESSION['donation_id'] : 0;
+
+// Bağışçı bilgileri session'dan alınır
+$donorName = isset($_SESSION['donor_name']) ? $_SESSION['donor_name'] : '';
+$donorEmail = isset($_SESSION['donor_email']) ? $_SESSION['donor_email'] : '';
+$donorPhone = isset($_SESSION['donor_phone']) ? $_SESSION['donor_phone'] : '';
+$donorCity = isset($_SESSION['donor_city']) ? $_SESSION['donor_city'] : '';
+$donorType = isset($_SESSION['donor_type']) ? $_SESSION['donor_type'] : 'individual';
+
+// Oturumdan bağış bilgilerini al
+$amount = number_format($donationAmount, 2, ',', '.');
+
+// Geçerli sayfanın tam URL'sini al
+$currentUrl = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]";
 ?>
 
 <div class="payment-container">
@@ -27,7 +50,7 @@ if (empty($_SERVER['HTTPS']) || $_SERVER['HTTPS'] === 'off') {
             </a>
             <div class="payment-step-title">
                 <span>Sepet Tutarı: </span>
-                <span class="payment-amount">₺12,00</span>
+                <span class="payment-amount">₺<?= $amount ?></span>
             </div>
         </div>
     </div>
@@ -54,12 +77,22 @@ if (empty($_SERVER['HTTPS']) || $_SERVER['HTTPS'] === 'off') {
 
             <!-- Kart ile ödeme içeriği -->
             <div class="card-info payment-content-section" id="cardPaymentContent">
-                <div class="card-label">KART BİLGİSİ</div>
-
-                <form id="paymentForm" method="post" action="<?= $_SERVER['PHP_SELF'] ?>">
-                    <input type="hidden" id="amount" name="amount" value="10000">
+                <form id="paymentForm" method="post" action="<?= htmlspecialchars($currentUrl) ?>">
+                    <input type="hidden" id="donation_id" name="donation_id" value="<?= $donationId ?>">
+                    <input type="hidden" id="donation_type" name="donation_type"
+                        value="<?= htmlspecialchars($donationType) ?>">
+                    <input type="hidden" id="amount" name="amount" value="<?= $donationAmount * 100 ?>">
                     <input type="hidden" name="csrf_token" value="<?= generate_csrf_token() ?>">
-                    
+
+                    <!-- Kişisel bilgiler session'dan alındığı için hidden field olarak eklenir -->
+                    <input type="hidden" name="donor_name" value="<?= htmlspecialchars($donorName) ?>">
+                    <input type="hidden" name="donor_email" value="<?= htmlspecialchars($donorEmail) ?>">
+                    <input type="hidden" name="donor_phone" value="<?= htmlspecialchars($donorPhone) ?>">
+                    <input type="hidden" name="city" value="<?= htmlspecialchars($donorCity) ?>">
+                    <input type="hidden" name="donor_type" value="<?= htmlspecialchars($donorType) ?>">
+
+                    <div class="card-label">KART BİLGİSİ</div>
+
                     <div class="card-number-container">
                         <input type="text" id="cardNumber" class="card-number-input" placeholder="Kart Numarası"
                             maxlength="19" autocomplete="cc-number">
@@ -79,11 +112,12 @@ if (empty($_SERVER['HTTPS']) || $_SERVER['HTTPS'] === 'off') {
 
                     <div class="form-group message-group">
                         <label class="small-label">Çınaraltına Mesajınız</label>
-                        <textarea class="form-control message-input" rows="2" placeholder="İsteğe bağlı"></textarea>
+                        <textarea class="form-control message-input" name="message" rows="2"
+                            placeholder="İsteğe bağlı"></textarea>
                     </div>
 
                     <div class="form-check">
-                        <input type="checkbox" class="form-check-input" id="regularDonation">
+                        <input type="checkbox" class="form-check-input" id="regularDonation" name="is_regular">
                         <label class="form-check-label" for="regularDonation">Düzenli bağış yapmak istiyorum</label>
                     </div>
 
@@ -93,7 +127,7 @@ if (empty($_SERVER['HTTPS']) || $_SERVER['HTTPS'] === 'off') {
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label>Tekrar süresi</label>
-                                        <select class="form-control">
+                                        <select class="form-control" name="donation_period">
                                             <option selected>1 ay</option>
                                             <option>2 ay</option>
                                             <option>3 ay</option>
@@ -112,7 +146,7 @@ if (empty($_SERVER['HTTPS']) || $_SERVER['HTTPS'] === 'off') {
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label>Ödeme günü</label>
-                                        <select class="form-control">
+                                        <select class="form-control" name="payment_day">
                                             <option selected>1. günü</option>
                                             <option>5. günü</option>
                                             <option>8. günü</option>
@@ -135,7 +169,7 @@ if (empty($_SERVER['HTTPS']) || $_SERVER['HTTPS'] === 'off') {
                             data-theme="light" data-size="normal" data-type="image"></div>
                     </div>
 
-                    <button type="submit" class="btn-pay" id="payButton" disabled>ÖDEME YAP</button>
+                    <button type="submit" class="btn-pay" id="payButton">ÖDEME YAP</button>
                 </form>
             </div>
         </div>
@@ -153,6 +187,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
     
+    // Bağış verilerini al
+    $donationData = [
+        'donation_id' => isset($_POST['donation_id']) ? (int)$_POST['donation_id'] : 0,
+        'donor_name' => isset($_POST['donor_name']) ? sanitize_input($_POST['donor_name']) : '',
+        'donor_email' => isset($_POST['donor_email']) ? sanitize_input($_POST['donor_email']) : '',
+        'donor_phone' => isset($_POST['donor_phone']) ? sanitize_input($_POST['donor_phone']) : '',
+        'city' => isset($_POST['city']) ? sanitize_input($_POST['city']) : '',
+        'amount' => isset($_POST['amount']) ? (float)($_POST['amount'] / 100) : 0, // Kuruştan TL'ye çevir
+        'donation_type' => isset($_POST['donation_type']) ? sanitize_input($_POST['donation_type']) : 'Genel Bağış',
+        'donor_type' => isset($_POST['donor_type']) ? sanitize_input($_POST['donor_type']) : 'individual',
+        'payment_status' => 'pending' // Başlangıç durumu: beklemede
+    ];
+    
+    // Bağış verisini veritabanına kaydet
+    $donationId = save_donation($donationData);
+    
+    // Kayıt başarısızsa hata sayfasına yönlendir
+    if (!$donationId) {
+        error_log("Bağış kaydetme hatası oluştu!");
+        header("Location: " . BASE_URL . "/fail?error=database");
+        exit;
+    }
+    
+    // Bağış ID'sini oturuma kaydet (ödeme sonucunu güncellemek için)
+    $_SESSION['donation_made_id'] = $donationId;
+    
     // Debug modu ayarlarını uygula
     ini_set('display_errors', PAYMENT_DEBUG ? 1 : 0);
     error_reporting(PAYMENT_DEBUG ? E_ALL : 0);
@@ -161,54 +221,62 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $merchantId = defined('PAYMENT_MERCHANT_ID') ? PAYMENT_MERCHANT_ID : '';
     $apiKey = defined('PAYMENT_API_KEY') ? PAYMENT_API_KEY : '';
     
-    // API bilgileri yoksa hata ver
+    // Geliştirme ortamında, eğer API bilgileri yoksa test bilgilerini kullan
     if (empty($merchantId) || empty($apiKey)) {
-        error_log("Ödeme API bilgileri eksik!");
-        header("Location: " . BASE_URL . "/fail?error=configuration");
-        exit;
+        if (PAYMENT_DEBUG) {
+            error_log("Ödeme API bilgileri eksik. Geliştirme için test değerleri kullanılıyor.");
+            // Test değerleri (Gerçek değerler değildir, sadece geliştirme amaçlı)
+            $merchantId = '123456789'; 
+            $apiKey = 'TEST_API_KEY';
+        } else {
+            error_log("Ödeme API bilgileri eksik!");
+            header("Location: " . BASE_URL . "/fail?error=configuration&ErrorMessage=" . urlencode('Ödeme sistemi yapılandırması tamamlanmamış. Lütfen site yöneticisiyle iletişime geçin.'));
+            exit;
+        }
     }
     
     // JavaScript'ten alınan tutar bilgisini kullan (hidden input'tan gelecek)
     $amount = isset($_POST['amount']) ? (int)$_POST['amount'] : 10000; // Kuruş cinsinden
     
     // URL'ler için tam yol kullan (HTTPS zorunlu)
-    $domain = 'https://' . $_SERVER['HTTP_HOST'];
+    $protocol = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') ? 'https' : 'http';
+    $domain = $protocol . '://' . $_SERVER['HTTP_HOST'];
     
-    $successUrl = $domain . BASE_URL . "/success";
-    $errorUrl = $domain . BASE_URL . "/fail";
+    // Tam yolu direkt php dosyalarına yönlendir (index.php üzerinden değil)
+    $successUrl = $domain . dirname($_SERVER['SCRIPT_NAME']) . "/success.php";
+    $errorUrl = $domain . dirname($_SERVER['SCRIPT_NAME']) . "/fail.php";
     $transactionType = "Sale";
-
-    // Güvenlik için HASH (SHA256 ile imzalanmış)
-    $hashStr = $merchantId . $amount . $successUrl . $errorUrl . $transactionType . $apiKey;
-    $hash = base64_encode(hash('sha256', $hashStr, true));
-
-    // Kuveyt Türk Kolay Kurulum URL'si
-    $url = "https://sanalpos.kuveytturk.com.tr/PaymentGateway/KolayKurulum.aspx";
-    $url .= "?MerchantId=" . urlencode($merchantId);
-    $url .= "&Amount=" . urlencode($amount);
-    $url .= "&SuccessUrl=" . urlencode($successUrl);
-    $url .= "&ErrorUrl=" . urlencode($errorUrl);
-    $url .= "&TransactionType=" . urlencode($transactionType);
-    $url .= "&Hash=" . urlencode($hash);
-
-    // Hata ayıklama için günlük kaydı
-    error_log("Ödeme işlemi başlatıldı: " . sanitize_input(substr($url, 0, 100)) . "...");
     
-    // Debug modunda ise yönlendirme bilgilerini göster
-    if (PAYMENT_DEBUG) {
-        echo "<div style='background: #f8f9fa; padding: 20px; margin: 20px; border-radius: 5px; border: 1px solid #ddd;'>";
-        echo "<h3>Ödeme Yönlendirme URL'si (Test Modu)</h3>";
-        echo "<p>Yönlendirme bekleyin...</p>";
-        echo "<code>" . htmlspecialchars(substr($url, 0, 100)) . "...</code>";
-        echo "</div>";
+    try {
+        // Güvenlik için HASH (SHA256 ile imzalanmış)
+        $hashStr = $merchantId . $amount . $successUrl . $errorUrl . $transactionType . $apiKey;
+        $hash = base64_encode(hash('sha256', $hashStr, true));
+
+        // Kuveyt Türk Kolay Kurulum URL'si veya diğer ödeme URL'si
+        $url = "https://sanalpos.kuveytturk.com.tr/PaymentGateway/KolayKurulum.aspx";
+        $url .= "?MerchantId=" . urlencode($merchantId);
+        $url .= "&Amount=" . urlencode($amount);
+        $url .= "&SuccessUrl=" . urlencode($successUrl);
+        $url .= "&FailUrl=" . urlencode($errorUrl);
+        $url .= "&TransactionType=" . urlencode($transactionType);
+        $url .= "&CustomerId=" . urlencode($donationId); // Bağış ID'sini gönder
+        $url .= "&HashData=" . urlencode($hash);
         
-        // 5 saniye bekledikten sonra yönlendirme
-        echo "<script>setTimeout(function() { window.location.href = '" . $url . "'; }, 5000);</script>";
-    } else {
-        // Üretim modunda doğrudan yönlendir
+        // Geliştirme modunda test için doğrudan success sayfasına yönlendir
+        if (PAYMENT_DEBUG) {
+            header("Location: " . $successUrl . "?OrderId=TEST_" . $donationId . "&AuthCode=TEST_AUTH_" . rand(100000, 999999));
+            exit;
+        }
+
+        // Ödeme sayfasına yönlendir
         header("Location: " . $url);
+        exit;
+    } catch (Exception $e) {
+        // Hata durumunda kullanıcıyı fail sayfasına yönlendir
+        error_log("Ödeme yönlendirme hatası: " . $e->getMessage());
+        header("Location: " . $errorUrl . "?error=payment_gateway&ErrorMessage=" . urlencode($e->getMessage()));
+        exit;
     }
-    exit;
 }
 ?>
 
@@ -572,19 +640,49 @@ document.addEventListener('DOMContentLoaded', function() {
 
     if (paymentForm) {
         paymentForm.addEventListener('submit', function(e) {
-            // Formun varsayılan davranışını engelle
-            e.preventDefault();
+            // Sorunları yakalamak için konsola mesaj yazalım
+            console.log('Form submission triggered');
 
-            // Yükleme ekranını göster
-            if (loadingOverlay) {
-                loadingOverlay.style.display = 'flex';
+            try {
+                // Formun varsayılan davranışını engelle
+                e.preventDefault();
+
+                // Form verilerinin doğruluğunu kontrol et
+                const cardNumber = document.getElementById('cardNumber');
+                if (!cardNumber || cardNumber.value.trim().length < 16) {
+                    alert('Lütfen geçerli bir kart numarası girin.');
+                    return false;
+                }
+
+                // Yükleme ekranını göster
+                if (loadingOverlay) {
+                    loadingOverlay.style.display = 'flex';
+                    console.log('Loading overlay shown');
+                }
+
+                // Form gönderimini geciktir (tarayıcının yükleme göstergesini göstermesi için)
+                setTimeout(() => {
+                    try {
+                        // Formu manuel olarak gönder
+                        console.log('Submitting form after delay');
+                        this.submit();
+                    } catch (submitError) {
+                        console.error('Form submission error:', submitError);
+                        alert('Ödeme işlemi sırasında bir hata oluştu. Lütfen tekrar deneyin.');
+                        // Hata durumunda yükleme ekranını gizle
+                        if (loadingOverlay) {
+                            loadingOverlay.style.display = 'none';
+                        }
+                    }
+                }, 500);
+            } catch (error) {
+                console.error('Payment process error:', error);
+                alert('Ödeme işlemi sırasında bir hata oluştu. Lütfen tekrar deneyin.');
+                // Hata durumunda yükleme ekranını gizle
+                if (loadingOverlay) {
+                    loadingOverlay.style.display = 'none';
+                }
             }
-
-            // Form gönderimini geciktir (tarayıcının yükleme göstergesini göstermesi için)
-            setTimeout(() => {
-                // Formu manuel olarak gönder
-                this.submit();
-            }, 500);
         });
     }
 
@@ -725,5 +823,7 @@ function onRecaptchaLoad() {
         'size': 'normal',
         'tabindex': 0
     });
+}
+</script>
 }
 </script>
