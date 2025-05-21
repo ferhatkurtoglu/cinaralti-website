@@ -32,7 +32,8 @@ function save_donation($donationData) {
                     amount, 
                     donation_option, 
                     donor_type, 
-                    payment_status
+                    payment_status,
+                    order_number
                 ) VALUES (
                     :donation_option_id, 
                     :donor_name, 
@@ -42,11 +43,15 @@ function save_donation($donationData) {
                     :amount, 
                     :donation_option, 
                     :donor_type, 
-                    :payment_status
+                    :payment_status,
+                    :order_number
                 )";
         
         // Sorguyu hazırla
         $stmt = $db->prepare($sql);
+        
+        // Sipariş numarası varsa kullan, yoksa oluştur
+        $orderNumber = isset($donationData['order_number']) ? $donationData['order_number'] : "CIN" . time() . rand(1000, 9999);
         
         // Parametreleri bağla
         $stmt->bindParam(':donation_option_id', $donationData['donation_option_id'], PDO::PARAM_INT);
@@ -58,6 +63,7 @@ function save_donation($donationData) {
         $stmt->bindParam(':donation_option', $donationData['donation_option'], PDO::PARAM_STR);
         $stmt->bindParam(':donor_type', $donationData['donor_type'], PDO::PARAM_STR);
         $stmt->bindParam(':payment_status', $donationData['payment_status'], PDO::PARAM_STR);
+        $stmt->bindParam(':order_number', $orderNumber, PDO::PARAM_STR);
         
         // Sorguyu çalıştır
         $stmt->execute();
@@ -142,6 +148,39 @@ function get_donation_by_id($donationId) {
     } catch (Exception $e) {
         // Hata durumunda günlüğe kaydet
         error_log("Bağış getirme hatası: " . $e->getMessage());
+        return false;
+    }
+}
+
+/**
+ * Sipariş numarasına göre en son bağış kaydını getirir
+ * 
+ * @param string $orderNumber Sipariş numarası
+ * @return array|bool Bağış verisi veya bulunamazsa false
+ */
+function get_recent_donation_by_order($orderNumber) {
+    try {
+        // Veritabanı bağlantısı
+        $db = db_connect();
+        
+        // SQL sorgusu hazırlama
+        $sql = "SELECT * FROM donations_made WHERE order_number = :order_number ORDER BY created_at DESC LIMIT 1";
+        
+        // Sorguyu hazırla
+        $stmt = $db->prepare($sql);
+        
+        // Parametreleri bağla
+        $stmt->bindParam(':order_number', $orderNumber, PDO::PARAM_STR);
+        
+        // Sorguyu çalıştır
+        $stmt->execute();
+        
+        // Sonucu döndür
+        return $stmt->fetch();
+        
+    } catch (Exception $e) {
+        // Hata durumunda günlüğe kaydet
+        error_log("Sipariş numarasına göre bağış getirme hatası: " . $e->getMessage());
         return false;
     }
 } 

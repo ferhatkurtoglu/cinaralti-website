@@ -34,6 +34,9 @@ $amount = number_format($donationAmount, 2, ',', '.');
 
 // Geçerli sayfanın tam URL'sini al
 $currentUrl = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]";
+
+// Kuveyt Türk için benzersiz sipariş no oluştur
+$orderNo = "CIN" . time() . rand(1000, 9999);
 ?>
 
 <div class="payment-container">
@@ -77,12 +80,14 @@ $currentUrl = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" 
 
             <!-- Kart ile ödeme içeriği -->
             <div class="card-info payment-content-section" id="cardPaymentContent">
+                <!-- Kuveyt Türk NonThreeD Payment API için form -->
                 <form id="paymentForm" method="post" action="<?= htmlspecialchars($currentUrl) ?>">
                     <input type="hidden" id="donation_id" name="donation_id" value="<?= $donationId ?>">
                     <input type="hidden" id="donation_type" name="donation_type"
                         value="<?= htmlspecialchars($donationType) ?>">
                     <input type="hidden" id="amount" name="amount" value="<?= $donationAmount * 100 ?>">
                     <input type="hidden" name="csrf_token" value="<?= generate_csrf_token() ?>">
+                    <input type="hidden" name="order_no" value="<?= $orderNo ?>">
 
                     <!-- Kişisel bilgiler session'dan alındığı için hidden field olarak eklenir -->
                     <input type="hidden" name="donor_name" value="<?= htmlspecialchars($donorName) ?>">
@@ -91,23 +96,40 @@ $currentUrl = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" 
                     <input type="hidden" name="city" value="<?= htmlspecialchars($donorCity) ?>">
                     <input type="hidden" name="donor_type" value="<?= htmlspecialchars($donorType) ?>">
 
+                    <!-- Kuveyt Türk NonThreeD Payment API için kart bilgi alanları -->
                     <div class="card-label">KART BİLGİSİ</div>
 
                     <div class="card-number-container">
-                        <input type="text" id="cardNumber" class="card-number-input" placeholder="Kart Numarası"
-                            maxlength="19" autocomplete="cc-number">
+                        <input type="text" id="cardNumber" name="cardNumber" class="card-number-input"
+                            placeholder="Kart Numarası" maxlength="19" autocomplete="cc-number">
                         <div class="card-validation-icon"></div>
                     </div>
 
                     <div class="form-row">
                         <div class="form-group col-md-6">
                             <label>Son Kul. Tarihi</label>
-                            <input type="text" class="form-control" placeholder="MM/YY" autocomplete="cc-exp">
+                            <input type="text" id="cardExpiry" name="cardExpiry" class="form-control"
+                                placeholder="MM/YY" autocomplete="cc-exp">
                         </div>
                         <div class="form-group col-md-6">
                             <label>CVV</label>
-                            <input type="text" class="form-control" placeholder="CVV" autocomplete="cc-csc">
+                            <input type="text" id="cardCvv" name="cardCvv" class="form-control" placeholder="CVV"
+                                autocomplete="cc-csc">
                         </div>
+                    </div>
+
+                    <!-- Kart sahibi adı -->
+                    <div class="form-group">
+                        <label>Kart Sahibinin Adı</label>
+                        <input type="text" id="cardHolderName" name="cardHolderName" class="form-control"
+                            placeholder="Kart üzerindeki isim">
+                    </div>
+
+                    <!-- TC Kimlik / Vergi No -->
+                    <div class="form-group">
+                        <label>TC Kimlik / Vergi No</label>
+                        <input type="text" id="identityTaxNumber" name="identityTaxNumber" class="form-control"
+                            placeholder="TC Kimlik veya Vergi No" maxlength="11">
                     </div>
 
                     <div class="form-group message-group">
@@ -189,7 +211,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
     // Bağış verilerini al
     $donationData = [
-        'donation_id' => isset($_POST['donation_id']) ? (int)$_POST['donation_id'] : 0,
+        'donation_option_id' => isset($_POST['donation_id']) ? (int)$_POST['donation_id'] : 0,
         'donor_name' => isset($_POST['donor_name']) ? sanitize_input($_POST['donor_name']) : '',
         'donor_email' => isset($_POST['donor_email']) ? sanitize_input($_POST['donor_email']) : '',
         'donor_phone' => isset($_POST['donor_phone']) ? sanitize_input($_POST['donor_phone']) : '',
@@ -197,7 +219,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'amount' => isset($_POST['amount']) ? (float)($_POST['amount'] / 100) : 0, // Kuruştan TL'ye çevir
         'donation_type' => isset($_POST['donation_type']) ? sanitize_input($_POST['donation_type']) : 'Genel Bağış',
         'donor_type' => isset($_POST['donor_type']) ? sanitize_input($_POST['donor_type']) : 'individual',
-        'payment_status' => 'pending' // Başlangıç durumu: beklemede
+        'payment_status' => 'pending', // Başlangıç durumu: beklemede
+        'order_number' => $orderNo // Sipariş numarasını ekle
     ];
     
     // Bağış verisini veritabanına kaydet
@@ -237,43 +260,107 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
     // JavaScript'ten alınan tutar bilgisini kullan (hidden input'tan gelecek)
     $amount = isset($_POST['amount']) ? (int)$_POST['amount'] : 10000; // Kuruş cinsinden
+    $orderNo = isset($_POST['order_no']) ? sanitize_input($_POST['order_no']) : '';
     
-    // URL'ler için tam yol kullan (HTTPS zorunlu)
+    // URL'ler için tam yol kullan
     $protocol = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') ? 'https' : 'http';
     $domain = $protocol . '://' . $_SERVER['HTTP_HOST'];
     
     // Tam yolu direkt php dosyalarına yönlendir (index.php üzerinden değil)
     $successUrl = $domain . dirname($_SERVER['SCRIPT_NAME']) . "/success.php";
     $errorUrl = $domain . dirname($_SERVER['SCRIPT_NAME']) . "/fail.php";
-    $transactionType = "Sale";
     
     try {
-        // Güvenlik için HASH (SHA256 ile imzalanmış)
-        $hashStr = $merchantId . $amount . $successUrl . $errorUrl . $transactionType . $apiKey;
-        $hash = base64_encode(hash('sha256', $hashStr, true));
-
-        // Kuveyt Türk Kolay Kurulum URL'si veya diğer ödeme URL'si
-        $url = "https://sanalpos.kuveytturk.com.tr/PaymentGateway/KolayKurulum.aspx";
-        $url .= "?MerchantId=" . urlencode($merchantId);
-        $url .= "&Amount=" . urlencode($amount);
-        $url .= "&SuccessUrl=" . urlencode($successUrl);
-        $url .= "&FailUrl=" . urlencode($errorUrl);
-        $url .= "&TransactionType=" . urlencode($transactionType);
-        $url .= "&CustomerId=" . urlencode($donationId); // Bağış ID'sini gönder
-        $url .= "&HashData=" . urlencode($hash);
-        
         // Geliştirme modunda test için doğrudan success sayfasına yönlendir
         if (PAYMENT_DEBUG) {
             header("Location: " . $successUrl . "?OrderId=TEST_" . $donationId . "&AuthCode=TEST_AUTH_" . rand(100000, 999999));
             exit;
         }
 
-        // Ödeme sayfasına yönlendir
-        header("Location: " . $url);
-        exit;
+        // Kart ve ödeme bilgilerini al
+        $cardNumber = isset($_POST['cardNumber']) ? preg_replace('/\D/', '', $_POST['cardNumber']) : '';
+        $identityTaxNumber = isset($_POST['identityTaxNumber']) ? preg_replace('/\D/', '', $_POST['identityTaxNumber']) : '';
+        
+        // API için gerekli parametreleri hazırla
+        $userName = "ApiUser"; // Kuveyt Türk tarafından verilen kullanıcı adı
+        
+        // Hash hesapla
+        $hashString = $merchantId . $userName . $amount . $orderNo . $successUrl . $errorUrl . $apiKey;
+        $hashData = base64_encode(hash('sha256', $hashString, true));
+        
+        // API isteği için veri hazırla
+        $apiData = [
+            "APIPaymentTransactionContract" => [
+                "merchantId" => $merchantId,
+                "customerId" => $donationId,  // Müşteri numarası olarak bağış ID'sini kullanabiliriz
+                "userName" => $userName,
+                "amount" => (string)$amount,
+                "merchantOrderId" => $orderNo,
+                "cardNumber" => $cardNumber,
+                "currencyCode" => "0949", // TRY için
+                "transactionType" => "1",  // Satış
+                "identityTaxNumber" => $identityTaxNumber,
+                "hashData" => $hashData,
+                "installmentCount" => "0",  // Taksitsiz
+                "description" => $donationData['donation_type'],
+                "insuranceDeferringCount" => "0"
+            ]
+        ];
+        
+        // API endpoint
+        $apiEndpoint = "https://sanalpos.kuveytturk.com.tr/v1/vpos/nonThreeDPayment";
+        
+        // cURL ile API isteği gönder
+        $ch = curl_init($apiEndpoint);
+        curl_setopt($ch, CURLOPT_POST, 1);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($apiData));
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            'Content-Type: application/json',
+            'Accept: application/json'
+        ]);
+        
+        // API yanıtını al
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+        
+        if ($httpCode == 200) {
+            $responseData = json_decode($response, true);
+            
+            // İşlem başarılı mı kontrol et
+            if (isset($responseData['success']) && $responseData['success'] === true) {
+                $firstResult = $responseData['value'][0];
+                $responseCode = $firstResult['responseCode'] ?? '';
+                
+                if ($responseCode === "00") {
+                    // İşlem başarılı, başarı sayfasına yönlendir
+                    $provisionNumber = $firstResult['provisionNumber'] ?? '';
+                    $orderId = $firstResult['orderId'] ?? '';
+                    
+                    header("Location: " . $successUrl . "?OrderId=" . $orderId . "&AuthCode=" . $provisionNumber);
+                    exit;
+                } else {
+                    // İşlem başarısız, hata mesajı ile fail sayfasına yönlendir
+                    $responseMessage = $firstResult['responseMessage'] ?? 'İşlem başarısız';
+                    header("Location: " . $errorUrl . "?ErrorCode=" . $responseCode . "&ErrorMessage=" . urlencode($responseMessage));
+                    exit;
+                }
+            } else {
+                // API yanıtı başarısız
+                $errorMessage = isset($responseData['errors']) ? implode(", ", $responseData['errors']) : 'API yanıtı başarısız';
+                header("Location: " . $errorUrl . "?error=payment_gateway&ErrorMessage=" . urlencode($errorMessage));
+                exit;
+            }
+        } else {
+            // HTTP hatası
+            header("Location: " . $errorUrl . "?error=payment_gateway&ErrorMessage=" . urlencode("HTTP Hata Kodu: " . $httpCode));
+            exit;
+        }
+        
     } catch (Exception $e) {
         // Hata durumunda kullanıcıyı fail sayfasına yönlendir
-        error_log("Ödeme yönlendirme hatası: " . $e->getMessage());
+        error_log("Ödeme işleme hatası: " . $e->getMessage());
         header("Location: " . $errorUrl . "?error=payment_gateway&ErrorMessage=" . urlencode($e->getMessage()));
         exit;
     }
@@ -639,173 +726,127 @@ document.addEventListener('DOMContentLoaded', function() {
     const loadingOverlay = document.getElementById('loadingOverlay');
 
     if (paymentForm) {
+        // Form gönderilirken yükleme ekranını göster
         paymentForm.addEventListener('submit', function(e) {
-            // Sorunları yakalamak için konsola mesaj yazalım
-            console.log('Form submission triggered');
+            // Form alanlarını kontrol et
+            const cardNumber = document.getElementById('cardNumber').value.replace(/\s/g, '');
+            const cardExpiry = document.getElementById('cardExpiry').value;
+            const cardCvv = document.getElementById('cardCvv').value;
+            const identityTaxNumber = document.getElementById('identityTaxNumber').value;
 
-            try {
-                // Formun varsayılan davranışını engelle
+            if (cardNumber.length < 16) {
                 e.preventDefault();
+                alert('Lütfen geçerli bir kart numarası girin');
+                return;
+            }
 
-                // Form verilerinin doğruluğunu kontrol et
-                const cardNumber = document.getElementById('cardNumber');
-                if (!cardNumber || cardNumber.value.trim().length < 16) {
-                    alert('Lütfen geçerli bir kart numarası girin.');
-                    return false;
+            if (cardExpiry.length < 5) {
+                e.preventDefault();
+                alert('Lütfen geçerli bir son kullanma tarihi girin');
+                return;
+            }
+
+            if (cardCvv.length < 3) {
+                e.preventDefault();
+                alert('Lütfen geçerli bir CVV kodu girin');
+                return;
+            }
+
+            if (identityTaxNumber.length !== 11) {
+                e.preventDefault();
+                alert('Lütfen geçerli bir TC Kimlik/Vergi numarası girin');
+                return;
+            }
+
+            // Yükleme ekranını göster
+            if (loadingOverlay) {
+                loadingOverlay.style.display = 'flex';
+            }
+        });
+
+        // Kredi kartı numarası formatı
+        const cardInput = document.getElementById('cardNumber');
+        if (cardInput) {
+            cardInput.addEventListener('input', function(e) {
+                let value = e.target.value.replace(/\D/g, '');
+
+                // 16 haneden fazla girilmesin
+                if (value.length > 16) {
+                    value = value.slice(0, 16);
                 }
 
-                // Yükleme ekranını göster
-                if (loadingOverlay) {
-                    loadingOverlay.style.display = 'flex';
-                    console.log('Loading overlay shown');
-                }
-
-                // Form gönderimini geciktir (tarayıcının yükleme göstergesini göstermesi için)
-                setTimeout(() => {
-                    try {
-                        // Formu manuel olarak gönder
-                        console.log('Submitting form after delay');
-                        this.submit();
-                    } catch (submitError) {
-                        console.error('Form submission error:', submitError);
-                        alert('Ödeme işlemi sırasında bir hata oluştu. Lütfen tekrar deneyin.');
-                        // Hata durumunda yükleme ekranını gizle
-                        if (loadingOverlay) {
-                            loadingOverlay.style.display = 'none';
-                        }
+                // 4'lü gruplara ayır
+                let formattedValue = '';
+                for (let i = 0; i < value.length; i++) {
+                    if (i > 0 && i % 4 === 0) {
+                        formattedValue += ' ';
                     }
-                }, 500);
-            } catch (error) {
-                console.error('Payment process error:', error);
-                alert('Ödeme işlemi sırasında bir hata oluştu. Lütfen tekrar deneyin.');
-                // Hata durumunda yükleme ekranını gizle
-                if (loadingOverlay) {
-                    loadingOverlay.style.display = 'none';
+                    formattedValue += value[i];
                 }
-            }
-        });
-    }
 
-    // Düzenli bağış seçeneği
-    const regularDonationCheck = document.getElementById('regularDonation');
-    const regularDonationOptions = document.getElementById('regularDonationOptions');
-
-    if (regularDonationCheck) {
-        regularDonationCheck.addEventListener('change', function() {
-            regularDonationOptions.style.display = this.checked ? 'block' : 'none';
-        });
-    }
-
-    // Kredi kartı numarası formatı ve doğrulama
-    const cardInput = document.getElementById('cardNumber');
-    const validationIcon = document.querySelector('.card-validation-icon');
-    const payButton = document.getElementById('payButton');
-
-    // Sayfa yüklendiğinde ödeme butonunu aktif et (recaptcha kontrolünü kaldır)
-    payButton.disabled = false;
-
-    if (cardInput) {
-        cardInput.addEventListener('input', function(e) {
-            let value = e.target.value.replace(/\D/g, '');
-
-            // 16 haneden fazla girilmesin
-            if (value.length > 16) {
-                value = value.slice(0, 16);
-            }
-
-            // 4'lü gruplara ayır
-            let formattedValue = '';
-            for (let i = 0; i < value.length; i++) {
-                if (i > 0 && i % 4 === 0) {
-                    formattedValue += ' ';
-                }
-                formattedValue += value[i];
-            }
-
-            e.target.value = formattedValue;
-
-            // Luhn Algoritması ile kart numarası doğrulama
-            if (value.length === 16) {
-                if (isValidCreditCard(value)) {
-                    validationIcon.classList.add('valid');
-                    validationIcon.classList.remove('invalid');
-                    payButton.disabled = false; // Kart geçerliyse butonu aktif et
-                } else {
-                    validationIcon.classList.add('invalid');
-                    validationIcon.classList.remove('valid');
-                    payButton.disabled = true; // Kart geçersizse butonu devre dışı bırak
-                }
-            } else {
-                validationIcon.classList.remove('valid');
-                validationIcon.classList.remove('invalid');
-                payButton.disabled = false; // Kart doğrulaması yapılmadığında buton aktif olsun
-            }
-        });
-
-        // Odaklandığında tüm metni seç
-        cardInput.addEventListener('focus', function() {
-            setTimeout(() => this.select(), 100);
-        });
-    }
-
-    // Son kullanma tarihi formatı
-    const expiryInput = document.querySelector('input[placeholder="MM/YY"]');
-    if (expiryInput) {
-        expiryInput.addEventListener('input', function(e) {
-            let value = e.target.value.replace(/\D/g, '');
-
-            // 4 haneden fazla girilmesin
-            if (value.length > 4) {
-                value = value.slice(0, 4);
-            }
-
-            // MM/YY formatı
-            if (value.length > 2) {
-                value = value.slice(0, 2) + '/' + value.slice(2);
-            }
-
-            e.target.value = value;
-        });
-    }
-
-    // Kredi kartı numarası doğrulama (Luhn algoritması)
-    function isValidCreditCard(number) {
-        // Sayıların toplamını hesapla
-        let sum = 0;
-        let shouldDouble = false;
-
-        // Sağdan sola doğru sayıları işle
-        for (let i = number.length - 1; i >= 0; i--) {
-            let digit = parseInt(number.charAt(i));
-
-            if (shouldDouble) {
-                digit *= 2;
-                if (digit > 9) {
-                    digit -= 9;
-                }
-            }
-
-            sum += digit;
-            shouldDouble = !shouldDouble;
+                e.target.value = formattedValue;
+            });
         }
 
-        // Toplam 10'a tam bölünüyorsa kart numarası geçerlidir
-        return (sum % 10) === 0;
-    }
+        // Son kullanma tarihi formatı
+        const expiryInput = document.getElementById('cardExpiry');
+        if (expiryInput) {
+            expiryInput.addEventListener('input', function(e) {
+                let value = e.target.value.replace(/\D/g, '');
 
-    // CVV formatı
-    const cvvInput = document.querySelector('input[placeholder="CVV"]');
-    if (cvvInput) {
-        cvvInput.addEventListener('input', function(e) {
-            let value = e.target.value.replace(/\D/g, '');
+                // 4 haneden fazla girilmesin
+                if (value.length > 4) {
+                    value = value.slice(0, 4);
+                }
 
-            // 3 haneden fazla girilmesin
-            if (value.length > 3) {
-                value = value.slice(0, 3);
-            }
+                // MM/YY formatı
+                if (value.length > 2) {
+                    value = value.slice(0, 2) + '/' + value.slice(2);
+                }
 
-            e.target.value = value;
-        });
+                e.target.value = value;
+            });
+        }
+
+        // CVV formatı
+        const cvvInput = document.getElementById('cardCvv');
+        if (cvvInput) {
+            cvvInput.addEventListener('input', function(e) {
+                let value = e.target.value.replace(/\D/g, '');
+
+                // 3 haneden fazla girilmesin
+                if (value.length > 3) {
+                    value = value.slice(0, 3);
+                }
+
+                e.target.value = value;
+            });
+        }
+
+        // TC Kimlik/Vergi No formatı
+        const identityInput = document.getElementById('identityTaxNumber');
+        if (identityInput) {
+            identityInput.addEventListener('input', function(e) {
+                let value = e.target.value.replace(/\D/g, '');
+
+                // 11 haneden fazla girilmesin
+                if (value.length > 11) {
+                    value = value.slice(0, 11);
+                }
+
+                e.target.value = value;
+            });
+        }
+
+        // Düzenli bağış seçeneği kontrolü
+        const regularDonationCheck = document.getElementById('regularDonation');
+        const regularDonationOptions = document.getElementById('regularDonationOptions');
+
+        if (regularDonationCheck && regularDonationOptions) {
+            regularDonationCheck.addEventListener('change', function() {
+                regularDonationOptions.style.display = this.checked ? 'block' : 'none';
+            });
+        }
     }
 });
 </script>
@@ -823,7 +864,5 @@ function onRecaptchaLoad() {
         'size': 'normal',
         'tabindex': 0
     });
-}
-</script>
 }
 </script>

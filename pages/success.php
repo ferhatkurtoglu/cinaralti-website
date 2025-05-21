@@ -7,26 +7,66 @@ if (session_status() === PHP_SESSION_NONE) {
 // Process-donation dosyasını dahil et
 require_once __DIR__ . '/../includes/actions/process-donation.php';
 
+// Kuveyt Türk'ten gelen yanıtları al
+$orderId = isset($_POST['oid']) ? sanitize_input($_POST['oid']) : 
+          (isset($_GET['OrderId']) ? sanitize_input($_GET['OrderId']) : '');
+$authCode = isset($_POST['authcode']) ? sanitize_input($_POST['authcode']) : 
+           (isset($_GET['AuthCode']) ? sanitize_input($_GET['AuthCode']) : '');
+$procReturnCode = isset($_POST['ProcReturnCode']) ? sanitize_input($_POST['ProcReturnCode']) : '';
+$response = isset($_POST['Response']) ? sanitize_input($_POST['Response']) : '';
+
 // Ödeme sonucunu veritabanında güncelle
 $donationId = isset($_SESSION['donation_made_id']) ? (int)$_SESSION['donation_made_id'] : 0;
-$orderId = isset($_GET['OrderId']) ? sanitize_input($_GET['OrderId']) : '';
-$authCode = isset($_GET['AuthCode']) ? sanitize_input($_GET['AuthCode']) : '';
+
+// Kuveyt Türk'ten dönen "oid" içinde CustomerId bilgisini ayıklama
+if (empty($donationId) && !empty($orderId) && strpos($orderId, 'CIN') !== false) {
+    // OrderId'den donationId'yi çıkarma işlemi (CINXXXXXXYYYY formatı için)
+    $parts = explode('CIN', $orderId);
+    if (count($parts) > 1) {
+        $timeStampRand = $parts[1]; // timestamp ve random sayıyı içerir
+        if (is_numeric($timeStampRand)) {
+            // Süreç kaydedildi mi diye kontrol et
+            $donation = get_recent_donation_by_order($orderId);
+            if ($donation) {
+                $donationId = $donation['id'];
+            }
+        }
+    }
+}
 
 // Ödeme durumunu güncelle (eğer valid bir donation ID varsa)
 if ($donationId > 0) {
     try {
-        // Ödeme başarılı olduğu için durumu "completed" olarak güncelle
-        $updated = update_donation_status($donationId, 'completed');
+        // Kuveyt Türk yanıtını kontrol et
+        $isSuccessful = true; // Varsayılan olarak başarılı kabul ediyoruz
         
-        if (DEBUG_MODE) {
-            error_log("Bağış durumu güncellendi: ID=$donationId, Status=completed, Sonuç=" . ($updated ? 'Başarılı' : 'Başarısız'));
+        if (isset($procReturnCode) && $procReturnCode != "00") {
+            $isSuccessful = false;
         }
         
-        // Oturumdaki bağış verilerini temizle
-        unset($_SESSION['donation_made_id']);
-        unset($_SESSION['cart_total']);
-        unset($_SESSION['donation_type']);
-        unset($_SESSION['donation_id']);
+        if (isset($response) && strtoupper($response) != "APPROVED") {
+            $isSuccessful = false;
+        }
+        
+        // Ödeme başarılı olduğu için durumu "completed" olarak güncelle
+        if ($isSuccessful) {
+            $updated = update_donation_status($donationId, 'completed');
+            
+            if (DEBUG_MODE) {
+                error_log("Bağış durumu güncellendi: ID=$donationId, Status=completed, Sonuç=" . ($updated ? 'Başarılı' : 'Başarısız'));
+                error_log("Kuveyt Türk yanıtı: OrderId=$orderId, AuthCode=$authCode, ProcReturnCode=$procReturnCode, Response=$response");
+            }
+            
+            // Oturumdaki bağış verilerini temizle
+            unset($_SESSION['donation_made_id']);
+            unset($_SESSION['cart_total']);
+            unset($_SESSION['donation_type']);
+            unset($_SESSION['donation_id']);
+        } else {
+            // Ödeme başarısız - fail sayfasına yönlendir
+            header("Location: " . BASE_URL . "/fail?ErrorCode=$procReturnCode&ErrorMessage=" . urlencode($response));
+            exit;
+        }
     } catch (Exception $e) {
         error_log("Bağış durumu güncelleme hatası: " . $e->getMessage());
     }

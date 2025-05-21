@@ -7,11 +7,28 @@ if (session_status() === PHP_SESSION_NONE) {
 // Process-donation dosyasını dahil et
 require_once __DIR__ . '/../includes/actions/process-donation.php';
 
+// Kuveyt Türk'ten gelen yanıtları al
+$orderId = isset($_POST['oid']) ? sanitize_input($_POST['oid']) : 
+          (isset($_GET['OrderId']) ? sanitize_input($_GET['OrderId']) : '');
+$errorCode = isset($_POST['ErrorCode']) ? sanitize_input($_POST['ErrorCode']) : 
+           (isset($_GET['ErrorCode']) ? sanitize_input($_GET['ErrorCode']) : '');
+$errorMessage = isset($_POST['ErrorMessage']) ? sanitize_input($_POST['ErrorMessage']) : 
+              (isset($_GET['ErrorMessage']) ? sanitize_input($_GET['ErrorMessage']) : '');
+$errorType = isset($_GET['error']) ? sanitize_input($_GET['error']) : 'payment_failed';
+$procReturnCode = isset($_POST['ProcReturnCode']) ? sanitize_input($_POST['ProcReturnCode']) : '';
+$response = isset($_POST['Response']) ? sanitize_input($_POST['Response']) : '';
+
 // Ödeme sonucunu veritabanında güncelle
 $donationId = isset($_SESSION['donation_made_id']) ? (int)$_SESSION['donation_made_id'] : 0;
-$errorCode = isset($_GET['ErrorCode']) ? sanitize_input($_GET['ErrorCode']) : '';
-$errorMessage = isset($_GET['ErrorMessage']) ? sanitize_input($_GET['ErrorMessage']) : '';
-$errorType = isset($_GET['error']) ? sanitize_input($_GET['error']) : 'unknown';
+
+// Kuveyt Türk'ten dönen "oid" içinde OrderNumber bilgisini ayıklama
+if (empty($donationId) && !empty($orderId) && strpos($orderId, 'CIN') !== false) {
+    // OrderId'den donationId'yi çıkarma işlemi (CINXXXXXXYYYY formatı için)
+    $donation = get_recent_donation_by_order($orderId);
+    if ($donation) {
+        $donationId = $donation['id'];
+    }
+}
 
 // Ödeme durumunu güncelle (eğer valid bir donation ID varsa)
 if ($donationId > 0) {
@@ -19,8 +36,10 @@ if ($donationId > 0) {
         // Ödeme başarısız olduğu için durumu "failed" olarak güncelle
         $updated = update_donation_status($donationId, 'failed');
         
+        // Hata detaylarını günlüğe kaydet
         if (DEBUG_MODE) {
             error_log("Bağış durumu güncellendi: ID=$donationId, Status=failed, Sonuç=" . ($updated ? 'Başarılı' : 'Başarısız'));
+            error_log("Ödeme hatası: OrderId=$orderId, ErrorCode=$errorCode, ErrorMessage=$errorMessage, ProcReturnCode=$procReturnCode, Response=$response");
         }
     } catch (Exception $e) {
         error_log("Bağış durumu güncelleme hatası: " . $e->getMessage());
@@ -40,6 +59,11 @@ if ($errorType == 'security') {
 } elseif ($errorType == 'payment_gateway') {
     $failMessage = "Ödeme sistemiyle iletişim sırasında bir sorun oluştu. Lütfen tekrar deneyiniz.";
 }
+
+// Kuveyt Türk'ten gelen hata mesajı varsa ekle
+if (!empty($response)) {
+    $failMessage .= "<br><br>Hata detayı: " . htmlspecialchars($response);
+}
 ?>
 
 <div class="fail-container">
@@ -53,19 +77,19 @@ if ($errorType == 'security') {
         </div>
         <div class="fail-details">
             <?php if (!empty($errorCode)) { ?>
-                <div class="detail-item">
-                    <span class="detail-label">Hata Kodu:</span>
-                    <span class="detail-value"><?= htmlspecialchars($errorCode) ?></span>
-                </div>
+            <div class="detail-item">
+                <span class="detail-label">Hata Kodu:</span>
+                <span class="detail-value"><?= htmlspecialchars($errorCode) ?></span>
+            </div>
             <?php } ?>
-            
+
             <?php if (!empty($errorMessage)) { ?>
-                <div class="detail-item">
-                    <span class="detail-label">Hata Mesajı:</span>
-                    <span class="detail-value"><?= htmlspecialchars($errorMessage) ?></span>
-                </div>
+            <div class="detail-item">
+                <span class="detail-label">Hata Mesajı:</span>
+                <span class="detail-value"><?= htmlspecialchars($errorMessage) ?></span>
+            </div>
             <?php } ?>
-            
+
             <div class="detail-item">
                 <span class="detail-label">Tarih:</span>
                 <span class="detail-value"><?= date('d.m.Y H:i') ?></span>
@@ -182,30 +206,31 @@ if ($errorType == 'security') {
     .fail-container {
         margin-top: 100px;
     }
-    
+
     .fail-card {
         padding: 30px 20px;
     }
-    
+
     .fail-icon {
         font-size: 60px;
     }
-    
+
     .fail-title {
         font-size: 24px;
     }
-    
+
     .fail-message {
         font-size: 16px;
     }
-    
+
     .fail-actions {
         flex-direction: column;
         gap: 10px;
     }
-    
-    .btn-retry, .btn-home {
+
+    .btn-retry,
+    .btn-home {
         width: 100%;
     }
 }
-</style> 
+</style>
