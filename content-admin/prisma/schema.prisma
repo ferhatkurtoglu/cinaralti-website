@@ -1,0 +1,69 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model ContentUser {
+  id            String         @id @default(cuid())
+  name          String
+  email         String         @unique
+  password      String
+  role          String         @default("user")
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  blogPosts     ContentBlogPost[]
+  videos        ContentVideo[]
+}
+
+model ContentBlogPost {
+  id          String         @id @default(cuid())
+  title       String
+  content     String         @db.Text
+  excerpt     String?        @db.Text
+  slug        String         @unique
+  status      String         @default("draft")
+  featured    Boolean        @default(false)
+  author      ContentUser    @relation(fields: [authorId], references: [id])
+  authorId    String
+  category    ContentCategory? @relation(fields: [categoryId], references: [id])
+  categoryId  String?
+  tags        String?
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+}
+
+model ContentVideo {
+  id          String         @id @default(cuid())
+  title       String
+  description String?        @db.Text
+  url         String
+  thumbnail   String?
+  status      String         @default("draft")
+  featured    Boolean        @default(false)
+  author      ContentUser    @relation(fields: [authorId], references: [id])
+  authorId    String
+  category    ContentCategory? @relation(fields: [categoryId], references: [id])
+  categoryId  String?
+  tags        String?
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+}
+
+model ContentCategory {
+  id          String         @id @default(cuid())
+  name        String
+  slug        String         @unique
+  description String?        @db.Text
+  type        String         @default("blog") // blog, video
+  blogPosts   ContentBlogPost[]
+  videos      ContentVideo[]
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+} 
