@@ -104,9 +104,6 @@
     <div class="container">
         <div class="donate-categories-wrapper">
             <?php
-            if (DEBUG_MODE) {
-                echo '<div style="padding: 10px; background-color: #f8d7da; color: #721c24; margin-bottom: 10px; border-radius: 5px;">Debug Modu Aktif - Veritabanı bağlantısı test ediliyor</div>';
-            }
             
             // Aktif kategoriyi belirle
             $activeCategory = isset($_GET['category']) ? $_GET['category'] : 'tumu';
@@ -138,9 +135,7 @@
                 // Veritabanı bağlantısı
                 $db = db_connect();
                 
-                if (DEBUG_MODE) {
-                    echo '<div style="padding: 10px; background-color: #d4edda; color: #155724; margin-bottom: 10px; border-radius: 5px;">Veritabanı bağlantısı başarılı</div>';
-                }
+
                 
                 // Kategorileri veritabanından çek (tekrarları gruplandırarak)
                 $stmt = $db->prepare("
@@ -153,9 +148,7 @@
                 $stmt->execute();
                 $categories = $stmt->fetchAll();
                 
-                if (DEBUG_MODE) {
-                    echo '<div style="padding: 10px; background-color: #d4edda; color: #155724; margin-bottom: 10px; border-radius: 5px;">' . count($categories) . ' kategori bulundu</div>';
-                }
+
                 
                 // Kategorileri göster
                 foreach ($categories as $category) {
@@ -170,9 +163,7 @@
                 
             } catch (Exception $e) {
                 // Hata durumunda statik kategori listesi gösterilir
-                if (DEBUG_MODE) {
-                    echo '<div style="padding: 10px; background-color: #f8d7da; color: #721c24; margin-bottom: 10px; border-radius: 5px;">Veritabanı hatası: ' . $e->getMessage() . '</div>';
-                }
+
                 
                 $staticCategories = [
                     'acil-yardim' => ['text' => 'Acil Yardım'],
@@ -193,9 +184,7 @@
                     echo '</a>';
                 }
                 
-                if (DEBUG_MODE) {
-                    error_log("Kategori çekme hatası: " . $e->getMessage());
-                }
+
             }
             
             // Para birimi seçeneği
@@ -226,9 +215,7 @@
                 $db = db_connect();
                 $donationItems = [];
                 
-                if (DEBUG_MODE) {
-                    echo '<div style="padding: 10px; background-color: #d4edda; color: #155724; margin-bottom: 10px; border-radius: 5px;">Bağış türleri için veritabanı bağlantısı başarılı</div>';
-                }
+
                 
                 // Aktif kategoriyi veritabanındaki id'ye çevir
                 $categorySlug = isset($_GET['category']) ? $_GET['category'] : 'tumu';
@@ -256,9 +243,7 @@
                     $stmt->execute();
                     $donationItems = $stmt->fetchAll();
                     
-                    if (DEBUG_MODE) {
-                        echo '<div style="padding: 10px; background-color: #cce5ff; color: #004085; margin-bottom: 10px; border-radius: 5px;">Tüm kategorilerden ' . count($donationItems) . ' bağış türü bulundu</div>';
-                    }
+                    // DEBUG_MODE test mesajı kaldırıldı
                 } else {
                     $stmt = $db->prepare("
                         SELECT id
@@ -271,9 +256,7 @@
                     $category = $stmt->fetch();
                     $categoryId = $category ? $category['id'] : 0;
                     
-                    if (DEBUG_MODE) {
-                        echo '<div style="padding: 10px; background-color: #cce5ff; color: #004085; margin-bottom: 10px; border-radius: 5px;">Seçili kategori: ' . $categorySlug . ', ID: ' . $categoryId . '</div>';
-                    }
+
                     
                     // Donation_options tablosundan bağış öğelerini çek
                     if ($categoryId > 0) {
@@ -298,9 +281,7 @@
                         $stmt->execute([$categoryId]);
                         $donationItems = $stmt->fetchAll();
                         
-                        if (DEBUG_MODE) {
-                            echo '<div style="padding: 10px; background-color: #cce5ff; color: #004085; margin-bottom: 10px; border-radius: 5px;">Kategoriye göre ' . count($donationItems) . ' bağış türü bulundu</div>';
-                        }
+
                     }
                 }
                 
@@ -337,9 +318,7 @@
                     $stmt->execute();
                     $donationItems = $stmt->fetchAll();
                     
-                    if (DEBUG_MODE) {
-                        echo '<div style="padding: 10px; background-color: #cce5ff; color: #004085; margin-bottom: 10px; border-radius: 5px;">Tüm kategorilerden ' . count($donationItems) . ' bağış türü bulundu</div>';
-                    }
+                    // DEBUG_MODE test mesajı kaldırıldı
                 }
                 
                 // Eğer veritabanında bağış türü yoksa, JSON dosyasından yükle

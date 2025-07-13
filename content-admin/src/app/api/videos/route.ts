@@ -11,7 +11,7 @@ export async function GET() {
       return new NextResponse('Unauthorized', { status: 401 })
     }
 
-    const videos = await prisma.contentVideo.findMany({
+    const videos = await prisma.video.findMany({
       include: {
         author: {
           select: {
@@ -51,7 +51,7 @@ export async function POST(request: Request) {
       return new NextResponse('Missing required fields', { status: 400 })
     }
 
-    const video = await prisma.contentVideo.create({
+    const video = await prisma.video.create({
       data: {
         title,
         description,
@@ -62,6 +62,18 @@ export async function POST(request: Request) {
         categoryId: categoryId || null,
         tags,
         authorId: session.user.id,
+      },
+      include: {
+        author: {
+          select: {
+            name: true,
+          },
+        },
+        category: {
+          select: {
+            name: true,
+          },
+        },
       },
     })
 

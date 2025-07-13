@@ -3,13 +3,11 @@ import { getServerSession } from 'next-auth'
 import { NextResponse } from 'next/server'
 import { authOptions } from '../../auth/[...nextauth]/route'
 
-interface Params {
-  params: {
-    id: string
-  }
+type Params = {
+  id: string
 }
 
-export async function GET(request: Request, { params }: Params) {
+export async function GET(request: Request, { params }: { params: Params }) {
   try {
     const session = await getServerSession(authOptions)
 
@@ -17,7 +15,7 @@ export async function GET(request: Request, { params }: Params) {
       return new NextResponse('Unauthorized', { status: 401 })
     }
 
-    const video = await prisma.contentVideo.findUnique({
+    const video = await prisma.video.findUnique({
       where: {
         id: params.id,
       },
@@ -36,7 +34,7 @@ export async function GET(request: Request, { params }: Params) {
     })
 
     if (!video) {
-      return new NextResponse('Video not found', { status: 404 })
+      return new NextResponse('Not Found', { status: 404 })
     }
 
     return NextResponse.json(video)
@@ -46,7 +44,7 @@ export async function GET(request: Request, { params }: Params) {
   }
 }
 
-export async function PUT(request: Request, { params }: Params) {
+export async function PUT(request: Request, { params }: { params: Params }) {
   try {
     const session = await getServerSession(authOptions)
 
@@ -61,7 +59,7 @@ export async function PUT(request: Request, { params }: Params) {
       return new NextResponse('Missing required fields', { status: 400 })
     }
 
-    const video = await prisma.contentVideo.update({
+    const video = await prisma.video.update({
       where: {
         id: params.id,
       },
@@ -75,6 +73,18 @@ export async function PUT(request: Request, { params }: Params) {
         categoryId: categoryId || null,
         tags,
       },
+      include: {
+        author: {
+          select: {
+            name: true,
+          },
+        },
+        category: {
+          select: {
+            name: true,
+          },
+        },
+      },
     })
 
     return NextResponse.json(video)
@@ -84,7 +94,7 @@ export async function PUT(request: Request, { params }: Params) {
   }
 }
 
-export async function DELETE(request: Request, { params }: Params) {
+export async function DELETE(request: Request, { params }: { params: Params }) {
   try {
     const session = await getServerSession(authOptions)
 
@@ -92,13 +102,19 @@ export async function DELETE(request: Request, { params }: Params) {
       return new NextResponse('Unauthorized', { status: 401 })
     }
 
-    await prisma.contentVideo.delete({
-      where: {
-        id: params.id,
-      },
+    const video = await prisma.video.findUnique({
+      where: { id: params.id },
     })
 
-    return new NextResponse(null, { status: 204 })
+    if (!video) {
+      return new NextResponse('Not Found', { status: 404 })
+    }
+
+    await prisma.video.delete({
+      where: { id: params.id },
+    })
+
+    return new NextResponse('OK', { status: 200 })
   } catch (error) {
     console.error('Video silinirken hata oluştu:', error)
     return new NextResponse('Internal Server Error', { status: 500 })

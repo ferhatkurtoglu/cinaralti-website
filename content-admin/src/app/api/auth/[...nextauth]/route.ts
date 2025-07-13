@@ -28,7 +28,7 @@ export const authOptions: NextAuthOptions = {
           return null;
         }
 
-        const user = await prisma.contentUser.findUnique({
+        const user = await prisma.user.findUnique({
           where: {
             email: credentials.email,
           },
@@ -48,7 +48,7 @@ export const authOptions: NextAuthOptions = {
         }
 
         return {
-          id: user.id,
+          id: user.id.toString(),
           email: user.email,
           name: user.name,
           role: user.role,
@@ -62,7 +62,7 @@ export const authOptions: NextAuthOptions = {
         ...session,
         user: {
           ...session.user,
-          id: token.id,
+          id: parseInt(token.id as string),
           role: token.role,
         },
       };

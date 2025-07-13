@@ -10,6 +10,12 @@
     "seed": "tsx prisma/seed.ts"
   },
   "dependencies": {
+    "@ckeditor/ckeditor5-alignment": "^46.0.0",
+    "@ckeditor/ckeditor5-build-classic": "^41.4.2",
+    "@ckeditor/ckeditor5-font": "^46.0.0",
+    "@ckeditor/ckeditor5-media-embed": "^46.0.0",
+    "@ckeditor/ckeditor5-react": "^11.0.0",
+    "@ckeditor/ckeditor5-table": "^46.0.0",
     "@headlessui/react": "^1.7.18",
     "@heroicons/react": "^2.1.1",
     "@hookform/resolvers": "^3.3.4",

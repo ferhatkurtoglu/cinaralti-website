@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -10,60 +7,164 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model ContentUser {
-  id            String         @id @default(cuid())
-  name          String
-  email         String         @unique
-  password      String
-  role          String         @default("user")
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
-  blogPosts     ContentBlogPost[]
-  videos        ContentVideo[]
+model User {
+  id         Int        @id @default(autoincrement())
+  name       String
+  email      String     @unique
+  password   String
+  role       String     @default("viewer")
+  avatar     String?
+  last_login DateTime?
+  status     String     @default("active")
+  created_at DateTime   @default(now())
+  updated_at DateTime   @updatedAt
+  blogPosts  BlogPost[]
+  videos     Video[]
+
+  @@map("users")
 }
 
-model ContentBlogPost {
-  id          String         @id @default(cuid())
-  title       String
-  content     String         @db.Text
-  excerpt     String?        @db.Text
-  slug        String         @unique
-  status      String         @default("draft")
-  featured    Boolean        @default(false)
-  author      ContentUser    @relation(fields: [authorId], references: [id])
-  authorId    String
-  category    ContentCategory? @relation(fields: [categoryId], references: [id])
-  categoryId  String?
-  tags        String?
-  createdAt   DateTime       @default(now())
-  updatedAt   DateTime       @updatedAt
+model BlogPost {
+  id         String        @id @default(cuid())
+  title      String
+  content    String        @db.Text
+  excerpt    String?       @db.Text
+  slug       String        @unique
+  status     String        @default("draft")
+  featured   Boolean       @default(false)
+  coverImage String?       @map("cover_image")
+  authorId   Int           @map("author_id")
+  categoryId String?       @map("category_id")
+  tags       String?
+  createdAt  DateTime      @default(now()) @map("created_at")
+  updatedAt  DateTime      @default(now()) @updatedAt @map("updated_at")
+  author     User          @relation(fields: [authorId], references: [id])
+  category   BlogCategory? @relation(fields: [categoryId], references: [id])
+
+  @@index([authorId])
+  @@index([categoryId])
+  @@map("blog_posts")
 }
 
-model ContentVideo {
-  id          String         @id @default(cuid())
+model Video {
+  id          String        @id @default(cuid())
   title       String
-  description String?        @db.Text
+  description String?       @db.Text
   url         String
   thumbnail   String?
-  status      String         @default("draft")
-  featured    Boolean        @default(false)
-  author      ContentUser    @relation(fields: [authorId], references: [id])
-  authorId    String
-  category    ContentCategory? @relation(fields: [categoryId], references: [id])
-  categoryId  String?
+  status      String        @default("draft")
+  featured    Boolean       @default(false)
+  authorId    Int           @map("author_id")
+  categoryId  String?       @map("category_id")
   tags        String?
-  createdAt   DateTime       @default(now())
-  updatedAt   DateTime       @updatedAt
+  createdAt   DateTime      @default(now()) @map("created_at")
+  updatedAt   DateTime      @default(now()) @updatedAt @map("updated_at")
+  author      User          @relation(fields: [authorId], references: [id])
+  category    BlogCategory? @relation(fields: [categoryId], references: [id])
+
+  @@index([authorId])
+  @@index([categoryId])
+  @@map("videos")
 }
 
-model ContentCategory {
-  id          String         @id @default(cuid())
+model BlogCategory {
+  id          String     @id @default(cuid())
   name        String
-  slug        String         @unique
-  description String?        @db.Text
-  type        String         @default("blog") // blog, video
-  blogPosts   ContentBlogPost[]
-  videos      ContentVideo[]
-  createdAt   DateTime       @default(now())
-  updatedAt   DateTime       @updatedAt
-} 
+  slug        String     @unique
+  description String?    @db.Text
+  type        String     @default("blog")
+  createdAt   DateTime   @default(now()) @map("created_at")
+  updatedAt   DateTime   @default(now()) @updatedAt @map("updated_at")
+  blogPosts   BlogPost[]
+  videos      Video[]
+
+  @@map("blog_categories")
+}
+
+model contact_messages {
+  id         Int                      @id @default(autoincrement())
+  name       String                   @db.VarChar(255)
+  email      String                   @db.VarChar(255)
+  phone      String?                  @db.VarChar(50)
+  subject    String                   @db.VarChar(255)
+  message    String                   @db.Text
+  status     contact_messages_status? @default(Yeni)
+  created_at DateTime                 @default(now()) @db.Timestamp(0)
+  updated_at DateTime                 @default(now()) @db.Timestamp(0)
+}
+
+model donation_categories {
+  id                       Int                        @id @default(autoincrement())
+  name                     String                     @db.VarChar(255)
+  slug                     String                     @unique(map: "slug") @db.VarChar(255)
+  description              String?                    @db.Text
+  created_at               DateTime                   @default(now()) @db.Timestamp(0)
+  updated_at               DateTime                   @default(now()) @db.Timestamp(0)
+  donation_type_categories donation_type_categories[]
+}
+
+model donation_type_categories {
+  id                  Int                 @id @default(autoincrement())
+  donation_type_id    Int
+  category_id         Int
+  donation_types      donation_types      @relation(fields: [donation_type_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "donation_type_categories_ibfk_1")
+  donation_categories donation_categories @relation(fields: [category_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "donation_type_categories_ibfk_2")
+
+  @@unique([donation_type_id, category_id], map: "unique_donation_type_category")
+  @@index([category_id], map: "category_id")
+}
+
+model donation_types {
+  id                       Int                        @id @default(autoincrement())
+  name                     String                     @db.VarChar(255)
+  slug                     String                     @unique(map: "slug") @db.VarChar(255)
+  image                    String?                    @db.VarChar(255)
+  description              String?                    @db.Text
+  is_active                Boolean?                   @default(true)
+  created_at               DateTime                   @default(now()) @db.Timestamp(0)
+  updated_at               DateTime                   @default(now()) @db.Timestamp(0)
+  donation_type_categories donation_type_categories[]
+  donations                donations[]
+}
+
+model donations {
+  id               Int                      @id @default(autoincrement())
+  donation_type_id Int
+  amount           Decimal                  @db.Decimal(10, 2)
+  donor_name       String?                  @db.VarChar(255)
+  donor_email      String?                  @db.VarChar(255)
+  donor_phone      String?                  @db.VarChar(50)
+  city             String?                  @db.VarChar(100)
+  payment_method   String                   @default("Banka") @db.VarChar(50)
+  payment_status   donations_payment_status @default(Beklemede)
+  payment_ref      String?                  @db.VarChar(255)
+  donation_date    DateTime                 @default(now()) @db.Timestamp(0)
+  note             String?                  @db.Text
+  created_at       DateTime                 @default(now()) @db.Timestamp(0)
+  updated_at       DateTime                 @default(now()) @db.Timestamp(0)
+  donation_types   donation_types           @relation(fields: [donation_type_id], references: [id], onUpdate: Restrict, map: "donations_ibfk_1")
+
+  @@index([donation_type_id], map: "donation_type_id")
+}
+
+model settings {
+  id            Int      @id @default(autoincrement())
+  setting_key   String   @unique(map: "setting_key") @db.VarChar(255)
+  setting_value String?  @db.Text
+  setting_group String?  @default("general") @db.VarChar(255)
+  created_at    DateTime @default(now()) @db.Timestamp(0)
+  updated_at    DateTime @default(now()) @db.Timestamp(0)
+}
+
+enum contact_messages_status {
+  Yeni
+  Okundu
+  Yan_tland_ @map("Yanıtlandı")
+  Ar_ivlendi @map("Arşivlendi")
+}
+
+enum donations_payment_status {
+  Beklemede
+  Tamamland_ @map("Tamamlandı")
+  ptal       @map("İptal")
+}

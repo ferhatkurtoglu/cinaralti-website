@@ -49,7 +49,6 @@ $routes = [
     '/donate' => 'donate.php',
     '/donate-details' => 'donate-details.php',
     '/cart' => 'cart.php',
-    '/payment' => 'payment.php',
     '/success' => 'success.php',
     '/fail' => 'fail.php',
     '/blog-details' => 'blog-details.php',
@@ -63,6 +62,24 @@ $routes = [
     '/ssl-info' => 'ssl-info.php',
     '/zakat-calculator' => 'zakat-calculator.php'
 ];
+
+// Özel sayfalar (header/footer olmadan)
+$specialPages = [
+    '/payment' => 'payment.php'
+];
+
+// Özel sayfaları kontrol et (header/footer olmadan)
+if (isset($specialPages[$uri])) {
+    $page = $specialPages[$uri];
+    $pagePath = __DIR__ . '/../pages/' . $page;
+    
+    if (file_exists($pagePath)) {
+        require_once $pagePath;
+    } else {
+        require_once __DIR__ . '/../pages/404.php';
+    }
+    exit;
+}
 
 // Header'ı yükle
 require_once __DIR__ . '/../includes/header.php';

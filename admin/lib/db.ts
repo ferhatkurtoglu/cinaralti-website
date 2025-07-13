@@ -5,6 +5,7 @@ const pool = mysql.createPool({
   user: process.env.DB_USER || 'root',
   password: process.env.DB_PASS || '',
   database: process.env.DB_NAME || 'cinaralti_db',
+  socketPath: process.env.DB_SOCKET || '/Applications/XAMPP/xamppfiles/var/mysql/mysql.sock',
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0
@@ -356,19 +357,19 @@ export async function deleteDonationType(id: number) {
 // Bağışlar için CRUD işlemleri
 export async function getDonations() {
   const query = `
-    SELECT d.*, dt.name as donation_type_name
-    FROM donations d
-    JOIN donation_options dt ON d.donation_option_id = dt.id
-    ORDER BY d.donation_date DESC
+    SELECT d.*, dt.title as donation_type_name
+    FROM donations_made d
+    LEFT JOIN donation_options dt ON d.donation_type = dt.slug
+    ORDER BY d.created_at DESC
   `;
   return executeQuery({ query });
 }
 
 export async function getDonationById(id: number) {
   const query = `
-    SELECT d.*, dt.name as donation_type_name
-    FROM donations d
-    JOIN donation_options dt ON d.donation_option_id = dt.id
+    SELECT d.*, dt.title as donation_type_name
+    FROM donations_made d
+    LEFT JOIN donation_options dt ON d.donation_type = dt.slug
     WHERE d.id = ?
   `;
   const results = await executeQuery({ query, values: [id] });
@@ -377,43 +378,32 @@ export async function getDonationById(id: number) {
 
 export async function createDonation(donationData: any) {
   const query = `
-    INSERT INTO donations (
-      donation_option_id, amount, donor_name, donor_email, donor_phone,
-      payment_method, payment_status, donation_date, note
+    INSERT INTO donations_made (
+      donor_name, donor_email, donor_phone, city, amount, 
+      donation_type, donor_type, payment_status
     )
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
   `;
   
   return executeQuery({
     query,
     values: [
-      donationData.donation_option_id,
-      donationData.amount,
       donationData.donor_name || null,
       donationData.donor_email || null,
       donationData.donor_phone || null,
-      donationData.payment_method || 'Banka',
-      donationData.payment_status || 'Beklemede',
-      donationData.donation_date || new Date(),
-      donationData.note || null
+      donationData.city || null,
+      donationData.amount,
+      donationData.donation_type || 'genel-bagis',
+      donationData.donor_type || 'individual',
+      donationData.payment_status || 'pending'
     ]
   });
 }
 
 export async function updateDonation(id: number, donationData: any) {
-  let query = `UPDATE donations SET `;
+  let query = `UPDATE donations_made SET `;
   const values = [];
   const updateFields = [];
-  
-  if (donationData.donation_option_id) {
-    updateFields.push('donation_option_id = ?');
-    values.push(donationData.donation_option_id);
-  }
-  
-  if (donationData.amount) {
-    updateFields.push('amount = ?');
-    values.push(donationData.amount);
-  }
   
   if (donationData.donor_name !== undefined) {
     updateFields.push('donor_name = ?');
@@ -430,24 +420,29 @@ export async function updateDonation(id: number, donationData: any) {
     values.push(donationData.donor_phone);
   }
   
-  if (donationData.payment_method) {
-    updateFields.push('payment_method = ?');
-    values.push(donationData.payment_method);
+  if (donationData.city !== undefined) {
+    updateFields.push('city = ?');
+    values.push(donationData.city);
+  }
+  
+  if (donationData.amount) {
+    updateFields.push('amount = ?');
+    values.push(donationData.amount);
+  }
+  
+  if (donationData.donation_type) {
+    updateFields.push('donation_type = ?');
+    values.push(donationData.donation_type);
+  }
+  
+  if (donationData.donor_type) {
+    updateFields.push('donor_type = ?');
+    values.push(donationData.donor_type);
   }
   
   if (donationData.payment_status) {
     updateFields.push('payment_status = ?');
     values.push(donationData.payment_status);
-  }
-  
-  if (donationData.donation_date) {
-    updateFields.push('donation_date = ?');
-    values.push(donationData.donation_date);
-  }
-  
-  if (donationData.note !== undefined) {
-    updateFields.push('note = ?');
-    values.push(donationData.note);
   }
   
   if (updateFields.length === 0) {
@@ -463,7 +458,7 @@ export async function updateDonation(id: number, donationData: any) {
 
 export async function deleteDonation(id: number) {
   const query = `
-    DELETE FROM donations
+    DELETE FROM donations_made
     WHERE id = ?
   `;
   return executeQuery({ query, values: [id] });
@@ -481,52 +476,52 @@ export async function getDonationSummary(period: string) {
       // Son 7 gün
       startDate = new Date(currentDate);
       startDate.setDate(startDate.getDate() - 7);
-      groupBy = 'DATE(donation_date)';
+      groupBy = 'DATE(created_at)';
       format = '%Y-%m-%d';
       break;
     case 'weekly':
       // Son 8 hafta
       startDate = new Date(currentDate);
       startDate.setDate(startDate.getDate() - 56);
-      groupBy = 'YEARWEEK(donation_date)';
+      groupBy = 'YEARWEEK(created_at)';
       format = '%Y-%u';
       break;
     case 'monthly':
       // Son 12 ay
       startDate = new Date(currentDate);
       startDate.setMonth(startDate.getMonth() - 12);
-      groupBy = 'CONCAT(YEAR(donation_date), "-", MONTH(donation_date))';
+      groupBy = 'CONCAT(YEAR(created_at), "-", MONTH(created_at))';
       format = '%Y-%m';
       break;
     case 'yearly':
       // Son 5 yıl
       startDate = new Date(currentDate);
       startDate.setFullYear(startDate.getFullYear() - 5);
-      groupBy = 'YEAR(donation_date)';
+      groupBy = 'YEAR(created_at)';
       format = '%Y';
       break;
     default:
       // Varsayılan olarak aylık
       startDate = new Date(currentDate);
       startDate.setMonth(startDate.getMonth() - 12);
-      groupBy = 'CONCAT(YEAR(donation_date), "-", MONTH(donation_date))';
+      groupBy = 'CONCAT(YEAR(created_at), "-", MONTH(created_at))';
       format = '%Y-%m';
   }
 
   const query = `
     SELECT 
-      DATE_FORMAT(donation_date, ?) as period,
+      DATE_FORMAT(created_at, ?) as period,
       SUM(amount) as total_amount,
       COUNT(*) as donation_count
     FROM 
-      donations
+      donations_made
     WHERE 
-      donation_date >= ? AND
-      payment_status = 'Tamamlandı'
+      created_at >= ? AND
+      payment_status = 'completed'
     GROUP BY 
       ${groupBy}
     ORDER BY 
-      MIN(donation_date)
+      MIN(created_at)
   `;
 
   return executeQuery({
@@ -568,16 +563,16 @@ export async function getDonationsByCategory(period: string) {
       SUM(d.amount) as total_amount,
       COUNT(d.id) as donation_count
     FROM 
-      donations d
+      donations_made d
     JOIN 
-      donation_options dt ON d.donation_option_id = dt.id
+      donation_options dt ON d.donation_type = dt.slug
     JOIN 
       donation_option_categories dtc ON dt.id = dtc.donation_option_id
     JOIN 
       donation_categories c ON dtc.category_id = c.id
     WHERE 
-      d.donation_date >= ? AND
-      d.payment_status = 'Tamamlandı'
+      d.created_at >= ? AND
+      d.payment_status = 'completed'
     GROUP BY 
       c.id
     ORDER BY 
@@ -597,15 +592,15 @@ export async function getRecentDonations(limit = 10) {
       d.id,
       d.amount,
       d.donor_name,
-      d.donation_date,
+      d.created_at,
       d.payment_status,
-      dt.name as donation_type
+      dt.title as donation_type
     FROM 
-      donations d
+      donations_made d
     JOIN 
-      donation_options dt ON d.donation_option_id = dt.id
+      donation_options dt ON d.donation_type = dt.slug
     ORDER BY 
-      d.donation_date DESC
+      d.created_at DESC
     LIMIT ?
   `;
 

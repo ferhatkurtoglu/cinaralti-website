@@ -10,8 +10,8 @@ define('DB_SOCKET', '/Applications/XAMPP/xamppfiles/var/mysql/mysql.sock');
 define('CACHE_DIR', __DIR__ . '/../cache');
 define('CACHE_TIME', 3600); // 1 saat
 
-// Debug modu
-define('DEBUG_MODE', false); // Debug modunu kapattık
+// Debug modu - config.php'den alınacak
+// define('DEBUG_MODE', false); // Debug modunu kapattık
 
 // Oturum başlatma
 if (session_status() === PHP_SESSION_NONE) {

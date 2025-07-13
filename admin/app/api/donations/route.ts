@@ -37,8 +37,8 @@ export async function GET(request: Request) {
     }
     
     if (type) {
-      query += ` AND donation_categori = ?`;
-      countQuery += ` AND donation_categori = ?`;
+      query += ` AND donation_category = ?`;
+      countQuery += ` AND donation_category = ?`;
       values.push(type);
       countValues.push(type);
     }
@@ -62,14 +62,14 @@ export async function GET(request: Request) {
         donor_name LIKE ? OR 
         donor_email LIKE ? OR 
         donor_phone LIKE ? OR
-        donation_categori LIKE ?
+        donation_category LIKE ?
       )`;
       
       countQuery += ` AND (
         donor_name LIKE ? OR 
         donor_email LIKE ? OR 
         donor_phone LIKE ? OR
-        donation_categori LIKE ?
+        donation_category LIKE ?
       )`;
       
       const searchPattern = `%${search}%`;
@@ -91,7 +91,7 @@ export async function GET(request: Request) {
     
     // Bağış türlerini al (filtre için)
     const donationTypesQuery = `
-      SELECT DISTINCT donation_categori as donation_type FROM donations_made ORDER BY donation_categori
+      SELECT DISTINCT donation_category as donation_type FROM donations_made ORDER BY donation_category
     `;
     const donationTypes = await executeQuery({ query: donationTypesQuery });
     

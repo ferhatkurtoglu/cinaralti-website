@@ -86,12 +86,7 @@
                 <div class="donate-details-description">
                     <h3 class="details-section-title">Bağış Hakkında</h3>
                     <div class="details-description-content" id="donation-description">
-                        <p>3.385.902 kişiye ekmek, 39.233 battaniye, 56.748 hijyen paketi, 54.469 bebek bezi, 501
-                            kişilik tıbbi malzeme ve 1.300 kişilik ilk yardım çantası ulaştırdık.</p>
-                        <p>Gelin, Filistinli ihtiyaç sahiplerine destek olalım. Yapacağınız küçük bir yardım bir kişinin
-                            hayatını kolaylaştırabilir. Bize ihtiyaçları var.</p>
-                        <p><em>Bu projeye bankadan bağış yapmak isterseniz açıklama kısmına 19163 yazmanız yeterli.</em>
-                        </p>
+                        <!-- Test/örnek yazılar kaldırıldı. Gerçek içerik buraya eklenecek. -->
                     </div>
                 </div>
             </div>

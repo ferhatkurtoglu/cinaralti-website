@@ -1,21 +1,20 @@
 <!-- Ödeme Sayfası -->
 <?php
-// Ödeme sayfası için ek güvenlik kontrolü - Geliştirme ortamında bu kontrolü devre dışı bırakıyoruz
-/*
-if (!defined('FORCE_HTTPS') || !FORCE_HTTPS) {
-    die("Güvenli olmayan bağlantı. Lütfen site yöneticisiyle iletişime geçin.");
-}
+// Ödeme sayfası için güvenlik kontrolü
+require_once __DIR__ . '/../config/payment_config.php';
 
-// HTTPS kontrolü
-if (empty($_SERVER['HTTPS']) || $_SERVER['HTTPS'] === 'off') {
+// HTTPS kontrolü (geliştirme ortamında devre dışı)
+if (PAYMENT_FORCE_HTTPS && (empty($_SERVER['HTTPS']) || $_SERVER['HTTPS'] === 'off')) {
     header('HTTP/1.1 301 Moved Permanently');
     header('Location: https://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']);
     exit();
 }
-*/
 
 // Process-donation dosyasını dahil et
 require_once __DIR__ . '/../includes/actions/process-donation.php';
+
+// Header'ı include et
+require_once __DIR__ . '/../includes/header.php';
 
 // Sepet ve bağış verilerini oturumdan al
 $donationAmount = isset($_SESSION['cart_total']) ? $_SESSION['cart_total'] : 0;
@@ -44,6 +43,19 @@ $orderNo = "CIN" . time() . rand(1000, 9999);
     <div id="loadingOverlay" class="loading-overlay">
         <div class="loading-spinner"></div>
         <div class="loading-text">Ödeme sistemine yönlendiriliyor...</div>
+    </div>
+
+    <!-- Ödeme Durumu Göstergesi -->
+    <div id="paymentStatusIndicator" class="payment-status-indicator" style="display: none;">
+        <div class="status-content">
+            <div class="status-icon">
+                <i class="fas fa-info-circle"></i>
+            </div>
+            <div class="status-message">
+                <div class="status-title">Ödeme Durumu</div>
+                <div class="status-description">İşleminiz işleniyor...</div>
+            </div>
+        </div>
     </div>
 
     <div class="payment-header">
@@ -125,11 +137,79 @@ $orderNo = "CIN" . time() . rand(1000, 9999);
                             placeholder="Kart üzerindeki isim">
                     </div>
 
-                    <!-- TC Kimlik / Vergi No -->
-                    <div class="form-group">
-                        <label>TC Kimlik / Vergi No</label>
-                        <input type="text" id="identityTaxNumber" name="identityTaxNumber" class="form-control"
-                            placeholder="TC Kimlik veya Vergi No" maxlength="11">
+                    <!-- Şehir Seçme Alanı -->
+                    <div class="form-group mb-3">
+                        <label for="city">Şehir</label>
+                        <select id="city" name="city" class="form-control" required>
+                            <option value="">Şehir Seçiniz</option>
+                            <option value="Adana">Adana</option>
+                            <option value="Adıyaman">Adıyaman</option>
+                            <option value="Afyonkarahisar">Afyonkarahisar</option>
+                            <option value="Ağrı">Ağrı</option>
+                            <option value="Amasya">Amasya</option>
+                            <option value="Ankara">Ankara</option>
+                            <option value="Antalya">Antalya</option>
+                            <option value="Artvin">Artvin</option>
+                            <option value="Aydın">Aydın</option>
+                            <option value="Balıkesir">Balıkesir</option>
+                            <option value="Bilecik">Bilecik</option>
+                            <option value="Bingöl">Bingöl</option>
+                            <option value="Bitlis">Bitlis</option>
+                            <option value="Bolu">Bolu</option>
+                            <option value="Burdur">Burdur</option>
+                            <option value="Bursa">Bursa</option>
+                            <option value="Çanakkale">Çanakkale</option>
+                            <option value="Çankırı">Çankırı</option>
+                            <option value="Çorum">Çorum</option>
+                            <option value="Denizli">Denizli</option>
+                            <option value="Diyarbakır">Diyarbakır</option>
+                            <option value="Edirne">Edirne</option>
+                            <option value="Elazığ">Elazığ</option>
+                            <option value="Erzincan">Erzincan</option>
+                            <option value="Erzurum">Erzurum</option>
+                            <option value="Eskişehir">Eskişehir</option>
+                            <option value="Gaziantep">Gaziantep</option>
+                            <option value="Giresun">Giresun</option>
+                            <option value="Gümüşhane">Gümüşhane</option>
+                            <option value="Hakkari">Hakkari</option>
+                            <option value="Hatay">Hatay</option>
+                            <option value="Isparta">Isparta</option>
+                            <option value="Mersin">Mersin</option>
+                            <option value="İstanbul">İstanbul</option>
+                            <option value="İzmir">İzmir</option>
+                            <option value="Kars">Kars</option>
+                            <option value="Kastamonu">Kastamonu</option>
+                            <option value="Kayseri">Kayseri</option>
+                            <option value="Kırklareli">Kırklareli</option>
+                            <option value="Kırşehir">Kırşehir</option>
+                            <option value="Kocaeli">Kocaeli</option>
+                            <option value="Konya">Konya</option>
+                            <option value="Kütahya">Kütahya</option>
+                            <option value="Malatya">Malatya</option>
+                            <option value="Manisa">Manisa</option>
+                            <option value="Kahramanmaraş">Kahramanmaraş</option>
+                            <option value="Mardin">Mardin</option>
+                            <option value="Muğla">Muğla</option>
+                            <option value="Muş">Muş</option>
+                            <option value="Nevşehir">Nevşehir</option>
+                            <option value="Niğde">Niğde</option>
+                            <option value="Ordu">Ordu</option>
+                            <option value="Rize">Rize</option>
+                            <option value="Sakarya">Sakarya</option>
+                            <option value="Samsun">Samsun</option>
+                            <option value="Siirt">Siirt</option>
+                            <option value="Sinop">Sinop</option>
+                            <option value="Sivas">Sivas</option>
+                            <option value="Tekirdağ">Tekirdağ</option>
+                            <option value="Tokat">Tokat</option>
+                            <option value="Trabzon">Trabzon</option>
+                            <option value="Tunceli">Tunceli</option>
+                            <option value="Şanlıurfa">Şanlıurfa</option>
+                            <option value="Uşak">Uşak</option>
+                            <option value="Van">Van</option>
+                            <option value="Yozgat">Yozgat</option>
+                            <option value="Zonguldak">Zonguldak</option>
+                        </select>
                     </div>
 
                     <div class="form-group message-group">
@@ -203,10 +283,10 @@ $orderNo = "CIN" . time() . rand(1000, 9999);
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // CSRF token kontrolü
     if (!isset($_POST['csrf_token']) || !verify_csrf_token($_POST['csrf_token'])) {
-        // CSRF token geçersizse işlemi reddet
-        error_log("Ödeme işlemi CSRF token hatası!");
-        header("Location: " . BASE_URL . "/fail?error=security");
-        exit;
+            // CSRF token geçersizse işlemi reddet
+    error_log("Ödeme işlemi CSRF token hatası!");
+    echo "<script>window.location.href = '" . BASE_URL . "/fail?error=security';</script>";
+    exit;
     }
     
     // Bağış verilerini al
@@ -217,19 +297,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'donor_phone' => isset($_POST['donor_phone']) ? sanitize_input($_POST['donor_phone']) : '',
         'city' => isset($_POST['city']) ? sanitize_input($_POST['city']) : '',
         'amount' => isset($_POST['amount']) ? (float)($_POST['amount'] / 100) : 0, // Kuruştan TL'ye çevir
-        'donation_type' => isset($_POST['donation_type']) ? sanitize_input($_POST['donation_type']) : 'Genel Bağış',
+        'donation_option' => isset($_POST['donation_type']) ? sanitize_input($_POST['donation_type']) : 'Genel Bağış',
         'donor_type' => isset($_POST['donor_type']) ? sanitize_input($_POST['donor_type']) : 'individual',
         'payment_status' => 'pending', // Başlangıç durumu: beklemede
         'order_number' => $orderNo // Sipariş numarasını ekle
     ];
     
+    // Debug: Bağış verilerini logla
+    if (PAYMENT_DEBUG) {
+        error_log("Bağış verileri: " . print_r($donationData, true));
+    }
+    
     // Bağış verisini veritabanına kaydet
     $donationId = save_donation($donationData);
+    
+    // Debug: Kayıt sonucunu logla
+    if (PAYMENT_DEBUG) {
+        error_log("Bağış kayıt sonucu: " . ($donationId ? "Başarılı (ID: $donationId)" : "Başarısız"));
+    }
     
     // Kayıt başarısızsa hata sayfasına yönlendir
     if (!$donationId) {
         error_log("Bağış kaydetme hatası oluştu!");
-        header("Location: " . BASE_URL . "/fail?error=database");
+        echo "<script>window.location.href = '" . BASE_URL . "/fail?error=database';</script>";
         exit;
     }
     
@@ -240,27 +330,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     ini_set('display_errors', PAYMENT_DEBUG ? 1 : 0);
     error_reporting(PAYMENT_DEBUG ? E_ALL : 0);
     
-    // Ödeme API bilgilerini güvenli bir şekilde al
-    $merchantId = defined('PAYMENT_MERCHANT_ID') ? PAYMENT_MERCHANT_ID : '';
-    $apiKey = defined('PAYMENT_API_KEY') ? PAYMENT_API_KEY : '';
+    // Ödeme API bilgilerini kontrol et
+    $merchantId = PAYMENT_MERCHANT_ID;
+    $apiKey = PAYMENT_API_KEY;
     
-    // Geliştirme ortamında, eğer API bilgileri yoksa test bilgilerini kullan
-    if (empty($merchantId) || empty($apiKey)) {
-        if (PAYMENT_DEBUG) {
-            error_log("Ödeme API bilgileri eksik. Geliştirme için test değerleri kullanılıyor.");
-            // Test değerleri (Gerçek değerler değildir, sadece geliştirme amaçlı)
-            $merchantId = '123456789'; 
-            $apiKey = 'TEST_API_KEY';
-        } else {
-            error_log("Ödeme API bilgileri eksik!");
-            header("Location: " . BASE_URL . "/fail?error=configuration&ErrorMessage=" . urlencode('Ödeme sistemi yapılandırması tamamlanmamış. Lütfen site yöneticisiyle iletişime geçin.'));
-            exit;
-        }
+    // API bilgileri eksikse hata ver
+    if (empty($merchantId) || empty($apiKey) || $merchantId === 'your_merchant_id_here') {
+        error_log("Ödeme API bilgileri eksik veya yapılandırılmamış!");
+        echo "<script>window.location.href = '" . BASE_URL . "/fail?error=configuration&ErrorMessage=" . urlencode('Ödeme sistemi yapılandırması tamamlanmamış. Lütfen site yöneticisiyle iletişime geçin.') . "';</script>";
+        exit;
     }
     
-    // JavaScript'ten alınan tutar bilgisini kullan (hidden input'tan gelecek)
-    $amount = isset($_POST['amount']) ? (int)$_POST['amount'] : 10000; // Kuruş cinsinden
+    // Form verilerini doğrula
+    $amount = isset($_POST['amount']) ? (int)$_POST['amount'] : 0;
     $orderNo = isset($_POST['order_no']) ? sanitize_input($_POST['order_no']) : '';
+    
+    // Tutar kontrolü
+    if ($amount <= 0) {
+        echo "<script>window.location.href = '" . BASE_URL . "/fail?error=invalid_amount&ErrorMessage=" . urlencode('Geçersiz bağış tutarı. Lütfen tutarı kontrol ediniz.') . "';</script>";
+        exit;
+    }
+    
+    // Kart bilgileri kontrolü
+    $cardNumber = isset($_POST['cardNumber']) ? preg_replace('/\D/', '', $_POST['cardNumber']) : '';
+    if (strlen($cardNumber) < 13 || strlen($cardNumber) > 19) {
+        echo "<script>window.location.href = '" . BASE_URL . "/fail?error=invalid_card&ErrorMessage=" . urlencode('Geçersiz kart numarası. Lütfen kart bilgilerinizi kontrol ediniz.') . "';</script>";
+        exit;
+    }
     
     // URL'ler için tam yol kullan
     $protocol = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') ? 'https' : 'http';
@@ -271,11 +367,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $errorUrl = $domain . dirname($_SERVER['SCRIPT_NAME']) . "/fail.php";
     
     try {
-        // Geliştirme modunda test için doğrudan success sayfasına yönlendir
-        if (PAYMENT_DEBUG) {
-            header("Location: " . $successUrl . "?OrderId=TEST_" . $donationId . "&AuthCode=TEST_AUTH_" . rand(100000, 999999));
-            exit;
-        }
+            // Geliştirme modunda test için JavaScript ile yönlendir
+    if (PAYMENT_DEBUG) {
+        echo "<script>window.location.href = '" . $successUrl . "?OrderId=TEST_" . $donationId . "&AuthCode=TEST_AUTH_" . rand(100000, 999999) . "';</script>";
+        exit;
+    }
 
         // Kart ve ödeme bilgilerini al
         $cardNumber = isset($_POST['cardNumber']) ? preg_replace('/\D/', '', $_POST['cardNumber']) : '';
@@ -292,29 +388,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $apiData = [
             "APIPaymentTransactionContract" => [
                 "merchantId" => $merchantId,
-                "customerId" => $donationId,  // Müşteri numarası olarak bağış ID'sini kullanabiliriz
+                "customerId" => $donationId,
                 "userName" => $userName,
                 "amount" => (string)$amount,
                 "merchantOrderId" => $orderNo,
                 "cardNumber" => $cardNumber,
-                "currencyCode" => "0949", // TRY için
-                "transactionType" => "1",  // Satış
+                "currencyCode" => PAYMENT_CURRENCY_CODE,
+                "transactionType" => PAYMENT_TRANSACTION_TYPE,
                 "identityTaxNumber" => $identityTaxNumber,
                 "hashData" => $hashData,
-                "installmentCount" => "0",  // Taksitsiz
-                "description" => $donationData['donation_type'],
+                "installmentCount" => "0",
+                "description" => $donationData['donation_option'],
                 "insuranceDeferringCount" => "0"
             ]
         ];
         
         // API endpoint
-        $apiEndpoint = "https://sanalpos.kuveytturk.com.tr/v1/vpos/nonThreeDPayment";
+        $apiEndpoint = PAYMENT_API_URL;
         
         // cURL ile API isteği gönder
         $ch = curl_init($apiEndpoint);
         curl_setopt($ch, CURLOPT_POST, 1);
         curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($apiData));
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 30); // 30 saniye timeout
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 10); // 10 saniye bağlantı timeout
         curl_setopt($ch, CURLOPT_HTTPHEADER, [
             'Content-Type: application/json',
             'Accept: application/json'
@@ -323,7 +421,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // API yanıtını al
         $response = curl_exec($ch);
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $curlError = curl_error($ch);
         curl_close($ch);
+        
+        // cURL hatası kontrolü
+        if ($curlError) {
+            error_log("cURL hatası: " . $curlError);
+            echo "<script>window.location.href = '" . BASE_URL . "/fail?error=network_error&ErrorMessage=" . urlencode('Ağ bağlantısı sorunu. Lütfen internet bağlantınızı kontrol edip tekrar deneyiniz.') . "';</script>";
+            exit;
+        }
         
         if ($httpCode == 200) {
             $responseData = json_decode($response, true);
@@ -338,30 +444,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $provisionNumber = $firstResult['provisionNumber'] ?? '';
                     $orderId = $firstResult['orderId'] ?? '';
                     
-                    header("Location: " . $successUrl . "?OrderId=" . $orderId . "&AuthCode=" . $provisionNumber);
+                    // Önce payment sayfasına başarılı durum ile yönlendir
+                    echo "<script>window.location.href = '" . $currentUrl . "?status=success&OrderId=" . $orderId . "&AuthCode=" . $provisionNumber . "';</script>";
                     exit;
                 } else {
-                    // İşlem başarısız, hata mesajı ile fail sayfasına yönlendir
+                    // İşlem başarısız, hata mesajı ile payment sayfasına yönlendir
                     $responseMessage = $firstResult['responseMessage'] ?? 'İşlem başarısız';
-                    header("Location: " . $errorUrl . "?ErrorCode=" . $responseCode . "&ErrorMessage=" . urlencode($responseMessage));
+                    echo "<script>window.location.href = '" . $currentUrl . "?status=failed&ErrorCode=" . $responseCode . "&ErrorMessage=" . urlencode($responseMessage) . "';</script>";
                     exit;
                 }
             } else {
                 // API yanıtı başarısız
                 $errorMessage = isset($responseData['errors']) ? implode(", ", $responseData['errors']) : 'API yanıtı başarısız';
-                header("Location: " . $errorUrl . "?error=payment_gateway&ErrorMessage=" . urlencode($errorMessage));
+                echo "<script>window.location.href = '" . $currentUrl . "?status=failed&error=payment_gateway&ErrorMessage=" . urlencode($errorMessage) . "';</script>";
                 exit;
             }
         } else {
             // HTTP hatası
-            header("Location: " . $errorUrl . "?error=payment_gateway&ErrorMessage=" . urlencode("HTTP Hata Kodu: " . $httpCode));
+            echo "<script>window.location.href = '" . $currentUrl . "?status=failed&error=payment_gateway&ErrorMessage=" . urlencode("HTTP Hata Kodu: " . $httpCode) . "';</script>";
             exit;
         }
         
     } catch (Exception $e) {
-        // Hata durumunda kullanıcıyı fail sayfasına yönlendir
+        // Hata durumunda kullanıcıyı payment sayfasına yönlendir
         error_log("Ödeme işleme hatası: " . $e->getMessage());
-        header("Location: " . $errorUrl . "?error=payment_gateway&ErrorMessage=" . urlencode($e->getMessage()));
+        echo "<script>window.location.href = '" . $currentUrl . "?status=failed&error=payment_gateway&ErrorMessage=" . urlencode($e->getMessage()) . "';</script>";
         exit;
     }
 }
@@ -389,6 +496,124 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     flex-direction: column;
     justify-content: center;
     align-items: center;
+}
+
+/* Ödeme Durumu Göstergesi */
+.payment-status-indicator {
+    background-color: #e3f2fd;
+    border: 1px solid #2196F3;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+}
+
+.status-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+}
+
+.status-icon {
+    font-size: 24px;
+    color: #2196F3;
+    flex-shrink: 0;
+}
+
+.status-message {
+    flex: 1;
+}
+
+.status-title {
+    font-weight: 600;
+    color: #1976D2;
+    margin-bottom: 4px;
+}
+
+.status-description {
+    color: #424242;
+    font-size: 14px;
+}
+
+/* Bildirim stili */
+.payment-notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background-color: #4CAF50;
+    color: white;
+    padding: 15px 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    max-width: 400px;
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+    border-left: 4px solid #45a049;
+}
+
+.payment-notification.show {
+    transform: translateX(0);
+}
+
+.notification-icon {
+    font-size: 20px;
+    flex-shrink: 0;
+}
+
+.notification-message {
+    flex: 1;
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+.notification-close {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 20px;
+    cursor: pointer;
+    padding: 0;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.8;
+    transition: opacity 0.2s;
+}
+
+.notification-close:hover {
+    opacity: 1;
+}
+
+.notification-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.notification-success-btn {
+    background-color: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    align-self: flex-start;
+}
+
+.notification-success-btn:hover {
+    background-color: rgba(255, 255, 255, 0.3);
+    border-color: rgba(255, 255, 255, 0.5);
 }
 
 .loading-spinner {
@@ -704,6 +929,19 @@ textarea.form-control {
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // URL parametrelerini kontrol et - ödeme sonucu durumu için
+    const urlParams = new URLSearchParams(window.location.search);
+    const paymentStatus = urlParams.get('status');
+    const orderId = urlParams.get('OrderId');
+    const errorCode = urlParams.get('ErrorCode');
+    const errorMessage = urlParams.get('ErrorMessage');
+
+    // Ödeme sonucu durumunu kontrol et ve bildirim göster
+    if (paymentStatus || orderId || errorCode) {
+        showPaymentResult(paymentStatus, orderId, errorCode, errorMessage);
+        updatePaymentStatusIndicator(paymentStatus, orderId, errorCode, errorMessage);
+    }
+
     // Sepet tutarını localStorage'dan al ve göster
     const storedAmount = localStorage.getItem('cartTotalAmount');
     if (storedAmount) {
@@ -728,34 +966,10 @@ document.addEventListener('DOMContentLoaded', function() {
     if (paymentForm) {
         // Form gönderilirken yükleme ekranını göster
         paymentForm.addEventListener('submit', function(e) {
-            // Form alanlarını kontrol et
-            const cardNumber = document.getElementById('cardNumber').value.replace(/\s/g, '');
-            const cardExpiry = document.getElementById('cardExpiry').value;
-            const cardCvv = document.getElementById('cardCvv').value;
-            const identityTaxNumber = document.getElementById('identityTaxNumber').value;
-
-            if (cardNumber.length < 16) {
+            // Form doğrulama
+            if (!validatePaymentForm()) {
                 e.preventDefault();
-                alert('Lütfen geçerli bir kart numarası girin');
-                return;
-            }
-
-            if (cardExpiry.length < 5) {
-                e.preventDefault();
-                alert('Lütfen geçerli bir son kullanma tarihi girin');
-                return;
-            }
-
-            if (cardCvv.length < 3) {
-                e.preventDefault();
-                alert('Lütfen geçerli bir CVV kodu girin');
-                return;
-            }
-
-            if (identityTaxNumber.length !== 11) {
-                e.preventDefault();
-                alert('Lütfen geçerli bir TC Kimlik/Vergi numarası girin');
-                return;
+                return false;
             }
 
             // Yükleme ekranını göster
@@ -763,6 +977,47 @@ document.addEventListener('DOMContentLoaded', function() {
                 loadingOverlay.style.display = 'flex';
             }
         });
+
+        // Form doğrulama fonksiyonu
+        function validatePaymentForm() {
+            const cardNumber = document.getElementById('cardNumber').value.replace(/\s/g, '');
+            const cardExpiry = document.getElementById('cardExpiry').value;
+            const cardCvv = document.getElementById('cardCvv').value;
+            const cardHolderName = document.getElementById('cardHolderName').value;
+            const city = document.getElementById('city').value;
+
+            // Kart numarası kontrolü
+            if (cardNumber.length < 13 || cardNumber.length > 19) {
+                showNotification('Geçersiz kart numarası. Lütfen kart bilgilerinizi kontrol ediniz.', 'error');
+                return false;
+            }
+
+            // Son kullanma tarihi kontrolü
+            if (!cardExpiry || cardExpiry.length !== 5) {
+                showNotification('Geçersiz son kullanma tarihi. Lütfen MM/YY formatında giriniz.', 'error');
+                return false;
+            }
+
+            // CVV kontrolü
+            if (cardCvv.length < 3 || cardCvv.length > 4) {
+                showNotification('Geçersiz CVV. Lütfen kart arkasındaki 3 haneli kodu giriniz.', 'error');
+                return false;
+            }
+
+            // Kart sahibi adı kontrolü
+            if (!cardHolderName.trim()) {
+                showNotification('Lütfen kart sahibinin adını giriniz.', 'error');
+                return false;
+            }
+
+            // Şehir kontrolü
+            if (!city) {
+                showNotification('Lütfen şehir seçiniz.', 'error');
+                return false;
+            }
+
+            return true;
+        }
 
         // Kredi kartı numarası formatı
         const cardInput = document.getElementById('cardNumber');
@@ -823,21 +1078,6 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
 
-        // TC Kimlik/Vergi No formatı
-        const identityInput = document.getElementById('identityTaxNumber');
-        if (identityInput) {
-            identityInput.addEventListener('input', function(e) {
-                let value = e.target.value.replace(/\D/g, '');
-
-                // 11 haneden fazla girilmesin
-                if (value.length > 11) {
-                    value = value.slice(0, 11);
-                }
-
-                e.target.value = value;
-            });
-        }
-
         // Düzenli bağış seçeneği kontrolü
         const regularDonationCheck = document.getElementById('regularDonation');
         const regularDonationOptions = document.getElementById('regularDonationOptions');
@@ -847,6 +1087,136 @@ document.addEventListener('DOMContentLoaded', function() {
                 regularDonationOptions.style.display = this.checked ? 'block' : 'none';
             });
         }
+    }
+
+    // Ödeme sonucu durumunu gösteren fonksiyon
+    function showPaymentResult(status, orderId, errorCode, errorMessage) {
+        let message = '';
+        let type = 'info';
+        let showSuccessButton = false;
+
+        if (status === 'success' || orderId) {
+            message = 'Ödeme işleminiz başarıyla tamamlandı! Sipariş numaranız: ' + (orderId || 'N/A');
+            type = 'success';
+            showSuccessButton = true;
+
+            // Başarılı ödeme sonrası sepeti temizle
+            setTimeout(() => {
+                localStorage.removeItem('donationCart');
+                localStorage.removeItem('cartTotalAmount');
+                document.dispatchEvent(new Event('cartUpdated'));
+            }, 2000);
+
+        } else if (status === 'failed' || errorCode) {
+            message = 'Ödeme işleminiz başarısız oldu. Hata kodu: ' + (errorCode || 'N/A');
+            if (errorMessage) {
+                message += ' - ' + errorMessage;
+            }
+            type = 'error';
+        }
+
+        if (message) {
+            showNotification(message, type, showSuccessButton, orderId);
+        }
+    }
+
+    // Bildirim gösterme fonksiyonu
+    function showNotification(message, type = 'info', showSuccessButton = false, orderId = '') {
+        // Mevcut bildirimleri temizle
+        const existingNotifications = document.querySelectorAll('.payment-notification');
+        existingNotifications.forEach(notification => notification.remove());
+
+        // Bildirim elementi oluştur
+        const notification = document.createElement('div');
+        notification.className = 'payment-notification';
+
+        // Tip'e göre stil uygula
+        if (type === 'success') {
+            notification.style.backgroundColor = '#4CAF50';
+            notification.style.borderColor = '#45a049';
+        } else if (type === 'error') {
+            notification.style.backgroundColor = '#F44336';
+            notification.style.borderColor = '#d32f2f';
+        } else {
+            notification.style.backgroundColor = '#2196F3';
+            notification.style.borderColor = '#1976D2';
+        }
+
+        // Başarılı ödeme için buton ekle
+        let successButton = '';
+        if (showSuccessButton && orderId) {
+            successButton =
+                `<button class="notification-success-btn" onclick="window.location.href='<?= BASE_URL ?>/success?OrderId=${orderId}'">Detayları Gör</button>`;
+        }
+
+        // Bildirim içeriği
+        notification.innerHTML = `
+            <div class="notification-icon">${type === 'success' ? '✓' : type === 'error' ? '⚠️' : 'ℹ️'}</div>
+            <div class="notification-content">
+                <div class="notification-message">${message}</div>
+                ${successButton}
+            </div>
+            <button class="notification-close" onclick="this.parentElement.remove()">×</button>
+        `;
+
+        // Sayfaya ekle
+        document.body.appendChild(notification);
+
+        // Animasyon için gecikme
+        setTimeout(() => {
+            notification.classList.add('show');
+        }, 100);
+
+        // Belirli bir süre sonra otomatik kaldır (sadece info tipi için)
+        if (type === 'info') {
+            setTimeout(() => {
+                notification.classList.remove('show');
+                setTimeout(() => {
+                    if (notification.parentElement) {
+                        notification.remove();
+                    }
+                }, 500);
+            }, 5000);
+        }
+    }
+
+    // Ödeme durumu göstergesini güncelleyen fonksiyon
+    function updatePaymentStatusIndicator(status, orderId, errorCode, errorMessage) {
+        const indicator = document.getElementById('paymentStatusIndicator');
+        if (!indicator) return;
+
+        const statusIcon = indicator.querySelector('.status-icon i');
+        const statusTitle = indicator.querySelector('.status-title');
+        const statusDescription = indicator.querySelector('.status-description');
+
+        if (status === 'success' || orderId) {
+            // Başarılı durum
+            indicator.style.backgroundColor = '#e8f5e8';
+            indicator.style.borderColor = '#4CAF50';
+            statusIcon.className = 'fas fa-check-circle';
+            statusIcon.style.color = '#4CAF50';
+            statusTitle.textContent = 'Ödeme Başarılı';
+            statusTitle.style.color = '#2E7D32';
+            statusDescription.textContent =
+                `İşleminiz başarıyla tamamlandı. Sipariş numaranız: ${orderId || 'N/A'}`;
+            statusDescription.style.color = '#424242';
+        } else if (status === 'failed' || errorCode) {
+            // Başarısız durum
+            indicator.style.backgroundColor = '#ffebee';
+            indicator.style.borderColor = '#F44336';
+            statusIcon.className = 'fas fa-times-circle';
+            statusIcon.style.color = '#F44336';
+            statusTitle.textContent = 'Ödeme Başarısız';
+            statusTitle.style.color = '#C62828';
+            statusDescription.textContent = `İşleminiz başarısız oldu. Hata kodu: ${errorCode || 'N/A'}`;
+            if (errorMessage) {
+                statusDescription.textContent += ` - ${errorMessage}`;
+            }
+            statusDescription.style.color = '#424242';
+        }
+
+        // Göstergiyi göster
+        indicator.style.display = 'flex';
     }
 });
 </script>
@@ -866,3 +1236,8 @@ function onRecaptchaLoad() {
     });
 }
 </script>
+
+<?php
+// Footer'ı include et
+require_once __DIR__ . '/../includes/footer.php';
+?>

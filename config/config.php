@@ -16,11 +16,11 @@ define('SITE_NAME', 'Çınaraltı');
 define('SITE_DESCRIPTION', 'Çınaraltı Resmi Web Sitesi');
 define('SITE_KEYWORDS', 'çınaraltı, vakıf, dernek, yardım');
 
-// Ödeme güvenliği ayarları - .env dosyasından al
-define('PAYMENT_MERCHANT_ID', getenv_var('PAYMENT_MERCHANT_ID', ''));
-define('PAYMENT_API_KEY', getenv_var('PAYMENT_API_KEY', ''));
-// Ödeme hata ayıklamasını geçici olarak açık bırakalım (Geliştirme ortamı)
-define('PAYMENT_DEBUG', true); // getenv_var('PAYMENT_DEBUG', 'false') === 'true');
+// Ödeme sistemi yapılandırmasını dahil et
+require_once __DIR__ . '/payment_config.php';
+
+// Debug modu açık
+define('DEBUG_MODE', true);
 
 // Zaman dilimi
 date_default_timezone_set('Europe/Istanbul');

@@ -45,60 +45,70 @@ export default function Statistics() {
   const [activeTab, setActiveTab] = useState('trend');
   const [dropdownOpen, setDropdownOpen] = useState<boolean>(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const [statsData, setStatsData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
   
-  // Örnek veriler - API'den gerçek veriler alınabilir
-  const trendData = {
-    daily: {
-      labels: ['1 Haz', '2 Haz', '3 Haz', '4 Haz', '5 Haz', '6 Haz', '7 Haz'],
-      values: [25000, 32000, 18000, 42000, 35000, 50000, 38000]
-    },
-    weekly: {
-      labels: ['1. Hafta', '2. Hafta', '3. Hafta', '4. Hafta', '5. Hafta', '6. Hafta', '7. Hafta', '8. Hafta'],
-      values: [105000, 125000, 145000, 165000, 185000, 210000, 245000, 270000]
-    },
-    monthly: {
-      labels: ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'],
-      values: [350000, 420000, 380000, 450000, 520000, 480000, 550000, 600000, 580000, 620000, 680000, 750000]
-    },
-    yearly: {
-      labels: ['2019', '2020', '2021', '2022', '2023'],
-      values: [2500000, 3800000, 4200000, 5500000, 6800000]
+  // API'den verileri al
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch(`/api/statistics?period=${period}`);
+        const data = await response.json();
+        setStatsData(data);
+      } catch (error) {
+        console.error('İstatistikler yüklenirken hata:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchStats();
+  }, [period]);
+  
+  // Dropdown dışına tıklandığında kapat
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setDropdownOpen(false);
+      }
     }
-  };
-  
-  const categoryData = {
-    labels: ['Acil Yardım', 'Yetim', 'Eğitim', 'Kurban', 'Genel', 'Projeler'],
-    values: [35, 20, 15, 10, 10, 10]
-  };
-  
-  const donorTypeData = {
-    labels: ['Bireysel', 'Kurumsal', 'Grup'],
-    values: [75, 20, 5]
+    
+    document.addEventListener("mousedown", handleClickOutside);
+    
+    // Cleanup
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  const toggleDropdown = () => {
+    setDropdownOpen(!dropdownOpen);
   };
 
-  // Bağış tiplerine göre dağılım için veri
-  const donationTypeData = {
-    labels: ['Genel Bağış', 'Zekat', 'Filistin Yardımı', 'Yetim Projesi', 'Kurban Bağışı', 'Afrika Bağışı', 'Kuran Talebelerinin İhtiyaçları', 'Bina Satın Alma'],
-    values: [25, 20, 18, 12, 10, 8, 5, 2],
-    amounts: [1250000, 1000000, 900000, 600000, 500000, 400000, 250000, 100000]
-  };
+  // API'den gelen verileri işle
+  const trendData = statsData?.trend || [];
+  const categoryData = statsData?.categories || [];
+  const cityData = statsData?.cities || [];
+  const donationTypeData = statsData?.donationTypes || [];
+  const generalStats = statsData?.general || {};
   
-  // Şehir bazlı bağış dağılımı için veri
-  const cityData = {
-    labels: ['İstanbul', 'Ankara', 'İzmir', 'Bursa', 'Antalya', 'Konya', 'Adana', 'Kayseri', 'Gaziantep', 'Trabzon'],
-    values: [35, 15, 12, 8, 7, 6, 5, 5, 4, 3],
-    amounts: [1750000, 750000, 600000, 400000, 350000, 300000, 250000, 250000, 200000, 150000]
-  };
-
-  // Aktif periyoda göre trend verilerini al
-  const activeTrendData = trendData[period as keyof typeof trendData];
-
+  // Veriler yüklenene kadar loading göster
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+  
+  // Trend verilerini grafik için hazırla
   const trendChartData = {
-    labels: activeTrendData.labels,
+    labels: trendData.map((item: any) => item.period).reverse(),
     datasets: [
       {
         label: 'Bağış Miktarı (₺)',
-        data: activeTrendData.values,
+        data: trendData.map((item: any) => parseFloat(item.total_amount)).reverse(),
         backgroundColor: 'rgba(76, 175, 80, 0.2)',
         borderColor: '#4CAF50',
         borderWidth: 2,
@@ -107,12 +117,13 @@ export default function Statistics() {
       }
     ]
   };
-
+  
+  // Kategori verilerini grafik için hazırla
   const categoryChartData = {
-    labels: categoryData.labels,
+    labels: categoryData.map((item: any) => item.donation_category),
     datasets: [
       {
-        data: categoryData.values,
+        data: categoryData.map((item: any) => parseFloat(item.total_amount)),
         backgroundColor: [
           '#4CAF50',
           '#2196F3',
@@ -125,48 +136,14 @@ export default function Statistics() {
       }
     ]
   };
-
-  const donorTypeChartData = {
-    labels: donorTypeData.labels,
-    datasets: [
-      {
-        data: donorTypeData.values,
-        backgroundColor: [
-          '#4CAF50',
-          '#FF9800',
-          '#2196F3'
-        ],
-        borderWidth: 1
-      }
-    ]
-  };
-
-  const donationTypeChartData = {
-    labels: donationTypeData.labels,
-    datasets: [
-      {
-        data: donationTypeData.values,
-        backgroundColor: [
-          '#4CAF50',
-          '#2196F3',
-          '#FF5722',
-          '#9C27B0',
-          '#795548',
-          '#FF9800',
-          '#607D8B',
-          '#3F51B5'
-        ],
-        borderWidth: 1
-      }
-    ]
-  };
   
+  // Şehir verilerini grafik için hazırla
   const cityChartData = {
-    labels: cityData.labels,
+    labels: cityData.map((item: any) => item.city),
     datasets: [
       {
         label: 'Şehir Bazlı Bağış Miktarı',
-        data: cityData.amounts,
+        data: cityData.map((item: any) => parseFloat(item.total_amount)),
         backgroundColor: [
           '#4CAF50',
           '#2196F3',
@@ -183,6 +160,27 @@ export default function Statistics() {
       }
     ]
   };
+  
+  // Bağış türü verilerini grafik için hazırla
+  const donationTypeChartData = {
+    labels: donationTypeData.map((item: any) => item.donation_option),
+    datasets: [
+      {
+        data: donationTypeData.map((item: any) => parseFloat(item.total_amount)),
+        backgroundColor: [
+          '#4CAF50',
+          '#2196F3',
+          '#FF5722',
+          '#9C27B0',
+          '#795548',
+          '#FF9800',
+          '#607D8B',
+          '#3F51B5'
+        ],
+        borderWidth: 1
+      }
+    ]
+  };
 
   const handleExport = (format: string) => {
     const prepareChartData = () => {
@@ -190,35 +188,34 @@ export default function Statistics() {
       
       if (activeTab === 'trend') {
         // Trend verileri
-        data = activeTrendData.labels.map((label, index) => ({
-          'Dönem': label,
-          'Bağış Miktarı (₺)': activeTrendData.values[index],
+        data = trendData.map((item: any) => ({
+          'Dönem': item.period,
+          'Bağış Miktarı (₺)': parseFloat(item.total_amount || 0),
+          'Bağış Sayısı': parseInt(item.donation_count || 0),
         }));
       } else if (activeTab === 'category') {
         // Kategori verileri
-        data = categoryData.labels.map((label, index) => ({
-          'Kategori': label,
-          'Yüzde (%)': categoryData.values[index],
+        data = categoryData.map((item: any) => ({
+          'Kategori': item.donation_category,
+          'Toplam Tutar (₺)': parseFloat(item.total_amount || 0),
+          'Bağış Sayısı': parseInt(item.donation_count || 0),
+          'Ortalama (₺)': parseFloat(item.avg_amount || 0),
         }));
-      } else if (activeTab === 'donorType') {
-        // Bağışçı türleri verileri
-        data = donorTypeData.labels.map((label, index) => ({
-          'Bağışçı Türü': label,
-          'Yüzde (%)': donorTypeData.values[index],
-        }));
-      } else if (activeTab === 'donationType') {
+      } else if (activeTab === 'donation-type') {
         // Bağış tipine göre veriler
-        data = donationTypeData.labels.map((label, index) => ({
-          'Bağış Tipi': label,
-          'Yüzde (%)': donationTypeData.values[index],
-          'Miktar (₺)': donationTypeData.amounts[index],
+        data = donationTypeData.map((item: any) => ({
+          'Bağış Tipi': item.donation_option,
+          'Toplam Tutar (₺)': parseFloat(item.total_amount || 0),
+          'Bağış Sayısı': parseInt(item.donation_count || 0),
+          'Ortalama (₺)': parseFloat(item.avg_amount || 0),
         }));
-      } else if (activeTab === 'location') {
-        // Konum verileri
-        data = cityData.labels.map((label, index) => ({
-          'Şehir': label,
-          'Yüzde (%)': cityData.values[index],
-          'Miktar (₺)': cityData.amounts[index],
+      } else if (activeTab === 'city') {
+        // Şehir verileri
+        data = cityData.map((item: any) => ({
+          'Şehir': item.city,
+          'Toplam Tutar (₺)': parseFloat(item.total_amount || 0),
+          'Bağış Sayısı': parseInt(item.donation_count || 0),
+          'Ortalama (₺)': parseFloat(item.avg_amount || 0),
         }));
       }
       
@@ -231,8 +228,7 @@ export default function Statistics() {
     const tabTitle = 
       activeTab === 'trend' ? 'Bağış_Trendi' :
       activeTab === 'category' ? 'Kategoriye_Gore_Bağışlar' :
-      activeTab === 'donorType' ? 'Bağışçı_Turleri' :
-      activeTab === 'donationType' ? 'Bağış_Tipleri' : 'Şehir_Bazlı_Bağışlar';
+      activeTab === 'donation-type' ? 'Bağış_Tipleri' : 'Şehir_Bazlı_Bağışlar';
     
     if (format === 'excel') {
       try {
@@ -284,8 +280,7 @@ export default function Statistics() {
         const title = 
           activeTab === 'trend' ? 'Bağış Trendi' :
           activeTab === 'category' ? 'Kategoriye Göre Bağışlar' :
-          activeTab === 'donorType' ? 'Bağışçı Türleri' :
-          activeTab === 'donationType' ? 'Bağış Tipleri' : 'Şehir Bazlı Bağışlar';
+          activeTab === 'donation-type' ? 'Bağış Tipleri' : 'Şehir Bazlı Bağışlar';
         
         // Başlık
         doc.setFontSize(16);
@@ -328,63 +323,7 @@ export default function Statistics() {
         console.error("PDF dışa aktarma hatası:", error);
         alert("PDF dosyası oluşturulurken bir hata oluştu.");
       }
-    } else if (format === 'csv') {
-      try {
-        // CSV'ye dönüştürme
-        const headers = Object.keys(data[0]).join(',');
-        const csvRows = data.map(row => {
-          return Object.values(row).map(value => {
-            // Virgülleri ve çift tırnakları kontrol et
-            if (typeof value === 'string' && (value.includes(',') || value.includes('"'))) {
-              return `"${value.replace(/"/g, '""')}"`;
-            }
-            return value;
-          }).join(',');
-        });
-        
-        const csvContent = [headers, ...csvRows].join('\n');
-        
-        // CSV indirme
-        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.setAttribute('href', url);
-        link.setAttribute('download', `Bağış_İstatistikleri_${tabTitle}.csv`);
-        link.style.visibility = 'hidden';
-        document.body.appendChild(link);
-        link.click();
-        
-        // Temizlik
-        setTimeout(() => {
-          document.body.removeChild(link);
-          URL.revokeObjectURL(url);
-        }, 100);
-      } catch (error) {
-        console.error("CSV dışa aktarma hatası:", error);
-        alert("CSV dosyası oluşturulurken bir hata oluştu.");
-      }
     }
-  };
-
-  useEffect(() => {
-    // Dropdown dışına tıklama olayını dinle
-    function handleClickOutside(event: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setDropdownOpen(false);
-      }
-    }
-    
-    // Event listener'ı ekle
-    document.addEventListener("mousedown", handleClickOutside);
-    
-    // Cleanup
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, []);
-
-  const toggleDropdown = () => {
-    setDropdownOpen(!dropdownOpen);
   };
 
   return (
@@ -436,17 +375,75 @@ export default function Statistics() {
                 >
                   PDF
                 </button>
-                <button
-                  onClick={() => {
-                    handleExport('csv');
-                    setDropdownOpen(false);
-                  }}
-                  className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                >
-                  CSV
-                </button>
               </div>
             )}
+          </div>
+        </div>
+      </div>
+      
+      {/* Genel İstatistik Kartları */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+        <div className="card">
+          <div className="card-body">
+            <div className="flex items-center">
+              <div className="p-3 rounded-full bg-green-100 text-green-600">
+                <FaHandHoldingHeart className="text-xl" />
+              </div>
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-500">Toplam Bağış</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {generalStats.total_donations?.toLocaleString('tr-TR') || '0'}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div className="card">
+          <div className="card-body">
+            <div className="flex items-center">
+              <div className="p-3 rounded-full bg-blue-100 text-blue-600">
+                <FaChartBar className="text-xl" />
+              </div>
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-500">Toplam Tutar</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {parseFloat(generalStats.total_amount || 0).toLocaleString('tr-TR')}₺
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div className="card">
+          <div className="card-body">
+            <div className="flex items-center">
+              <div className="p-3 rounded-full bg-orange-100 text-orange-600">
+                <FaChartLine className="text-xl" />
+              </div>
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-500">Ortalama Bağış</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {parseFloat(generalStats.avg_amount || 0).toLocaleString('tr-TR')}₺
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div className="card">
+          <div className="card-body">
+            <div className="flex items-center">
+              <div className="p-3 rounded-full bg-purple-100 text-purple-600">
+                <FaChartPie className="text-xl" />
+              </div>
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-500">Benzersiz Bağışçı</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {generalStats.unique_donors?.toLocaleString('tr-TR') || '0'}
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -473,13 +470,6 @@ export default function Statistics() {
         >
           <FaHandHoldingHeart className="inline mr-2" />
           Bağış Tipi Analizi
-        </button>
-        <button
-          className={`px-4 py-2 font-medium ${activeTab === 'donor' ? 'text-primary border-b-2 border-primary' : 'text-gray-500'}`}
-          onClick={() => setActiveTab('donor')}
-        >
-          <FaChartBar className="inline mr-2" />
-          Bağışçı Tipi
         </button>
         <button
           className={`px-4 py-2 font-medium ${activeTab === 'city' ? 'text-primary border-b-2 border-primary' : 'text-gray-500'}`}
@@ -532,19 +522,33 @@ export default function Statistics() {
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div>
                   <p className="text-sm text-gray-500">Toplam Bağış</p>
-                  <p className="text-lg font-bold">{activeTrendData.values.reduce((a, b) => a + b, 0).toLocaleString('tr-TR')}₺</p>
+                  <p className="text-lg font-bold">
+                    {trendData.reduce((sum: number, item: any) => sum + parseFloat(item.total_amount || 0), 0).toLocaleString('tr-TR')}₺
+                  </p>
                 </div>
                 <div>
                   <p className="text-sm text-gray-500">Ortalama</p>
-                  <p className="text-lg font-bold">{Math.round(activeTrendData.values.reduce((a, b) => a + b, 0) / activeTrendData.values.length).toLocaleString('tr-TR')}₺</p>
+                  <p className="text-lg font-bold">
+                    {trendData.length > 0 ? 
+                      Math.round(trendData.reduce((sum: number, item: any) => sum + parseFloat(item.total_amount || 0), 0) / trendData.length).toLocaleString('tr-TR') : 0
+                    }₺
+                  </p>
                 </div>
                 <div>
                   <p className="text-sm text-gray-500">En Yüksek</p>
-                  <p className="text-lg font-bold">{Math.max(...activeTrendData.values).toLocaleString('tr-TR')}₺</p>
+                  <p className="text-lg font-bold">
+                    {trendData.length > 0 ? 
+                      Math.max(...trendData.map((item: any) => parseFloat(item.total_amount || 0))).toLocaleString('tr-TR') : 0
+                    }₺
+                  </p>
                 </div>
                 <div>
                   <p className="text-sm text-gray-500">En Düşük</p>
-                  <p className="text-lg font-bold">{Math.min(...activeTrendData.values).toLocaleString('tr-TR')}₺</p>
+                  <p className="text-lg font-bold">
+                    {trendData.length > 0 ? 
+                      Math.min(...trendData.map((item: any) => parseFloat(item.total_amount || 0))).toLocaleString('tr-TR') : 0
+                    }₺
+                  </p>
                 </div>
               </div>
             </div>
@@ -571,7 +575,7 @@ export default function Statistics() {
                       tooltip: {
                         callbacks: {
                           label: function(context) {
-                            return context.label + ': %' + context.parsed;
+                            return context.label + ': ' + context.parsed.toLocaleString('tr-TR') + '₺';
                           }
                         }
                       }
@@ -579,39 +583,23 @@ export default function Statistics() {
                   }}
                 />
               </div>
-              <div>
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead>
-                    <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Kategori</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Yüzde</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Miktar</th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    {categoryData.labels.map((label, index) => (
-                      <tr key={index}>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="flex items-center">
-                            <div className="h-3 w-3 rounded-full mr-2" style={{ backgroundColor: (categoryChartData.datasets[0].backgroundColor as string[])[index] }}></div>
-                            <div className="text-sm font-medium text-gray-900">{label}</div>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900">%{categoryData.values[index]}</div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900">{(categoryData.values[index] * 50000).toLocaleString('tr-TR')}₺</div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold">Kategori Detayları</h3>
+                <div className="space-y-2">
+                  {categoryData.map((item: any, index: number) => (
+                    <div key={index} className="flex justify-between items-center p-3 bg-gray-50 rounded">
+                      <span className="font-medium">{item.donation_category}</span>
+                      <span className="text-primary font-bold">
+                        {parseFloat(item.total_amount || 0).toLocaleString('tr-TR')}₺
+                      </span>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
         )}
-
+        
         {/* Bağış Tipi Analizi */}
         {activeTab === 'donation-type' && (
           <div className="card">
@@ -632,7 +620,7 @@ export default function Statistics() {
                       tooltip: {
                         callbacks: {
                           label: function(context) {
-                            return context.label + ': %' + context.parsed;
+                            return context.label + ': ' + context.parsed.toLocaleString('tr-TR') + '₺';
                           }
                         }
                       }
@@ -640,95 +628,18 @@ export default function Statistics() {
                   }}
                 />
               </div>
-              <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead>
-                    <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Bağış Tipi</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Yüzde</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Miktar</th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    {donationTypeData.labels.map((label, index) => (
-                      <tr key={index}>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="flex items-center">
-                            <div className="h-3 w-3 rounded-full mr-2" style={{ backgroundColor: (donationTypeChartData.datasets[0].backgroundColor as string[])[index] }}></div>
-                            <div className="text-sm font-medium text-gray-900">{label}</div>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900">%{donationTypeData.values[index]}</div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900">{donationTypeData.amounts[index].toLocaleString('tr-TR')}₺</div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        )}
-        
-        {/* Bağışçı Tipi */}
-        {activeTab === 'donor' && (
-          <div className="card">
-            <div className="card-header">
-              <h2 className="card-title">Bağışçı Tiplerine Göre Dağılım</h2>
-            </div>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 p-4">
-              <div className="h-80 flex items-center justify-center">
-                <Pie 
-                  data={donorTypeChartData}
-                  options={{
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                      legend: {
-                        position: 'right',
-                      },
-                      tooltip: {
-                        callbacks: {
-                          label: function(context) {
-                            return context.label + ': %' + context.parsed;
-                          }
-                        }
-                      }
-                    }
-                  }}
-                />
-              </div>
-              <div>
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead>
-                    <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Bağışçı Tipi</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Yüzde</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Miktar</th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    {donorTypeData.labels.map((label, index) => (
-                      <tr key={index}>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="flex items-center">
-                            <div className="h-3 w-3 rounded-full mr-2" style={{ backgroundColor: (donorTypeChartData.datasets[0].backgroundColor as string[])[index] }}></div>
-                            <div className="text-sm font-medium text-gray-900">{label}</div>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900">%{donorTypeData.values[index]}</div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900">{(donorTypeData.values[index] * 50000).toLocaleString('tr-TR')}₺</div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold">Bağış Tipi Detayları</h3>
+                <div className="space-y-2">
+                  {donationTypeData.map((item: any, index: number) => (
+                    <div key={index} className="flex justify-between items-center p-3 bg-gray-50 rounded">
+                      <span className="font-medium">{item.donation_option}</span>
+                      <span className="text-primary font-bold">
+                        {parseFloat(item.total_amount || 0).toLocaleString('tr-TR')}₺
+                      </span>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
@@ -740,25 +651,13 @@ export default function Statistics() {
             <div className="card-header">
               <h2 className="card-title">Şehirlere Göre Bağış Dağılımı</h2>
             </div>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 p-4">
-              <div className="h-80 flex items-center justify-center">
+            <div className="p-4">
+              <div className="h-96">
                 <Bar 
                   data={cityChartData}
                   options={{
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: {
-                      legend: {
-                        position: 'top',
-                      },
-                      tooltip: {
-                        callbacks: {
-                          label: function(context) {
-                            return context.parsed.y.toLocaleString('tr-TR') + '₺';
-                          }
-                        }
-                      }
-                    },
                     scales: {
                       y: {
                         beginAtZero: true,
@@ -768,38 +667,30 @@ export default function Statistics() {
                           }
                         }
                       }
+                    },
+                    plugins: {
+                      tooltip: {
+                        callbacks: {
+                          label: function(context) {
+                            return context.parsed.y.toLocaleString('tr-TR') + '₺';
+                          }
+                        }
+                      }
                     }
                   }}
                 />
               </div>
-              <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead>
-                    <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Şehir</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Yüzde</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Miktar</th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    {cityData.labels.map((label, index) => (
-                      <tr key={index}>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="flex items-center">
-                            <div className="h-3 w-3 rounded-full mr-2" style={{ backgroundColor: (cityChartData.datasets[0].backgroundColor as string[])[index] }}></div>
-                            <div className="text-sm font-medium text-gray-900">{label}</div>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900">%{cityData.values[index]}</div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900">{cityData.amounts[index].toLocaleString('tr-TR')}₺</div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+            </div>
+            <div className="p-4 border-t border-gray-100">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {cityData.map((item: any, index: number) => (
+                  <div key={index} className="flex justify-between items-center p-3 bg-gray-50 rounded">
+                    <span className="font-medium">{item.city}</span>
+                    <span className="text-primary font-bold">
+                      {parseFloat(item.total_amount || 0).toLocaleString('tr-TR')}₺
+                    </span>
+                  </div>
+                ))}
               </div>
             </div>
           </div>

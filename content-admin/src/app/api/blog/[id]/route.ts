@@ -14,7 +14,7 @@ export async function GET(
       return new NextResponse('Unauthorized', { status: 401 })
     }
 
-    const post = await prisma.contentBlogPost.findUnique({
+    const post = await prisma.blogPost.findUnique({
       where: {
         id: params.id,
       },
@@ -55,21 +55,58 @@ export async function PUT(
     }
 
     const body = await request.json()
-    const { title, content, status, categoryId } = body
+    const { title, slug, content, excerpt, status, featured, categoryId, tags, coverImage } = body
 
-    if (!title || !content || !status || !categoryId) {
+    if (!title || !slug || !content || !status) {
       return new NextResponse('Missing required fields', { status: 400 })
     }
 
-    const post = await prisma.contentBlogPost.update({
+    // Mevcut yazıyı getir
+    const existingPost = await prisma.blogPost.findUnique({
+      where: { id: params.id },
+    })
+
+    if (!existingPost) {
+      return new NextResponse('Not Found', { status: 404 })
+    }
+
+    // Eğer slug değişmişse, yeni slug'ın benzersiz olup olmadığını kontrol et
+    if (slug !== existingPost.slug) {
+      const slugExists = await prisma.blogPost.findUnique({
+        where: { slug }
+      })
+
+      if (slugExists) {
+        return NextResponse.json({ error: 'Bu slug zaten kullanılıyor' }, { status: 400 })
+      }
+    }
+
+    const post = await prisma.blogPost.update({
       where: {
         id: params.id,
       },
       data: {
         title,
+        slug,
         content,
+        excerpt: excerpt || null,
         status,
-        categoryId,
+        featured: featured || false,
+        categoryId: categoryId || null,
+        tags: tags || null,
+        coverImage: coverImage || null,
+      },
+      include: {
+        author: {
+          select: {
+            name: true,
+          },
+        },
+        category: {
+          select: {
+            name: true,
+          },
+        },
       },
     })
 
@@ -91,13 +128,19 @@ export async function DELETE(
       return new NextResponse('Unauthorized', { status: 401 })
     }
 
-    await prisma.contentBlogPost.delete({
-      where: {
-        id: params.id,
-      },
+    const post = await prisma.blogPost.findUnique({
+      where: { id: params.id },
     })
 
-    return new NextResponse(null, { status: 204 })
+    if (!post) {
+      return new NextResponse('Not Found', { status: 404 })
+    }
+
+    await prisma.blogPost.delete({
+      where: { id: params.id },
+    })
+
+    return new NextResponse('OK', { status: 200 })
   } catch (error) {
     console.error('Blog yazısı silinirken hata oluştu:', error)
     return new NextResponse('Internal Server Error', { status: 500 })

@@ -11,7 +11,7 @@ export async function GET() {
       return new NextResponse('Unauthorized', { status: 401 })
     }
 
-    const categories = await prisma.contentCategory.findMany({
+    const categories = await prisma.blogCategory.findMany({
       orderBy: {
         name: 'asc',
       },
@@ -33,15 +33,32 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json()
-    const { name } = body
+    const { name, slug, description, type } = body
 
     if (!name) {
       return new NextResponse('Missing required fields', { status: 400 })
     }
 
-    const category = await prisma.contentCategory.create({
+    // Slug oluştur (eğer verilmemişse)
+    const finalSlug = slug || name
+      .toLowerCase()
+      .replace(/ğ/g, 'g')
+      .replace(/ü/g, 'u')
+      .replace(/ş/g, 's')
+      .replace(/ı/g, 'i')
+      .replace(/ö/g, 'o')
+      .replace(/ç/g, 'c')
+      .replace(/[^a-z0-9\s-]/g, '')
+      .replace(/\s+/g, '-')
+      .replace(/-+/g, '-')
+      .trim()
+
+    const category = await prisma.blogCategory.create({
       data: {
         name,
+        slug: finalSlug,
+        description: description || null,
+        type: type || 'blog',
       },
     })
 

@@ -11,7 +11,7 @@ export async function GET() {
       return new NextResponse('Unauthorized', { status: 401 })
     }
 
-    const posts = await prisma.contentBlogPost.findMany({
+    const posts = await prisma.blogPost.findMany({
       include: {
         author: {
           select: {
@@ -45,19 +45,45 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json()
-    const { title, content, status, categoryId } = body
+    const { title, slug, content, excerpt, status, featured, categoryId, tags, coverImage } = body
 
-    if (!title || !content || !status || !categoryId) {
+    if (!title || !slug || !content || !status) {
       return new NextResponse('Missing required fields', { status: 400 })
     }
 
-    const post = await prisma.contentBlogPost.create({
+    // Slug'ın benzersiz olup olmadığını kontrol et
+    const existingPost = await prisma.blogPost.findUnique({
+      where: { slug }
+    })
+
+    if (existingPost) {
+      return NextResponse.json({ error: 'Bu slug zaten kullanılıyor' }, { status: 400 })
+    }
+
+    const post = await prisma.blogPost.create({
       data: {
         title,
+        slug,
         content,
+        excerpt: excerpt || null,
         status,
-        categoryId,
+        featured: featured || false,
+        categoryId: categoryId || null,
+        tags: tags || null,
+        coverImage: coverImage || null,
         authorId: session.user.id,
+      },
+      include: {
+        author: {
+          select: {
+            name: true,
+          },
+        },
+        category: {
+          select: {
+            name: true,
+          },
+        },
       },
     })
 
