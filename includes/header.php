@@ -296,6 +296,61 @@ if (isset($page_titles[$current_page])) {
         }
     }
 
+    /* Ekstra küçük ekranlar için header iyileştirmeleri */
+    @media screen and (max-width: 480px) {
+        .brand-logo {
+            gap: 2px;
+        }
+
+        .brand-logo img {
+            width: 30px;
+            height: 30px;
+        }
+
+        .brand-text {
+            font-size: 18px;
+        }
+
+        .header-cta-btn-wrapper {
+            margin-right: 5px;
+            gap: 5px;
+        }
+
+        .btn-cart-header {
+            width: 30px;
+            height: 30px;
+            min-width: 30px;
+        }
+
+        .btn-cart-header i {
+            font-size: 12px;
+        }
+
+        .btn-donate {
+            height: 30px;
+            padding: 0 10px;
+            font-size: 12px;
+        }
+    }
+
+    @media screen and (max-width: 360px) {
+        .brand-text {
+            font-size: 16px;
+        }
+
+        .btn-cart-header {
+            width: 28px;
+            height: 28px;
+            min-width: 28px;
+        }
+
+        .btn-donate {
+            height: 28px;
+            padding: 0 8px;
+            font-size: 11px;
+        }
+    }
+
     /* Tablet görünümü için medya sorguları */
     @media screen and (max-width: 1023.98px) {
         .brand-logo {

@@ -17,6 +17,20 @@ type FormData = {
   tags: string
 }
 
+// YouTube URL'sinden video ID'sini çıkaran fonksiyon
+function getYouTubeVideoId(url: string): string | null {
+  const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/
+  const match = url.match(regExp)
+  return (match && match[2].length === 11) ? match[2] : null
+}
+
+// YouTube thumbnail URL'si oluşturan fonksiyon
+function getYouTubeThumbnail(url: string): string | null {
+  const videoId = getYouTubeVideoId(url)
+  if (!videoId) return null
+  return `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`
+}
+
 export default function VideoEditPage({
   params,
 }: {
@@ -26,13 +40,37 @@ export default function VideoEditPage({
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
   const [categories, setCategories] = useState([])
+  const [previewThumbnail, setPreviewThumbnail] = useState<string | null>(null)
 
   const {
     register,
     handleSubmit,
     setValue,
+    watch,
     formState: { errors },
   } = useForm<FormData>()
+
+  const watchedUrl = watch('url')
+  const watchedThumbnail = watch('thumbnail')
+
+  // URL değiştiğinde otomatik thumbnail oluştur
+  useEffect(() => {
+    if (watchedUrl) {
+      const autoThumbnail = getYouTubeThumbnail(watchedUrl)
+      if (autoThumbnail) {
+        setValue('thumbnail', autoThumbnail)
+        setPreviewThumbnail(autoThumbnail)
+      }
+    }
+  }, [watchedUrl, setValue])
+
+  // Thumbnail değiştiğinde preview'u güncelle
+  useEffect(() => {
+    if (watchedThumbnail) {
+      const thumbnailUrl = getYouTubeThumbnail(watchedThumbnail) || watchedThumbnail
+      setPreviewThumbnail(thumbnailUrl)
+    }
+  }, [watchedThumbnail])
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -67,6 +105,12 @@ export default function VideoEditPage({
           setValue('featured', data.featured)
           setValue('categoryId', data.categoryId || '')
           setValue('tags', data.tags || '')
+          
+          // Thumbnail preview'unu ayarla
+          const thumbnailUrl = getYouTubeThumbnail(data.url) || getYouTubeThumbnail(data.thumbnail)
+          if (thumbnailUrl) {
+            setPreviewThumbnail(thumbnailUrl)
+          }
         })
         .catch((error) => {
           console.error('Video getirilirken hata oluştu:', error)
@@ -179,6 +223,9 @@ export default function VideoEditPage({
                       </p>
                     )}
                   </div>
+                  <p className="mt-1 text-sm text-gray-500">
+                    YouTube URL'si girildiğinde thumbnail otomatik olarak oluşturulur.
+                  </p>
                 </div>
 
                 <div>
@@ -195,6 +242,19 @@ export default function VideoEditPage({
                       className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                     />
                   </div>
+                  {previewThumbnail && (
+                    <div className="mt-3">
+                      <p className="text-sm font-medium text-gray-700 mb-2">Önizleme:</p>
+                      <img
+                        src={previewThumbnail}
+                        alt="Thumbnail Önizleme"
+                        className="h-32 w-48 object-cover rounded-lg border border-gray-200"
+                        onError={(e) => {
+                          e.currentTarget.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTkyIiBoZWlnaHQ9IjEyOCIgdmlld0JveD0iMCAwIDE5MiAxMjgiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxOTIiIGhlaWdodD0iMTI4IiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik03MiA0OFY4MEw5NiA2NEw3MiA0OFoiIGZpbGw9IiM5Q0EzQUYiLz4KPC9zdmc+Cg=='
+                        }}
+                      />
+                    </div>
+                  )}
                 </div>
 
                 <div>

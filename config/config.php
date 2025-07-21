@@ -1,12 +1,34 @@
 <?php
+// Session güvenlik ayarları - session başlatılmadan önce yapılmalı
+if (session_status() === PHP_SESSION_NONE) {
+    ini_set('session.cookie_httponly', 1);
+    ini_set('session.cookie_secure', isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 1 : 0);
+    ini_set('session.cookie_samesite', 'Strict');
+    ini_set('session.use_strict_mode', 1);
+    ini_set('session.gc_maxlifetime', 7200); // 2 saat
+    ini_set('session.cookie_lifetime', 0); // Browser kapanınca expire
+}
+
 // Gerekli dosyaları dahil et - functions.php dosyasını önce dahil ediyoruz
 require_once __DIR__ . '/../includes/functions.php';
 
-// Temel URL tanımı
-define('BASE_URL', '/cinaralti-website/public');
+// Temel URL tanımı - Geliştirme ortamı için
+if (isset($_SERVER['SERVER_NAME']) && $_SERVER['SERVER_NAME'] === 'localhost' && isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] == '8000') {
+    // PHP built-in server için (localhost:8000)
+    define('BASE_URL', '');
+} elseif (isset($_SERVER['SERVER_NAME']) && $_SERVER['SERVER_NAME'] === 'localhost' && (strpos($_SERVER['SCRIPT_NAME'], '/cinaralti-website/') !== false)) {
+    // XAMPP için (localhost/cinaralti-website/)
+    define('BASE_URL', '/cinaralti-website/public');
+} else {
+    // Production için
+    define('BASE_URL', '/cinaralti-website/public');
+}
+
 // Geliştirme ortamında HTTP kullan, yayın ortamında HTTPS kullan
 $protocol = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') ? 'https' : 'http';
-define('SITE_URL', $protocol . '://' . $_SERVER['HTTP_HOST'] . '/cinaralti-website/public');
+$httpHost = isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : 'localhost';
+$baseUrl = BASE_URL ?: '';
+define('SITE_URL', $protocol . '://' . $httpHost . $baseUrl);
 
 // HTTPS zorunluluğu - geliştirme ortamında devre dışı bırakalım
 define('FORCE_HTTPS', false);

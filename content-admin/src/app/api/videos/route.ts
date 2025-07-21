@@ -1,4 +1,3 @@
-import prisma from '@/lib/prisma'
 import { getServerSession } from 'next-auth'
 import { NextResponse } from 'next/server'
 import { authOptions } from '../auth/[...nextauth]/route'
@@ -11,24 +10,20 @@ export async function GET() {
       return new NextResponse('Unauthorized', { status: 401 })
     }
 
-    const videos = await prisma.video.findMany({
-      include: {
-        author: {
-          select: {
-            name: true,
-          },
-        },
-        category: {
-          select: {
-            name: true,
-          },
-        },
-      },
-      orderBy: {
-        createdAt: 'desc',
+    // PHP backend'e istek gönder - XAMPP üzerinden doğru adres
+    const response = await fetch('http://localhost/cinaralti-website/database/api/videos.php', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
       },
     })
 
+    if (!response.ok) {
+      throw new Error('Videolar getirilemedi')
+    }
+
+    const videos = await response.json()
+    
     return NextResponse.json(videos)
   } catch (error) {
     console.error('Videolar getirilirken hata oluştu:', error)
@@ -51,33 +46,33 @@ export async function POST(request: Request) {
       return new NextResponse('Missing required fields', { status: 400 })
     }
 
-    const video = await prisma.video.create({
-      data: {
+    // PHP backend'e video oluşturma isteği gönder - XAMPP üzerinden doğru adres
+    const response = await fetch('http://localhost/cinaralti-website/database/api/videos.php', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
         title,
-        description,
+        description: description || null,
         url,
-        thumbnail,
+        thumbnail: thumbnail || null,
         status,
         featured: featured || false,
         categoryId: categoryId || null,
-        tags,
-        authorId: session.user.id,
-      },
-      include: {
-        author: {
-          select: {
-            name: true,
-          },
-        },
-        category: {
-          select: {
-            name: true,
-          },
-        },
-      },
+        tags: tags || null,
+        authorId: 1, // Şimdilik default author
+      }),
     })
 
-    return NextResponse.json(video)
+    if (!response.ok) {
+      const error = await response.json()
+      return NextResponse.json({ error: error.error || 'Video oluşturulamadı' }, { status: 400 })
+    }
+
+    const data = await response.json()
+    
+    return NextResponse.json(data)
   } catch (error) {
     console.error('Video oluşturulurken hata oluştu:', error)
     return new NextResponse('Internal Server Error', { status: 500 })

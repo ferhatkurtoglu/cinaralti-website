@@ -1,11 +1,9 @@
 <?php
-// Oturum başlatma
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-
 // Temel yapılandırma dosyasını dahil et
 require_once __DIR__ . '/../config/config.php';
+
+// Güvenli oturum başlat
+secure_session_start();
 require_once __DIR__ . '/../includes/actions/process-donation.php';
 
 // Yetkilendirme kontrolü - sadece yetkili admin kullanıcıları erişebilir

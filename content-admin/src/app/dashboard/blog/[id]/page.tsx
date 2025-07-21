@@ -66,10 +66,10 @@ export default function BlogPostPage({ params }: { params: { id: string } }) {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await fetch('/api/categories')
+        const response = await fetch('/api/categories?type=blog')
         if (response.ok) {
           const data = await response.json()
-          setCategories(data.filter((cat: any) => cat.type === 'blog'))
+          setCategories(data)
         }
       } catch (error) {
         console.error('Kategoriler yüklenirken hata:', error)

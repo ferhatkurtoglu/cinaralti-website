@@ -22,7 +22,7 @@
                 <div class="donate-details-info">
                     <div class="donate-details-header">
                         <h2 class="donate-details-title" id="donation-type">Filistin/Gazze</h2>
-                        <p class="donate-details-category" id="donation-category">Acil Yardım</p>
+                        <p class="donate-details-category" id="donation-category">Yükleniyor...</p>
                     </div>
 
                     <div class="donate-form">
@@ -499,22 +499,79 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // URL'den bağış türünü al
+    // URL'den bağış ID'sini al
     const urlParams = new URLSearchParams(window.location.search);
+    const donationId = urlParams.get('id');
     const donationType = urlParams.get('type') || 'Genel Bağış';
 
-    // Sayfa başlığını ve diğer yerleri güncelle
-    document.getElementById('donation-title').textContent = donationType;
-    document.getElementById('donation-type').textContent = donationType;
-
-    // Bağış türüne göre kategori belirle (örnek)
-    let category = "Acil Yardım";
-    if (donationType === "Zekat") {
-        category = "Zekat Bağışı";
-    } else if (donationType === "Bina Satın Alma") {
-        category = "Altyapı Projesi";
+    // Eğer ID varsa, API'den veriyi çek
+    if (donationId) {
+        loadDonationData(donationId);
+    } else {
+        // Varsayılan değerler
+        document.getElementById('donation-title').textContent = donationType;
+        document.getElementById('donation-type').textContent = donationType;
+        document.getElementById('donation-category').textContent = 'Genel Bağış';
     }
-    document.getElementById('donation-category').textContent = category;
+
+    // Bağış verilerini API'den yükle
+    async function loadDonationData(id) {
+        try {
+            const response = await fetch(`../admin/app/api/donation-types/${id}`);
+            if (!response.ok) {
+                throw new Error('Veri yüklenemedi');
+            }
+            
+            const data = await response.json();
+            
+            // Sayfa verilerini güncelle
+            document.getElementById('donation-title').textContent = data.name;
+            document.getElementById('donation-type').textContent = data.name;
+            
+            // Kategorileri göster
+            if (data.categories && data.categories.length > 0) {
+                const categoryNames = data.categories.map(cat => cat.name).join(', ');
+                document.getElementById('donation-category').textContent = categoryNames;
+            } else {
+                document.getElementById('donation-category').textContent = 'Genel Bağış';
+            }
+            
+            // Açıklama
+            if (data.description) {
+                document.getElementById('donation-description').innerHTML = `<p>${data.description}</p>`;
+            }
+            
+            // Ana görsel
+            if (data.cover_image) {
+                document.getElementById('donation-main-image').src = data.cover_image;
+            }
+            
+            // Galeri görselleri
+            if (data.gallery_images && Array.isArray(data.gallery_images)) {
+                updateCarouselImages(data.gallery_images);
+            }
+            
+        } catch (error) {
+            console.error('Bağış verisi yüklenirken hata:', error);
+            // Varsayılan değerler
+            document.getElementById('donation-category').textContent = 'Genel Bağış';
+        }
+    }
+    
+    // Carousel görsellerini güncelle
+    function updateCarouselImages(images) {
+        const carouselInner = document.querySelector('#donationImagesCarousel .carousel-inner');
+        if (!carouselInner || images.length === 0) return;
+        
+        carouselInner.innerHTML = '';
+        
+        images.forEach((image, index) => {
+            const carouselItem = document.createElement('div');
+            carouselItem.className = `carousel-item ${index === 0 ? 'active' : ''}`;
+            carouselItem.innerHTML = `<img src="${image}" class="d-block w-100" alt="Yardım Faaliyeti">`;
+            carouselInner.appendChild(carouselItem);
+        });
+    }
 
     // Para formatı için input işleyici
     const donateInputs = document.querySelectorAll('.donate-form__input, .donate-card-price-input');
@@ -742,35 +799,14 @@ document.addEventListener('DOMContentLoaded', function() {
         localStorage.setItem('cartTotalAmount', formattedTotal);
     }
 
-    // Form doğrulama fonksiyonu
+    // Form doğrulama fonksiyonu - Sadece tutar zorunlu
     function validateDonationForm() {
         const donationAmount = document.querySelector('.donate-form__input').value;
-        const donorName = document.querySelector('.donate-form__field input[placeholder="Ad Soyad"]').value;
-        const donorPhone = document.querySelector('.donate-form__field input[placeholder="+90"]').value;
-        const donorEmail = document.querySelector('.donate-form__field input[placeholder="E-Posta"]').value;
 
-        // Bağış tutarı kontrolü
+        // Bağış tutarı kontrolü (sadece bu zorunlu)
         const amountValue = donationAmount.replace(/[₺,.]/g, '');
         if (!amountValue || parseInt(amountValue) <= 0) {
             showValidationError('Lütfen geçerli bir bağış tutarı giriniz.');
-            return false;
-        }
-
-        // İsim kontrolü
-        if (!donorName.trim()) {
-            showValidationError('Lütfen adınızı ve soyadınızı giriniz.');
-            return false;
-        }
-
-        // Telefon kontrolü
-        if (!donorPhone.trim()) {
-            showValidationError('Lütfen telefon numaranızı giriniz.');
-            return false;
-        }
-
-        // E-posta kontrolü
-        if (!donorEmail.trim() || !isValidEmail(donorEmail)) {
-            showValidationError('Lütfen geçerli bir e-posta adresi giriniz.');
             return false;
         }
 

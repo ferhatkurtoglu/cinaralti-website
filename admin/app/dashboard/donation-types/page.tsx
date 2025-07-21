@@ -43,12 +43,11 @@ interface Category {
 
 interface DonationType {
   id: number;
-  title: string;
+  name: string;
   slug: string;
   description: string;
   categories: Category[];
-  active: boolean;
-  category_id?: number;
+  is_active: boolean;
   target_amount?: number;
   collected_amount?: number;
   position?: number;
@@ -68,6 +67,9 @@ export default function DonationOptions() {
   const [galleryImages, setGalleryImages] = useState<string[]>([]);
   const [highlightScrollbar, setHighlightScrollbar] = useState<boolean>(false);
   const [apiError, setApiError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [showDeactivateModal, setShowDeactivateModal] = useState<boolean>(false);
+  const [deactivateTargetId, setDeactivateTargetId] = useState<number | null>(null);
   const formContentRef = useRef<HTMLDivElement>(null);
   const [submitting, setSubmitting] = useState<boolean>(false);
 
@@ -121,8 +123,8 @@ export default function DonationOptions() {
   };
 
   const filteredDonationTypes = donationTypes.filter((type: DonationType) =>
-    type.title.toLowerCase().includes(search.toLowerCase()) ||
-    type.description.toLowerCase().includes(search.toLowerCase())
+    type.name.toLowerCase().includes(search.toLowerCase()) ||
+    (type.description && type.description.toLowerCase().includes(search.toLowerCase()))
   );
 
   const handleEdit = (donationType: DonationType) => {
@@ -186,21 +188,91 @@ export default function DonationOptions() {
   const handleDelete = async (id: number) => {
     if (confirm('Bu bağış seçeneğini silmek istediğinizden emin misiniz?')) {
       try {
+        // Önceki mesajları temizle
+        setApiError(null);
+        setSuccessMessage(null);
+        
         const response = await fetch(`/api/donation-types/${id}`, {
           method: 'DELETE',
         });
         
         if (!response.ok) {
-          throw new Error('Silme işlemi başarısız oldu');
+          const errorData = await response.json();
+          
+          // Eğer bağışlar varsa modal aç
+          if (errorData.error === 'HAS_DONATIONS') {
+            setDeactivateTargetId(id);
+            setShowDeactivateModal(true);
+            return;
+          }
+          
+          setApiError(errorData.message || errorData.error || 'Silme işlemi başarısız oldu');
+          return;
         }
         
         // UI'dan sil
         setDonationTypes(donationTypes.filter((option: DonationType) => option.id !== id));
-        alert('Bağış seçeneği başarıyla silindi');
-      } catch (error) {
+        setSuccessMessage('Bağış seçeneği başarıyla silindi');
+        
+        // Başarı mesajını 3 saniye sonra temizle
+        setTimeout(() => {
+          setSuccessMessage(null);
+        }, 3000);
+        
+      } catch (error: any) {
         console.error('Bağış seçeneği silinirken hata:', error);
-        alert('Bağış seçeneği silinirken bir hata oluştu. Lütfen tekrar deneyin.');
+        setApiError(`Hata: ${error.message}`);
       }
+    }
+  };
+
+  const handleDeactivate = async () => {
+    if (!deactivateTargetId) return;
+    
+    try {
+      setApiError(null);
+      setSuccessMessage(null);
+      
+      console.log('Sending deactivate request for ID:', deactivateTargetId);
+      
+      const response = await fetch(`/api/donation-types/${deactivateTargetId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ action: 'deactivate' }),
+      });
+      
+      console.log('Response status:', response.status);
+      const responseData = await response.json();
+      console.log('Response data:', responseData);
+      
+      if (!response.ok) {
+        setApiError(responseData.error || 'Pasif yapma işlemi başarısız oldu');
+        return;
+      }
+      
+      // UI'ı güncelle - is_active'i false yap
+      setDonationTypes(donationTypes.map((option: DonationType) => 
+        option.id === deactivateTargetId 
+          ? { ...option, is_active: false }
+          : option
+      ));
+      
+      setSuccessMessage(responseData.message || 'Bağış seçeneği pasif duruma alındı');
+      
+      // Modal'ı kapat
+      setShowDeactivateModal(false);
+      setDeactivateTargetId(null);
+      
+      // Başarı mesajını 3 saniye sonra temizle
+      setTimeout(() => {
+        setSuccessMessage(null);
+      }, 3000);
+      
+    } catch (error: any) {
+      console.error('Bağış seçeneği pasif yapılırken hata:', error);
+      setApiError(`Hata: ${error.message}`);
     }
   };
 
@@ -211,7 +283,7 @@ export default function DonationOptions() {
       setSubmitting(true);
       
       const form = e.currentTarget;
-      const title = (form.elements.namedItem('title') as HTMLInputElement).value;
+      const name = (form.elements.namedItem('name') as HTMLInputElement).value;
       const description = (form.elements.namedItem('description') as HTMLTextAreaElement).value;
       const active = (form.elements.namedItem('active') as HTMLInputElement).checked;
       const targetAmount = (form.elements.namedItem('target_amount') as HTMLInputElement).value;
@@ -234,20 +306,19 @@ export default function DonationOptions() {
       
       try {
         if (modalMode === 'add') {
-          // Yeni bağış seçeneği için API isteği
-          const newTypeData = {
-            title,
-            slug: title.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''),
-            description,
-            categories: selectedCategoryIds,
-            active,
-            category_id: selectedCategoryIds.length > 0 ? selectedCategoryIds[0] : null,
-            target_amount: parseFloat(targetAmount) || 0,
-            collected_amount: parseFloat(collectedAmount) || 0,
-            position: parseInt(position) || 0,
-            cover_image: coverImage,
-            gallery_images: galleryImages
-          };
+                  // Yeni bağış seçeneği için API isteği
+        const newTypeData = {
+          name,
+          slug: name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''),
+          description,
+          categories: selectedCategoryIds,
+          is_active: active,
+          target_amount: parseFloat(targetAmount) || 0,
+          collected_amount: parseFloat(collectedAmount) || 0,
+          position: parseInt(position) || 0,
+          cover_image: coverImage,
+          gallery_images: galleryImages
+        };
           
           console.log('Gönderilen veri:', newTypeData);
           
@@ -272,22 +343,26 @@ export default function DonationOptions() {
             ...addedType, 
             categories: selectedCategories
           }]);
-          alert('Yeni bağış seçeneği başarıyla eklendi');
+          setSuccessMessage('Yeni bağış seçeneği başarıyla eklendi');
+          
+          // Başarı mesajını 3 saniye sonra temizle
+          setTimeout(() => {
+            setSuccessMessage(null);
+          }, 3000);
         } else if (modalMode === 'edit' && currentDonationType) {
-          // Mevcut bağış seçeneğini güncelle
-          const updatedTypeData = {
-            title,
-            slug: title.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''),
-            description,
-            categories: selectedCategoryIds,
-            active,
-            category_id: selectedCategoryIds.length > 0 ? selectedCategoryIds[0] : null,
-            target_amount: parseFloat(targetAmount) || 0,
-            collected_amount: parseFloat(collectedAmount) || 0,
-            position: parseInt(position) || 0,
-            cover_image: coverImage,
-            gallery_images: galleryImages
-          };
+                  // Mevcut bağış seçeneğini güncelle
+        const updatedTypeData = {
+          name,
+          slug: name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''),
+          description,
+          categories: selectedCategoryIds,
+          is_active: active,
+          target_amount: parseFloat(targetAmount) || 0,
+          collected_amount: parseFloat(collectedAmount) || 0,
+          position: parseInt(position) || 0,
+          cover_image: coverImage,
+          gallery_images: galleryImages
+        };
           
           console.log('Güncellenen veri:', updatedTypeData);
           
@@ -314,18 +389,23 @@ export default function DonationOptions() {
               categories: selectedCategories
             } : type
           ));
-          alert('Bağış seçeneği başarıyla güncellendi');
+          setSuccessMessage('Bağış seçeneği başarıyla güncellendi');
+          
+          // Başarı mesajını 3 saniye sonra temizle
+          setTimeout(() => {
+            setSuccessMessage(null);
+          }, 3000);
         }
         
         // Formu kapat
         setShowModal(false);
       } catch (error) {
         console.error('API hatası:', error);
-        alert('İşlem sırasında bir hata oluştu. Lütfen tekrar deneyin.');
+        setApiError('İşlem sırasında bir hata oluştu. Lütfen tekrar deneyin.');
       }
     } catch (error) {
       console.error('Form gönderme hatası:', error);
-      alert('Form gönderilirken bir hata oluştu. Lütfen tekrar deneyin.');
+      setApiError('Form gönderilirken bir hata oluştu. Lütfen tekrar deneyin.');
     } finally {
       setSubmitting(false);
     }
@@ -355,6 +435,59 @@ export default function DonationOptions() {
           <FaPlus className="mr-2" /> Yeni Ekle
         </button>
       </div>
+
+      {/* Bildirim Mesajları */}
+      {apiError && (
+        <div className="mb-4 p-4 bg-red-50 border-l-4 border-red-400 rounded-md">
+          <div className="flex items-center">
+            <div className="flex-shrink-0">
+              <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+              </svg>
+            </div>
+            <div className="ml-3">
+              <p className="text-sm text-red-700">{apiError}</p>
+            </div>
+            <div className="ml-auto pl-3">
+              <button
+                onClick={() => setApiError(null)}
+                className="inline-flex bg-red-50 rounded-md p-1.5 text-red-500 hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-red-50 focus:ring-red-600"
+                aria-label="Hata mesajını kapat"
+              >
+                <svg className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {successMessage && (
+        <div className="mb-4 p-4 bg-green-50 border-l-4 border-green-400 rounded-md">
+          <div className="flex items-center">
+            <div className="flex-shrink-0">
+              <svg className="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+              </svg>
+            </div>
+            <div className="ml-3">
+              <p className="text-sm text-green-700">{successMessage}</p>
+            </div>
+            <div className="ml-auto pl-3">
+              <button
+                onClick={() => setSuccessMessage(null)}
+                className="inline-flex bg-green-50 rounded-md p-1.5 text-green-500 hover:bg-green-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-green-50 focus:ring-green-600"
+                aria-label="Başarı mesajını kapat"
+              >
+                <svg className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {apiError && (
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
@@ -415,14 +548,16 @@ export default function DonationOptions() {
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <div className="ml-4">
-                          <div className="text-sm font-medium text-gray-900">{donationType.title}</div>
+                          <div className="text-sm font-medium text-gray-900">{donationType.name}</div>
                           <div className="text-sm text-gray-500">{donationType.slug}</div>
                         </div>
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-900">
-                        {categories.find(c => c.id === donationType.category_id)?.name || '-'}
+                        {donationType.categories && donationType.categories.length > 0 
+                    ? donationType.categories.map(c => c.name).join(', ')
+                    : '-'}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
@@ -451,23 +586,23 @@ export default function DonationOptions() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                        donationType.active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                        donationType.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
                       }`}>
-                        {donationType.active ? 'Aktif' : 'Pasif'}
+                        {donationType.is_active ? 'Aktif' : 'Pasif'}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <button
                         onClick={() => handleEdit(donationType)}
                         className="text-indigo-600 hover:text-indigo-900 mr-3"
-                        aria-label={`${donationType.title} düzenle`}
+                        aria-label={`${donationType.name} düzenle`}
                       >
                         <FaEdit />
                       </button>
                       <button
                         onClick={() => handleDelete(donationType.id)}
                         className="text-red-600 hover:text-red-900"
-                        aria-label={`${donationType.title} sil`}
+                        aria-label={`${donationType.name} sil`}
                       >
                         <FaTrash />
                       </button>
@@ -531,10 +666,10 @@ export default function DonationOptions() {
                   </label>
                   <input
                     type="text"
-                    name="title"
+                    name="name"
                     className="input-field"
                     placeholder="Bağış seçeneği adı"
-                    defaultValue={currentDonationType?.title || ''}
+                    defaultValue={currentDonationType?.name || ''}
                     required
                   />
                 </div>
@@ -703,7 +838,7 @@ export default function DonationOptions() {
                             input.value = '';
                           } catch (error) {
                             console.error('Kategori eklenirken hata:', error);
-                            alert('Kategori eklenirken bir hata oluştu. Lütfen tekrar deneyin.');
+                            setApiError('Kategori eklenirken bir hata oluştu. Lütfen tekrar deneyin.');
                           }
                         }
                       }}
@@ -719,7 +854,7 @@ export default function DonationOptions() {
                     type="checkbox"
                     id="active"
                     name="active"
-                    defaultChecked={currentDonationType?.active ?? true}
+                    defaultChecked={currentDonationType?.is_active ?? true}
                     className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
                   />
                   <label htmlFor="active" className="ml-2 block text-sm text-gray-900">
@@ -757,6 +892,50 @@ export default function DonationOptions() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Deactivate Modal */}
+      {showDeactivateModal && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <div className="mt-3 text-center">
+              <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-yellow-100">
+                <svg className="h-6 w-6 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                </svg>
+              </div>
+              <h3 className="text-lg font-medium text-gray-900 mt-2">
+                Bağış Seçeneği Silinemedi
+              </h3>
+              <div className="mt-2 px-7 py-3">
+                <p className="text-sm text-gray-500">
+                  Bu bağış seçeneği ile yapılan bağışlar bulunduğu için silinemez. 
+                  Önce bu bağış seçeneği ile yapılan bağışları silmeniz gerekiyor.
+                </p>
+                <p className="text-sm text-gray-700 mt-2 font-medium">
+                  İsterseniz bu bağış seçeneğini pasif durumuna alabilirsiniz.
+                </p>
+              </div>
+              <div className="items-center px-4 py-3">
+                <button
+                  onClick={handleDeactivate}
+                  className="px-4 py-2 bg-yellow-500 text-white text-base font-medium rounded-md w-full shadow-sm hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-300 mb-2"
+                >
+                  Pasif Duruma Al
+                </button>
+                <button
+                  onClick={() => {
+                    setShowDeactivateModal(false);
+                    setDeactivateTargetId(null);
+                  }}
+                  className="px-4 py-2 bg-gray-500 text-white text-base font-medium rounded-md w-full shadow-sm hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-300"
+                >
+                  İptal
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}

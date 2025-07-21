@@ -1,3 +1,17 @@
+<?php
+// Gerekli servisleri dahil et
+require_once dirname(__DIR__) . '/services/video-service.php';
+require_once dirname(__DIR__) . '/includes/blog-service.php';
+
+// Video servisi
+$videoService = new VideoService();
+$homeVideos = $videoService->getFeaturedVideos(3); // Ana sayfa için öne çıkan 3 video
+
+// Blog servisi
+$blogService = getBlogService();
+$homeBlogs = $blogService->getPublishedPosts(3); // Ana sayfa için son 3 makale
+?>
+
   <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     Home 3 : Hero Section 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
@@ -173,109 +187,109 @@
           <div class="ticker-01_content">
               <div class="ticker-item">
                   <p>Çınaraltı</p>
-                  <img src="../public/assets/image/logo.png" alt="">
+                  <img src="<?= BASE_URL ?>/assets/image/logo.png" alt="Çınaraltı Logo">
               </div>
               <div class="ticker-item">
                   <p>Çınaraltı</p>
-                  <img src="../public/assets/image/logo.png" alt="">
+                  <img src="<?= BASE_URL ?>/assets/image/logo.png" alt="Çınaraltı Logo">
               </div>
               <div class="ticker-item">
                   <p>Çınaraltı</p>
-                  <img src="../public/assets/image/logo.png" alt="">
+                  <img src="<?= BASE_URL ?>/assets/image/logo.png" alt="Çınaraltı Logo">
               </div>
               <div class="ticker-item">
                   <p>Çınaraltı</p>
-                  <img src="../public/assets/image/logo.png" alt="">
-              </div>
-          </div>
-          <div class="ticker-01_content">
-              <div class="ticker-item">
-                  <p>Çınaraltı</p>
-                  <img src="../public/assets/image/logo.png" alt="">
-              </div>
-              <div class="ticker-item">
-                  <p>Çınaraltı</p>
-                  <img src="../public/assets/image/logo.png" alt="">
-              </div>
-              <div class="ticker-item">
-                  <p>Çınaraltı</p>
-                  <img src="../public/assets/image/logo.png" alt="">
-              </div>
-              <div class="ticker-item">
-                  <p>Çınaraltı</p>
-                  <img src="../public/assets/image/logo.png" alt="">
+                  <img src="<?= BASE_URL ?>/assets/image/logo.png" alt="Çınaraltı Logo">
               </div>
           </div>
           <div class="ticker-01_content">
               <div class="ticker-item">
                   <p>Çınaraltı</p>
-                  <img src="../public/assets/image/logo.png" alt="">
+                  <img src="<?= BASE_URL ?>/assets/image/logo.png" alt="Çınaraltı Logo">
               </div>
               <div class="ticker-item">
                   <p>Çınaraltı</p>
-                  <img src="../public/assets/image/logo.png" alt="">
+                  <img src="<?= BASE_URL ?>/assets/image/logo.png" alt="Çınaraltı Logo">
               </div>
               <div class="ticker-item">
                   <p>Çınaraltı</p>
-                  <img src="../public/assets/image/logo.png" alt="">
+                  <img src="<?= BASE_URL ?>/assets/image/logo.png" alt="Çınaraltı Logo">
               </div>
               <div class="ticker-item">
                   <p>Çınaraltı</p>
-                  <img src="../public/assets/image/logo.png" alt="">
-              </div>
-          </div>
-          <div class="ticker-01_content">
-              <div class="ticker-item">
-                  <p>Çınaraltı</p>
-                  <img src="../public/assets/image/logo.png" alt="">
-              </div>
-              <div class="ticker-item">
-                  <p>Çınaraltı</p>
-                  <img src="../public/assets/image/logo.png" alt="">
-              </div>
-              <div class="ticker-item">
-                  <p>Çınaraltı</p>
-                  <img src="../public/assets/image/logo.png" alt="">
-              </div>
-              <div class="ticker-item">
-                  <p>Çınaraltı</p>
-                  <img src="../public/assets/image/logo.png" alt="">
+                  <img src="<?= BASE_URL ?>/assets/image/logo.png" alt="Çınaraltı Logo">
               </div>
           </div>
           <div class="ticker-01_content">
               <div class="ticker-item">
                   <p>Çınaraltı</p>
-                  <img src="../public/assets/image/logo.png" alt="">
+                  <img src="<?= BASE_URL ?>/assets/image/logo.png" alt="Çınaraltı Logo">
               </div>
               <div class="ticker-item">
                   <p>Çınaraltı</p>
-                  <img src="../public/assets/image/logo.png" alt="">
+                  <img src="<?= BASE_URL ?>/assets/image/logo.png" alt="Çınaraltı Logo">
               </div>
               <div class="ticker-item">
                   <p>Çınaraltı</p>
-                  <img src="../public/assets/image/logo.png" alt="">
+                  <img src="<?= BASE_URL ?>/assets/image/logo.png" alt="Çınaraltı Logo">
               </div>
               <div class="ticker-item">
                   <p>Çınaraltı</p>
-                  <img src="../public/assets/image/logo.png" alt="">
+                  <img src="<?= BASE_URL ?>/assets/image/logo.png" alt="Çınaraltı Logo">
               </div>
           </div>
           <div class="ticker-01_content">
               <div class="ticker-item">
                   <p>Çınaraltı</p>
-                  <img src="../public/assets/image/logo.png" alt="">
+                  <img src="<?= BASE_URL ?>/assets/image/logo.png" alt="Çınaraltı Logo">
               </div>
               <div class="ticker-item">
                   <p>Çınaraltı</p>
-                  <img src="../public/assets/image/logo.png" alt="">
+                  <img src="<?= BASE_URL ?>/assets/image/logo.png" alt="Çınaraltı Logo">
               </div>
               <div class="ticker-item">
                   <p>Çınaraltı</p>
-                  <img src="../public/assets/image/logo.png" alt="">
+                  <img src="<?= BASE_URL ?>/assets/image/logo.png" alt="Çınaraltı Logo">
               </div>
               <div class="ticker-item">
                   <p>Çınaraltı</p>
-                  <img src="../public/assets/image/logo.png" alt="">
+                  <img src="<?= BASE_URL ?>/assets/image/logo.png" alt="Çınaraltı Logo">
+              </div>
+          </div>
+          <div class="ticker-01_content">
+              <div class="ticker-item">
+                  <p>Çınaraltı</p>
+                  <img src="<?= BASE_URL ?>/assets/image/logo.png" alt="Çınaraltı Logo">
+              </div>
+              <div class="ticker-item">
+                  <p>Çınaraltı</p>
+                  <img src="<?= BASE_URL ?>/assets/image/logo.png" alt="Çınaraltı Logo">
+              </div>
+              <div class="ticker-item">
+                  <p>Çınaraltı</p>
+                  <img src="<?= BASE_URL ?>/assets/image/logo.png" alt="Çınaraltı Logo">
+              </div>
+              <div class="ticker-item">
+                  <p>Çınaraltı</p>
+                  <img src="<?= BASE_URL ?>/assets/image/logo.png" alt="Çınaraltı Logo">
+              </div>
+          </div>
+          <div class="ticker-01_content">
+              <div class="ticker-item">
+                  <p>Çınaraltı</p>
+                  <img src="<?= BASE_URL ?>/assets/image/logo.png" alt="Çınaraltı Logo">
+              </div>
+              <div class="ticker-item">
+                  <p>Çınaraltı</p>
+                  <img src="<?= BASE_URL ?>/assets/image/logo.png" alt="Çınaraltı Logo">
+              </div>
+              <div class="ticker-item">
+                  <p>Çınaraltı</p>
+                  <img src="<?= BASE_URL ?>/assets/image/logo.png" alt="Çınaraltı Logo">
+              </div>
+              <div class="ticker-item">
+                  <p>Çınaraltı</p>
+                  <img src="<?= BASE_URL ?>/assets/image/logo.png" alt="Çınaraltı Logo">
               </div>
           </div>
       </div>
@@ -303,51 +317,42 @@
               </div>
           </div>
           <div class="row gutter-y-40 justify-content-center">
-              <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="100">
-                  <div class="video-widget">
-                      <div class="video-widget__thumbnail-wrapper">
-                          <div class="video-widget__thumbnail">
-                              <img src="../public/assets/image/home-3/video-thumbnail-1.png" alt="image alt">
-                              <a href="https://www.youtube.com/watch?v=zo9dJFo8H8g" data-fancybox
-                                  class="btn-play absolute-center btn-play--outline btn-play--70">
-                                  <i class="fa-solid fa-play"></i>
-                              </a>
+              <?php if (!empty($homeVideos)): ?>
+                  <?php foreach ($homeVideos as $index => $video): ?>
+                  <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="<?= (($index + 1) * 100) ?>">
+                      <div class="video-widget">
+                          <div class="video-widget__thumbnail-wrapper">
+                              <div class="video-widget__thumbnail">
+                                  <img src="<?= $videoService->getYouTubeThumbnail($video['url']) ?>" alt="<?= htmlspecialchars($video['title']) ?>">
+                                  <a href="<?= $video['url'] ?>" data-fancybox
+                                      class="btn-play absolute-center btn-play--outline btn-play--70">
+                                      <i class="fa-solid fa-play"></i>
+                                  </a>
+                              </div>
                           </div>
+                          <h3 class="video-widget__title"><?= htmlspecialchars($video['title']) ?></h3>
+                          <p><?= htmlspecialchars(substr($video['description'], 0, 100)) ?><?= strlen($video['description']) > 100 ? '...' : '' ?></p>
                       </div>
-                      <h3 class="video-widget__title">Custom workout plans</h3>
-                      <p>Snaga is fully customizable workout app. Whether you do weightlifting, physical etc.</p>
                   </div>
-              </div>
-              <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="200">
-                  <div class="video-widget">
-                      <div class="video-widget__thumbnail-wrapper">
-                          <div class="video-widget__thumbnail">
-                              <img src="../public/assets/image/home-3/video-thumbnail-2.png" alt="image alt">
-                              <a href="https://www.youtube.com/watch?v=zo9dJFo8H8g" data-fancybox
-                                  class="btn-play absolute-center btn-play--outline btn-play--70">
-                                  <i class="fa-solid fa-play"></i>
-                              </a>
+                  <?php endforeach; ?>
+              <?php else: ?>
+                  <!-- Fallback statik videolar -->
+                  <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="100">
+                      <div class="video-widget">
+                          <div class="video-widget__thumbnail-wrapper">
+                              <div class="video-widget__thumbnail">
+                                  <img src="../public/assets/image/home-3/video-thumbnail-1.png" alt="image alt">
+                                  <a href="https://www.youtube.com/watch?v=zo9dJFo8H8g" data-fancybox
+                                      class="btn-play absolute-center btn-play--outline btn-play--70">
+                                      <i class="fa-solid fa-play"></i>
+                                  </a>
+                              </div>
                           </div>
+                          <h3 class="video-widget__title">Örnek Video</h3>
+                          <p>Henüz video eklenmemiş.</p>
                       </div>
-                      <h3 class="video-widget__title">Clearing meditation</h3>
-                      <p>A highly accessible meditation that will create more clarity &amp; space in the body.</p>
                   </div>
-              </div>
-              <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="300">
-                  <div class="video-widget">
-                      <div class="video-widget__thumbnail-wrapper">
-                          <div class="video-widget__thumbnail">
-                              <img src="../public/assets/image/home-3/video-thumbnail-3.png" alt="image alt">
-                              <a href="https://www.youtube.com/watch?v=zo9dJFo8H8g" data-fancybox
-                                  class="btn-play absolute-center btn-play--outline btn-play--70">
-                                  <i class="fa-solid fa-play"></i>
-                              </a>
-                          </div>
-                      </div>
-                      <h3 class="video-widget__title">Daily fitness challenges</h3>
-                      <p>Snaga gives you achieve a specific goal with a specific exercise for daily activities.</p>
-                  </div>
-              </div>
+              <?php endif; ?>
               <div class="section-button">
                   <a href="<?= BASE_URL ?>/video" class="btn-masco btn-primary-l03 rounded-pill btn-shadow">
                       <span>Tüm videoları görüntüle</span>
@@ -375,54 +380,47 @@
               </div>
           </div>
           <div class="row gutter-y-default justify-content-center">
-              <div class="col-lg-4 col-md-6 col-sm-8">
-                  <div class="blog-card h-100">
-                      <div class="blog-card__image">
-                          <img src="../public/assets/image/home-8/blog-image-1.png" alt="image alt">
-                          <a href="#" class="blog-card__badge">Sureler</a>
-                      </div>
-                      <div class="blog-card__body">
-                          <div class="blog-card__meta">
-                              <span><img src="../public/assets/image/home-8/blog-card-icon-1.svg" alt="icon">Osman Sungur Yeken</span>
-                              <span><img src="../public/assets/image/home-8/blog-card-icon-2.svg" alt="calender">10 Kasım 2025</span>
+              <?php if (!empty($homeBlogs)): ?>
+                  <?php foreach ($homeBlogs as $blog): ?>
+                  <div class="col-lg-4 col-md-6 col-sm-8">
+                      <div class="blog-card h-100">
+                          <div class="blog-card__image">
+                              <img src="<?= $blogService->getImagePath($blog['cover_image']) ?>" alt="<?= htmlspecialchars($blog['title']) ?>">
+                              <a href="<?= BASE_URL ?>/blog-details?slug=<?= $blog['slug'] ?>" class="blog-card__badge">
+                                  <?= htmlspecialchars($blog['category_name'] ?? 'Genel') ?>
+                              </a>
                           </div>
-                          <h3 class="blog-card__title">Benefits to first-generation low-income entrepreneurs</h3>
-                          <a href="#" class="blog-card__link btn-link btn-arrow">Devamını oku</a>
+                          <div class="blog-card__body">
+                                                        <div class="blog-card__meta">
+                              <span><i class="fa-regular fa-user me-2"></i><?= htmlspecialchars($blog['author_name'] ?? 'Osman Sungur Yeken') ?></span>
+                              <span><i class="fa-regular fa-calendar-days me-2"></i><?= $blogService->formatDate($blog['created_at']) ?>
+                              </span>
+                          </div>
+                              <h3 class="blog-card__title"><?= htmlspecialchars($blog['title']) ?></h3>
+                              <a href="<?= BASE_URL ?>/blog-details?slug=<?= $blog['slug'] ?>" class="blog-card__link btn-link btn-arrow">Devamını oku</a>
+                          </div>
                       </div>
                   </div>
-              </div>
-              <div class="col-lg-4 col-md-6 col-sm-8">
-                  <div class="blog-card h-100">
-                      <div class="blog-card__image">
-                          <img src="../public/assets/image/home-8/blog-image-2.png" alt="image alt">
-                          <a href="#" class="blog-card__badge">Sahabeler</a>
-                      </div>
-                      <div class="blog-card__body">
-                          <div class="blog-card__meta">
-                              <span><img src="../public/assets/image/home-8/blog-card-icon-1.svg" alt="icon">Osman Sungur Yeken</span>
-                              <span><img src="../public/assets/image/home-8/blog-card-icon-2.svg" alt="calender">10 Kasım 2025</span>
+                  <?php endforeach; ?>
+              <?php else: ?>
+                  <!-- Fallback statik makaleler -->
+                  <div class="col-lg-4 col-md-6 col-sm-8">
+                      <div class="blog-card h-100">
+                          <div class="blog-card__image">
+                              <img src="../public/assets/image/home-8/blog-image-1.png" alt="image alt">
+                              <a href="#" class="blog-card__badge">Genel</a>
                           </div>
-                          <h3 class="blog-card__title">Dangers of a traditional for your career goal</h3>
-                          <a href="#" class="blog-card__link btn-link btn-arrow">Devamını oku</a>
+                          <div class="blog-card__body">
+                              <div class="blog-card__meta">
+                                  <span><i class="fa-regular fa-user me-2"></i>Osman Sungur Yeken</span>
+                                  <span><i class="fa-regular fa-calendar-days me-2"></i>Yakında</span>
+                              </div>
+                              <h3 class="blog-card__title">Henüz makale eklenmemiş</h3>
+                              <a href="<?= BASE_URL ?>/blog" class="blog-card__link btn-link btn-arrow">Tüm makaleleri gör</a>
+                          </div>
                       </div>
                   </div>
-              </div>
-              <div class="col-lg-4 col-md-6 col-sm-8">
-                  <div class="blog-card h-100">
-                      <div class="blog-card__image">
-                          <img src="../public/assets/image/home-8/blog-image-3.png" alt="image alt">
-                          <a href="#" class="blog-card__badge">İspatlar</a>
-                      </div>
-                      <div class="blog-card__body">
-                          <div class="blog-card__meta">
-                              <span><img src="../public/assets/image/home-8/blog-card-icon-1.svg" alt="icon">Osman Sungur Yeken</span>
-                              <span><img src="../public/assets/image/home-8/blog-card-icon-2.svg" alt="calender">10 Kasım 2025</span>
-                          </div>
-                          <h3 class="blog-card__title">How to increase ad revenue in mobile applications</h3>
-                          <a href="<?= BASE_URL ?>/blog-detail" class="blog-card__link btn-link btn-arrow">Devamını oku</a>
-                      </div>
-                  </div>
-              </div>
+              <?php endif; ?>
               <div class="section-button">
                   <a href="<?= BASE_URL ?>/blog" class="btn-masco btn-primary-l03 rounded-pill btn-shadow">
                       <span>Tüm makaleleri görüntüle</span>

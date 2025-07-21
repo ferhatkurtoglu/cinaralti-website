@@ -2,12 +2,12 @@
 
 import { Dialog, Menu, Transition } from '@headlessui/react';
 import {
-    Bars3Icon,
-    DocumentTextIcon,
-    HomeIcon,
-    TagIcon,
-    VideoCameraIcon,
-    XMarkIcon
+  Bars3Icon,
+  DocumentTextIcon,
+  HomeIcon,
+  TagIcon,
+  VideoCameraIcon,
+  XMarkIcon
 } from '@heroicons/react/24/outline';
 import { signOut, useSession } from 'next-auth/react';
 import Link from 'next/link';
@@ -92,7 +92,7 @@ export default function DashboardLayout({
                   <div className="flex h-16 shrink-0 items-center">
                     <img
                       className="h-8 w-auto"
-                      src="/logo.png"
+                      src="/logo-white.png"
                       alt="Çınaraltı"
                     />
                   </div>
@@ -141,7 +141,7 @@ export default function DashboardLayout({
           <div className="flex h-16 shrink-0 items-center">
             <img
               className="h-8 w-auto"
-              src="/logo.png"
+              src="/logo-white.png"
               alt="Çınaraltı"
             />
           </div>
@@ -191,17 +191,17 @@ export default function DashboardLayout({
             <Bars3Icon className="h-6 w-6" aria-hidden="true" />
           </button>
 
-          <div className="flex flex-1 gap-x-4 self-stretch lg:gap-x-6">
+          <div className="flex flex-1 gap-x-4 self-stretch lg:gap-x-6 min-w-0">
             <div className="flex flex-1" />
-            <div className="flex items-center gap-x-4 lg:gap-x-6">
+            <div className="flex items-center gap-x-4 lg:gap-x-6 min-w-0">
               {/* Profile dropdown */}
               <Menu as="div" className="relative">
-                <Menu.Button className="-m-1.5 flex items-center p-1.5">
+                <Menu.Button className="-m-1.5 flex items-center p-1.5 min-w-0">
                   <span className="sr-only">Kullanıcı menüsü</span>
-                  <div className="flex items-center">
-                    <span className="hidden lg:flex lg:items-center">
+                                      <div className="flex items-center min-w-0">
+                                          <span className="hidden lg:flex lg:items-center min-w-0">
                       <span
-                        className="ml-4 text-sm font-semibold leading-6 text-gray-900"
+                        className="ml-4 text-sm font-semibold leading-6 text-gray-900 truncate max-w-xs"
                         aria-hidden="true"
                       >
                         {session?.user?.name}
@@ -218,7 +218,7 @@ export default function DashboardLayout({
                   leaveFrom="transform opacity-100 scale-100"
                   leaveTo="transform opacity-0 scale-95"
                 >
-                  <Menu.Items className="absolute right-0 z-10 mt-2.5 w-32 origin-top-right rounded-md bg-white py-2 shadow-lg ring-1 ring-gray-900/5 focus:outline-none">
+                  <Menu.Items className="absolute right-0 z-50 mt-2.5 w-32 origin-top-right rounded-md bg-white py-2 shadow-lg ring-1 ring-gray-900/5 focus:outline-none">
                     <Menu.Item>
                       {({ active }) => (
                         <button

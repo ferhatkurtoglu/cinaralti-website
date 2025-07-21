@@ -1,5 +1,10 @@
 <!-- Donate -->
 
+<?php 
+if (DEBUG_MODE) error_log("Donate sayfası yüklendi"); 
+echo "<!-- Donate sayfası çalışıyor -->";
+?>
+
 <style>
 .inner_banner-subtitle {
     margin-top: 15px;
@@ -139,11 +144,10 @@
                 
                 // Kategorileri veritabanından çek (tekrarları gruplandırarak)
                 $stmt = $db->prepare("
-                    SELECT id, name, slug, position 
+                    SELECT id, name, slug
                     FROM donation_categories 
-                    WHERE active = 1
                     GROUP BY slug
-                    ORDER BY position ASC
+                    ORDER BY name ASC
                 ");
                 $stmt->execute();
                 $categories = $stmt->fetchAll();
@@ -215,26 +219,30 @@
                 $db = db_connect();
                 $donationItems = [];
                 
+                if (DEBUG_MODE) {
+                    error_log("Donate sayfası - Veritabanı bağlantısı başarılı");
+                }
+                
 
                 
                 // Aktif kategoriyi veritabanındaki id'ye çevir
-                $categorySlug = isset($_GET['category']) ? $_GET['category'] : 'tumu';
+                    $categorySlug = isset($_GET['category']) ? $_GET['category'] : (isset($_SESSION['selected_category']) ? $_SESSION['selected_category'] : 'tumu');
                 
                 // Eğer kategori "tumu" ise tüm bağışları getir
                 if ($categorySlug === 'tumu') {
                     $stmt = $db->prepare("
                         SELECT 
                             id, 
-                            title, 
+                            name as title, 
                             slug, 
                             description, 
-                            main_image,
+                            image as main_image,
                             target_amount,
                             collected_amount
                         FROM 
                             donation_options
                         WHERE 
-                            active = 1
+                            is_active = 1
                         GROUP BY
                             slug
                         ORDER BY
@@ -243,12 +251,17 @@
                     $stmt->execute();
                     $donationItems = $stmt->fetchAll();
                     
-                    // DEBUG_MODE test mesajı kaldırıldı
+                    if (DEBUG_MODE) {
+                        error_log("Tüm bağışlar sorgusu - Sonuç sayısı: " . count($donationItems));
+                        if (count($donationItems) > 0) {
+                            error_log("İlk bağış: " . json_encode($donationItems[0]));
+                        }
+                    }
                 } else {
                     $stmt = $db->prepare("
                         SELECT id
                         FROM donation_categories 
-                        WHERE slug = ? AND active = 1
+                        WHERE slug = ?
                         GROUP BY slug
                         LIMIT 1
                     ");
@@ -262,21 +275,23 @@
                     if ($categoryId > 0) {
                         $stmt = $db->prepare("
                             SELECT 
-                                id, 
-                                title, 
-                                slug, 
-                                description, 
-                                main_image,
-                                target_amount,
-                                collected_amount
+                                do.id, 
+                                do.name as title, 
+                                do.slug, 
+                                do.description, 
+                                do.image as main_image,
+                                do.target_amount,
+                                do.collected_amount
                             FROM 
-                                donation_options
+                                donation_options do
+                            INNER JOIN 
+                                donation_option_categories doc ON do.id = doc.donation_option_id
                             WHERE 
-                                category_id = ? AND active = 1
+                                doc.category_id = ? AND do.is_active = 1
                             GROUP BY 
-                                slug
+                                do.slug
                             ORDER BY
-                                position ASC
+                                do.position ASC
                         ");
                         $stmt->execute([$categoryId]);
                         $donationItems = $stmt->fetchAll();
@@ -300,16 +315,16 @@
                     $stmt = $db->prepare("
                         SELECT 
                             id, 
-                            title, 
+                            name as title, 
                             slug, 
                             description, 
-                            main_image,
+                            image as main_image,
                             target_amount,
                             collected_amount
                         FROM 
                             donation_options
                         WHERE 
-                            active = 1
+                            is_active = 1
                         GROUP BY
                             slug
                         ORDER BY
@@ -427,6 +442,10 @@
                     </div>';
                 }
             } catch (Exception $e) {
+                if (DEBUG_MODE) {
+                    error_log("Donate sayfası Exception yakalandı: " . $e->getMessage());
+                    error_log("Exception trace: " . $e->getTraceAsString());
+                }
                 echo '<div class="col-12 text-center"><p>Bağış verileri yüklenemedi: ' . $e->getMessage() . '</p></div>';
                 if (DEBUG_MODE) {
                     echo '<div style="padding: 10px; background-color: #f8d7da; color: #721c24; margin-bottom: 10px; border-radius: 5px;">Hata detayı: ' . $e->getTraceAsString() . '</div>';
@@ -1602,6 +1621,12 @@ function openDonateModal(title, buttonElement) {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
+    // Payment sayfasından gelen hata mesajını kontrol et
+    <?php if (isset($_SESSION['payment_error'])): ?>
+        showNotification('<?= addslashes($_SESSION['payment_error']) ?>', 'error');
+        <?php unset($_SESSION['payment_error']); // Mesajı gösterdikten sonra temizle ?>
+    <?php endif; ?>
+
     // Para formatı için input işleyici
     const donateInputs = document.querySelectorAll('.donate-form__input, .donate-card-price-input');
 
@@ -1734,14 +1759,24 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Bildirim gösterme fonksiyonu
-    function showNotification(message) {
+    function showNotification(message, type = 'success') {
         // Bildirim elementi oluştur
         const notification = document.createElement('div');
         notification.className = 'donation-notification';
+        
+        // Hata bildirimi için farklı renk
+        if (type === 'error') {
+            notification.style.backgroundColor = '#F44336';
+            notification.style.borderColor = '#d32f2f';
+        }
+        
+        // İkon tipine göre değiştir
+        const icon = type === 'success' ? '✓' : type === 'error' ? '⚠️' : 'ℹ️';
+        
         notification.innerHTML = `
-                <div class="notification-icon">✓</div>
+                <div class="notification-icon">${icon}</div>
                 <div class="notification-message">${message}</div>
-                <a href="<?= BASE_URL ?>/cart" class="notification-btn">Sepete Git</a>
+                ${type === 'success' ? `<a href="<?= BASE_URL ?>/cart" class="notification-btn">Sepete Git</a>` : ''}
             `;
 
         // Sayfaya ekle
@@ -1753,12 +1788,13 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 100);
 
         // Belirli bir süre sonra kaldır
+        const hideDelay = type === 'error' ? 4000 : 5000; // Hata mesajları daha uzun gösterilsin
         setTimeout(() => {
             notification.classList.remove('show');
             setTimeout(() => {
                 notification.remove();
             }, 500);
-        }, 5000); // Süreyi 5 saniyeye çıkardım, kullanıcının butona tıklaması için daha fazla zaman
+        }, hideDelay);
     }
 
     // Sepet toplam tutarını güncelleme
@@ -2121,3 +2157,7 @@ const fallbackCountries = [{
     }
 ];
 </script>
+
+<?php 
+echo "\n\n<!-- DONATE PAGE DEBUG: Sayfa sonu -->\n";
+?>

@@ -12,6 +12,7 @@ export const authOptions: NextAuthOptions = {
   session: {
     strategy: 'jwt',
   },
+  debug: true,
   providers: [
     CredentialsProvider({
       name: 'Sign in',
@@ -24,26 +25,34 @@ export const authOptions: NextAuthOptions = {
         password: { label: 'Password', type: 'password' },
       },
       async authorize(credentials) {
+        console.log('🔍 Authorize called with:', credentials);
+        
         if (!credentials?.email || !credentials.password) {
+          console.log('❌ Missing credentials');
           return null;
         }
 
-        const user = await prisma.user.findUnique({
+        console.log('🔍 Searching for user:', credentials.email);
+        const user = await prisma.contentAdminUser.findUnique({
           where: {
             email: credentials.email,
           },
         });
 
         if (!user) {
+          console.log('❌ User not found');
           return null;
         }
 
+        console.log('✅ User found:', user.email);
         const isPasswordValid = await compare(
           credentials.password,
           user.password
         );
 
+        console.log('🔍 Password validation:', isPasswordValid);
         if (!isPasswordValid) {
+          console.log('❌ Invalid password');
           return null;
         }
 

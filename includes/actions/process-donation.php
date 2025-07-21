@@ -22,6 +22,24 @@ function save_donation($donationData) {
         // Veritabanı bağlantısı
         $db = db_connect();
         
+        // Debug modu için encryption'ı atla, direkt veriyi kullan
+        if (defined('DEBUG_MODE') && DEBUG_MODE) {
+            error_log("SAVE_DONATION DEBUG: Encryption atlandı, raw data kullanılıyor");
+            $secureData = $donationData; // Encryption'ı atla
+        } else {
+            // Sensitive data'yı encrypt et
+            $secureData = prepare_donation_data_for_storage($donationData);
+        }
+        
+        // Güvenli logging
+        if (function_exists('log_sensitive_operation')) {
+            log_sensitive_operation('donation_save_attempt', [
+                'donor_email' => $donationData['donor_email'],
+                'amount' => $donationData['amount'],
+                'donation_option' => $donationData['donation_option']
+            ]);
+        }
+        
         // SQL sorgusu hazırlama
         $sql = "INSERT INTO donations_made (
                     donation_option_id, 
@@ -51,31 +69,61 @@ function save_donation($donationData) {
         $stmt = $db->prepare($sql);
         
         // Sipariş numarası varsa kullan, yoksa oluştur
-        $orderNumber = isset($donationData['order_number']) ? $donationData['order_number'] : "CIN" . time() . rand(1000, 9999);
+        $orderNumber = isset($secureData['order_number']) ? $secureData['order_number'] : "CIN" . time() . rand(1000, 9999);
+        
+        // Debug log
+        if (defined('DEBUG_MODE') && DEBUG_MODE) {
+            error_log("SAVE_DONATION DEBUG: Order number: " . $orderNumber);
+            error_log("SAVE_DONATION DEBUG: Donation option ID: " . ($secureData['donation_option_id'] ?? 'NULL'));
+        }
         
         // Parametreleri bağla
-        $stmt->bindParam(':donation_option_id', $donationData['donation_option_id'], PDO::PARAM_INT);
-        $stmt->bindParam(':donor_name', $donationData['donor_name'], PDO::PARAM_STR);
-        $stmt->bindParam(':donor_email', $donationData['donor_email'], PDO::PARAM_STR);
-        $stmt->bindParam(':donor_phone', $donationData['donor_phone'], PDO::PARAM_STR);
-        $stmt->bindParam(':city', $donationData['city'], PDO::PARAM_STR);
-        $stmt->bindParam(':amount', $donationData['amount'], PDO::PARAM_STR);
-        $stmt->bindParam(':donation_option', $donationData['donation_option'], PDO::PARAM_STR);
-        $stmt->bindParam(':donor_type', $donationData['donor_type'], PDO::PARAM_STR);
-        $stmt->bindParam(':payment_status', $donationData['payment_status'], PDO::PARAM_STR);
+        $stmt->bindParam(':donation_option_id', $secureData['donation_option_id'], PDO::PARAM_INT);
+        $stmt->bindParam(':donor_name', $secureData['donor_name'], PDO::PARAM_STR);
+        $stmt->bindParam(':donor_email', $secureData['donor_email'], PDO::PARAM_STR);
+        $stmt->bindParam(':donor_phone', $secureData['donor_phone'], PDO::PARAM_STR);
+        $stmt->bindParam(':city', $secureData['city'], PDO::PARAM_STR);
+        $stmt->bindParam(':amount', $secureData['amount'], PDO::PARAM_STR);
+        $stmt->bindParam(':donation_option', $secureData['donation_option'], PDO::PARAM_STR);
+        $stmt->bindParam(':donor_type', $secureData['donor_type'], PDO::PARAM_STR);
+        $stmt->bindParam(':payment_status', $secureData['payment_status'], PDO::PARAM_STR);
         $stmt->bindParam(':order_number', $orderNumber, PDO::PARAM_STR);
         
         // Sorguyu çalıştır
         $stmt->execute();
         
         // Eklenen kaydın ID'sini döndür
-        return $db->lastInsertId();
+        $donationId = $db->lastInsertId();
+        
+        // Debug log
+        if (defined('DEBUG_MODE') && DEBUG_MODE) {
+            error_log("SAVE_DONATION DEBUG: Bağış başarıyla kaydedildi, ID: " . $donationId);
+        }
+        
+        // Başarılı kayıt logla
+        if (function_exists('log_sensitive_operation')) {
+            log_sensitive_operation('donation_saved_successfully', [
+                'donation_id' => $donationId,
+                'donor_email' => $donationData['donor_email'],
+                'amount' => $donationData['amount']
+            ]);
+        }
+        
+        return $donationId;
         
     } catch (Exception $e) {
-        // Hata durumunda günlüğe kaydet
+        // Hata durumunda güvenli log
+        if (function_exists('log_sensitive_operation')) {
+            log_sensitive_operation('donation_save_error', [
+                'error' => $e->getMessage(),
+                'donor_email' => $donationData['donor_email'] ?? 'unknown'
+            ]);
+        }
+        
         error_log("Bağış kaydetme hatası: " . $e->getMessage());
-        if (DEBUG_MODE) {
-            error_log("Hata detayları: " . print_r($donationData, true));
+        if (defined('DEBUG_MODE') && DEBUG_MODE) {
+            error_log("SAVE_DONATION DEBUG: SQL Hatası: " . $e->getMessage());
+            error_log("SAVE_DONATION DEBUG: Veri: " . print_r($donationData, true));
         }
         return false;
     }

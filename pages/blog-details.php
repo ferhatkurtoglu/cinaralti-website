@@ -1,42 +1,31 @@
 <?php
-// Oturum kontrolü
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-
 // Config dosyasını dahil et
 require_once dirname(__DIR__) . '/config/config.php';
 
+// Güvenli oturum başlat
+secure_session_start();
+
+// Blog servisini dahil et
+require_once dirname(__DIR__) . '/includes/blog-service.php';
+
 // İstenen blog yazısını al
-$requestedId = isset($_GET['id']) ? $_GET['id'] : null;
+$requestedSlug = isset($_GET['slug']) ? $_GET['slug'] : (isset($_GET['id']) ? $_GET['id'] : null);
 $blogData = null;
 
-if ($requestedId) {
-    // Blogs.json dosyasını oku
-    $blogsFile = dirname(__DIR__) . '/public/data/blogs.json';
-    $blogsData = [];
-    
-    if (file_exists($blogsFile)) {
-        $blogsJson = file_get_contents($blogsFile);
-        $blogsData = json_decode($blogsJson, true) ?: ['blogs' => []];
+if ($requestedSlug) {
+    try {
+        $blogService = getBlogService();
         
-        // Blog'u bul
-        foreach ($blogsData['blogs'] as $blog) {
-            if ($blog['id'] === $requestedId) {
-                // Blog içeriğini oku
-                $contentPath = dirname(__DIR__) . '/' . $blog['path'];
-                if (file_exists($contentPath)) {
-                    $content = file_get_contents($contentPath);
-                    preg_match('/---\s*(.*?)\s*---\s*(.*)/s', $content, $matches);
-                    
-                    if (count($matches) >= 3) {
-                        $markdownContent = $matches[2];
-                        $blogData = array_merge($blog, ['content' => $markdownContent]);
-                        break;
-                    }
-                }
-            }
+        // Slug ile blog yazısını getir
+        $blogData = $blogService->getPostBySlug($requestedSlug);
+        
+        // Eğer slug ile bulunamazsa, ID ile dene (eski URL'ler için)
+        if (!$blogData) {
+            $blogData = $blogService->getPostById($requestedSlug);
         }
+    } catch (Exception $e) {
+        // Hata durumunda blog bulunamadı olarak işle
+        $blogData = null;
     }
 }
 
@@ -47,24 +36,23 @@ if (!$blogData) {
     return;
 }
 
-$imagePath = '../public/assets/image/blog/' . $blogData['image'];
-$dateFormatted = date('d F Y', strtotime($blogData['date']));
+// Blog verilerini hazırla
+$imagePath = $blogService->getImagePath($blogData['cover_image']);
+$dateFormatted = $blogService->formatDate($blogData['created_at']);
+$categoryName = $blogData['category_name'] ?? 'Genel';
+$authorName = $blogData['author_name'] ?? 'Çınaraltı Vakfı';
 
-// Onaylanmış yorumları al
-$approvedComments = array_filter($blogData['comments'] ?? [], function($comment) {
-    return $comment['approved'] === true;
-});
+// Onaylanmış yorumları veritabanından getir
+$approvedComments = $blogService->getComments($blogData['id'], 'approved');
 
-// Yorumları tarihe göre sırala (en yeni en üstte)
-usort($approvedComments, function($a, $b) {
-    return strtotime($b['date']) - strtotime($a['date']);
-});
+// Yorum sayısını al
+$commentCount = $blogService->getCommentCount($blogData['id'], 'approved');
 ?>
 
 <div class="blog-details_main-section">
     <div class="inner_banner-section text-center">
         <div class="container">
-            <h3 class="inner_banner-title"><?php echo $blogData['title']; ?></h3>
+            <h3 class="inner_banner-title"><?php echo htmlspecialchars($blogData['title']); ?></h3>
         </div>
     </div>
     <div class="container">
@@ -72,23 +60,26 @@ usort($approvedComments, function($a, $b) {
             <div class="row">
                 <div class="col-xl-8">
                     <div class="blog-content">
-                        <img src="<?php echo $imagePath; ?>" alt="<?php echo $blogData['title']; ?>" class="mb-30 w-100"
-                            style="max-height: 400px; object-fit: cover;">
+                        <img src="<?php echo $imagePath; ?>" alt="<?php echo htmlspecialchars($blogData['title']); ?>"
+                            class="mb-30 w-100" style="max-height: 400px; object-fit: cover;">
                         <div class="blog-content-meta">
                             <a href="#">
                                 <span class="blog-content__user">
-                                    <img src="../public/assets/image/blog/user-image.png" alt="user image">
-                                    <?php echo $blogData['author']; ?>
+                                    <i class="fa-solid fa-user-tie"
+                                        style="color: #2563eb; font-size: 18px; margin-right: 8px;"></i>
+                                    <?php echo htmlspecialchars($authorName); ?>
                                 </span>
                             </a>
                             <a href="#">
                                 <span class="blog-content__time">
-                                    <img src="../public/assets/image/blog/blog-card-icon.svg" alt="calendar">
+                                    <i class="fa-regular fa-calendar-days"
+                                        style="color: #059669; font-size: 18px; margin-right: 8px;"></i>
                                     <?php echo $dateFormatted; ?>
                                 </span>
                             </a>
                             <a href="#">
-                                <span class="blog-content__category"><?php echo $blogData['category']; ?></span>
+                                <span
+                                    class="blog-content__category"><?php echo htmlspecialchars($categoryName); ?></span>
                             </a>
                         </div>
                         <div class="blog-content-wrapper">
@@ -96,13 +87,13 @@ usort($approvedComments, function($a, $b) {
                             <div class="blog-content__social-options">
                                 <div class="social-options-left">
                                     <span title="Beğen" style="cursor: pointer;"
-                                        onclick="handleLike(this, '<?php echo $requestedId; ?>')">
+                                        onclick="handleLike(this, '<?php echo $blogData['id']; ?>')">
                                         <i class="far fa-heart like-icon"></i>
                                         <span class="like-count">0</span>
                                     </span>
                                     <span title="Yorum Yap" style="cursor: pointer;" onclick="showMainCommentForm()">
                                         <i class="far fa-comment"></i>
-                                        <span>0</span>
+                                        <span><?php echo $commentCount; ?></span>
                                     </span>
                                 </div>
                                 <div class="social-options-right">
@@ -111,35 +102,35 @@ usort($approvedComments, function($a, $b) {
                                         <i class="fa-solid fa-share-nodes"></i>
                                         <div class="share-menu" style="display: none;">
                                             <a href="#"
-                                                onclick="shareOnWhatsApp('<?php echo BASE_URL; ?>/blog-details?id=<?php echo $requestedId; ?>', '<?php echo $blogData['title']; ?>'); return false;"
+                                                onclick="shareOnWhatsApp('<?php echo BASE_URL; ?>/blog-details?slug=<?php echo $blogData['slug']; ?>', '<?php echo htmlspecialchars($blogData['title']); ?>'); return false;"
                                                 title="WhatsApp'ta Paylaş">
                                                 <i class="fab fa-whatsapp" style="color: #25D366; font-size: 20px;"></i>
                                             </a>
                                             <a href="#"
-                                                onclick="shareOnFacebook('<?php echo BASE_URL; ?>/blog-details?id=<?php echo $requestedId; ?>'); return false;"
+                                                onclick="shareOnFacebook('<?php echo BASE_URL; ?>/blog-details?slug=<?php echo $blogData['slug']; ?>'); return false;"
                                                 title="Facebook'ta Paylaş">
                                                 <i class="fab fa-facebook" style="color: #1877F2; font-size: 20px;"></i>
                                             </a>
                                             <a href="#"
-                                                onclick="shareOnTwitter('<?php echo BASE_URL; ?>/blog-details?id=<?php echo $requestedId; ?>', '<?php echo $blogData['title']; ?>'); return false;"
+                                                onclick="shareOnTwitter('<?php echo BASE_URL; ?>/blog-details?slug=<?php echo $blogData['slug']; ?>', '<?php echo htmlspecialchars($blogData['title']); ?>'); return false;"
                                                 title="X'te Paylaş">
                                                 <i class="fab fa-x-twitter"
                                                     style="color: #000000; font-size: 20px;"></i>
                                             </a>
                                             <a href="#"
-                                                onclick="shareOnTelegram('<?php echo BASE_URL; ?>/blog-details?id=<?php echo $requestedId; ?>', '<?php echo $blogData['title']; ?>'); return false;"
+                                                onclick="shareOnTelegram('<?php echo BASE_URL; ?>/blog-details?slug=<?php echo $blogData['slug']; ?>', '<?php echo htmlspecialchars($blogData['title']); ?>'); return false;"
                                                 title="Telegram'da Paylaş">
                                                 <i class="fab fa-telegram" style="color: #0088cc; font-size: 20px;"></i>
                                             </a>
                                             <a href="#"
-                                                onclick="copyLink('<?php echo BASE_URL; ?>/blog-details?id=<?php echo $requestedId; ?>'); return false;"
+                                                onclick="copyLink('<?php echo BASE_URL; ?>/blog-details?slug=<?php echo $blogData['slug']; ?>'); return false;"
                                                 title="Bağlantıyı Kopyala">
                                                 <i class="fas fa-link" style="color: #666666; font-size: 20px;"></i>
                                             </a>
                                         </div>
                                     </span>
                                     <span title="Kaydet" style="cursor: pointer;"
-                                        onclick="handleSave(this, '<?php echo $requestedId; ?>')">
+                                        onclick="handleSave(this, '<?php echo $blogData['id']; ?>')">
                                         <i class="far fa-bookmark save-icon"></i>
                                     </span>
                                 </div>
@@ -365,7 +356,7 @@ usort($approvedComments, function($a, $b) {
 
                             // Sayfa yüklendiğinde beğeni ve kayıt durumlarını kontrol et
                             document.addEventListener('DOMContentLoaded', function() {
-                                const postId = '<?php echo $requestedId; ?>';
+                                const postId = '<?php echo $blogData['id']; ?>';
 
                                 // Beğeni durumunu kontrol et
                                 const likedPosts = JSON.parse(localStorage.getItem('likedPosts') || '[]');
@@ -484,7 +475,10 @@ usort($approvedComments, function($a, $b) {
                         <div class="comment-widget">
                             <div class="comment-widget__inner">
                                 <div class="comment-widget__image">
-                                    <img src="../public/assets/image/blog/user-1.png" alt="kullanıcı">
+                                    <div
+                                        style="width: 50px; height: 50px; border-radius: 50%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center;">
+                                        <i class="fa-solid fa-user" style="color: white; font-size: 20px;"></i>
+                                    </div>
                                 </div>
                                 <div class="comment-widget__body">
                                     <div class="comment-widget__meta">
@@ -492,7 +486,7 @@ usort($approvedComments, function($a, $b) {
                                             <h3 class="comment-widget__user-name">
                                                 <?php echo htmlspecialchars($comment['name']); ?></h3>
                                             <span
-                                                class="comment-widget__date"><?php echo date('d F Y', strtotime($comment['date'])); ?></span>
+                                                class="comment-widget__date"><?php echo $blogService->formatDate($comment['created_at']); ?></span>
                                         </div>
                                         <div class="comment-widget__button">
                                             <a href="#" class="nav-btn"
@@ -582,7 +576,7 @@ usort($approvedComments, function($a, $b) {
                                 </button>
                             </div>
 
-                            <input type="hidden" name="post" value="<?php echo $requestedId; ?>">
+                            <input type="hidden" name="post" value="<?php echo $blogData['id']; ?>">
                             <input type="hidden" name="parent_id" value="">
                         </form>
                     </template>
@@ -694,41 +688,23 @@ usort($approvedComments, function($a, $b) {
                                 </div>
                                 <ul class="sidebar-category-list">
                                     <?php
-                                    $categories = [];
-                                    $blogDir = dirname(__DIR__) . '/content/blog/';
-                                    
-                                    if (is_dir($blogDir)) {
-                                        if ($dh = opendir($blogDir)) {
-                                            while (($file = readdir($dh)) !== false) {
-                                                if (pathinfo($file, PATHINFO_EXTENSION) === 'md') {
-                                                    $content = file_get_contents($blogDir . $file);
-                                                    preg_match('/---\s*(.*?)\s*---\s*(.*)/s', $content, $matches);
-                                                    
-                                                    if (count($matches) >= 3) {
-                                                        $frontMatter = $matches[1];
-                                                        preg_match('/category:\s*"(.+?)"/s', $frontMatter, $catMatch);
-                                                        $category = isset($catMatch[1]) ? $catMatch[1] : '';
-                                                        
-                                                        if ($category) {
-                                                            if (!isset($categories[$category])) {
-                                                                $categories[$category] = 0;
-                                                            }
-                                                            $categories[$category]++;
-                                                        }
-                                                    }
-                                                }
+                                    try {
+                                        // Kategorileri veritabanından getir
+                                        $categories = $blogService->getCategories();
+                                        
+                                        if (!empty($categories)) {
+                                            foreach ($categories as $category) {
+                                                echo '<li class="sidebar-category-list-item">
+                                                    <a href="#" class="sidebar-category">
+                                                        ' . htmlspecialchars($category['name']) . ' (' . $category['post_count'] . ')
+                                                    </a>
+                                                </li>';
                                             }
-                                            closedir($dh);
+                                        } else {
+                                            echo '<li class="sidebar-category-list-item">Henüz kategori bulunmuyor</li>';
                                         }
-                                    }
-
-                                    foreach ($categories as $category => $count) {
-                                        echo '
-                                        <li class="sidebar-category-list-item">
-                                            <a href="#" class="sidebar-category">
-                                                ' . $category . ' (' . $count . ')
-                                            </a>
-                                        </li>';
+                                    } catch (Exception $e) {
+                                        echo '<li class="sidebar-category-list-item">Kategoriler yüklenirken hata oluştu</li>';
                                     }
                                     ?>
                                 </ul>
@@ -743,57 +719,41 @@ usort($approvedComments, function($a, $b) {
                                 </div>
                                 <div class="sidebar-blog-widget-wrapper">
                                     <?php
-                                    $recentPosts = [];
-                                    
-                                    if (is_dir($blogDir)) {
-                                        if ($dh = opendir($blogDir)) {
-                                            while (($file = readdir($dh)) !== false) {
-                                                if (pathinfo($file, PATHINFO_EXTENSION) === 'md' && $file !== $requestedId.'.md') {
-                                                    $content = file_get_contents($blogDir . $file);
-                                                    preg_match('/---\s*(.*?)\s*---\s*(.*)/s', $content, $matches);
-
-                                                    if (count($matches) >= 3) {
-                                                        $frontMatter = $matches[1];
-                                                        preg_match('/title:\s*"(.+?)"/s', $frontMatter, $titleMatch);
-                                                        preg_match('/date:\s*"(.+?)"/s', $frontMatter, $dateMatch);
-
-                                                        $recentPosts[] = [
-                                                            'title' => isset($titleMatch[1]) ? $titleMatch[1] : '',
-                                                            'date' => isset($dateMatch[1]) ? $dateMatch[1] : '',
-                                                            'file' => pathinfo($file, PATHINFO_FILENAME)
-                                                        ];
-                                                    }
-                                                }
-                                            }
-                                            closedir($dh);
-                                        }
-                                    }
-
-                                    usort($recentPosts, function($a, $b) {
-                                        return strtotime($b['date']) - strtotime($a['date']);
-                                    });
-
-                                    $recentPosts = array_slice($recentPosts, 0, 3);
-
-                                    foreach ($recentPosts as $post) {
-                                        $postDate = date('d F Y', strtotime($post['date']));
-                                        echo '
-                                        <div class="sidebar-blog-widget">
-                                            <a href="blog-details?id=' . $post['file'] . '" class="sidebar-blog-widget__image">
-                                                <img src="../public/assets/image/blog/recent-1.png" alt="blog görseli">
-                                            </a>
-                                            <div class="sidebar-blog-widget__body">
-                                                <a href="blog-details?id=' . $post['file'] . '" class="sidebar-blog-widget__date">
-                                                    <img src="../public/assets/image/blog/calendar.svg" alt="takvim">
-                                                    ' . $postDate . '
-                                                </a>
-                                                <h3 class="sidebar-blog-widget__title">
-                                                    <a href="blog-details?id=' . $post['file'] . '">
-                                                        ' . $post['title'] . '
+                                    try {
+                                        // Son yazıları getir (mevcut yazıyı hariç tut)
+                                        $recentPosts = $blogService->getRecentPosts(3, $blogData['id']);
+                                        
+                                        if (!empty($recentPosts)) {
+                                            foreach ($recentPosts as $post) {
+                                                // Görsel yolunu al
+                                                $imagePath = $blogService->getImagePath($post['cover_image']);
+                                                
+                                                // Tarihi formatla
+                                                $dateFormatted = $blogService->formatDate($post['created_at']);
+                                                
+                                                echo '
+                                                <div class="sidebar-blog-widget">
+                                                    <a href="blog-details?slug=' . htmlspecialchars($post['slug']) . '" class="sidebar-blog-widget__image">
+                                                        <img src="' . $imagePath . '" alt="' . htmlspecialchars($post['title']) . '" style="width: 100%; height: 60px; object-fit: cover; border-radius: 8px;">
                                                     </a>
-                                                </h3>
-                                            </div>
-                                        </div>';
+                                                    <div class="sidebar-blog-widget__body">
+                                                        <div class="sidebar-blog-widget__date" style="display: flex; align-items: center; margin-bottom: 8px;">
+                                                            <i class="fa-regular fa-calendar-days" style="color: #059669; font-size: 14px; margin-right: 6px;"></i>
+                                                            <span style="color: #666; font-size: 13px;">' . $dateFormatted . '</span>
+                                                        </div>
+                                                        <h3 class="sidebar-blog-widget__title">
+                                                            <a href="blog-details?slug=' . htmlspecialchars($post['slug']) . '" style="color: #333; text-decoration: none; font-size: 14px; line-height: 1.4;">
+                                                                ' . htmlspecialchars($post['title']) . '
+                                                            </a>
+                                                        </h3>
+                                                    </div>
+                                                </div>';
+                                            }
+                                        } else {
+                                            echo '<div class="card card-body">Başka yazı bulunmuyor</div>';
+                                        }
+                                    } catch (Exception $e) {
+                                        echo '<div class="card card-body">Son yazılar yüklenirken hata oluştu</div>';
                                     }
                                     ?>
                                 </div>

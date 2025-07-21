@@ -1,13 +1,49 @@
 <!-- Ödeme Sayfası -->
 <?php
-// Ödeme sayfası için güvenlik kontrolü
+// Güvenli session başlatma
+require_once __DIR__ . '/../includes/functions.php';
+secure_session_start();
+
+// Debug bilgilerini göster
+if (defined('DEBUG_MODE') && DEBUG_MODE) {
+    echo "<!-- DEBUG_MODE: Aktif -->\n";
+    echo "<!-- PAYMENT_DEBUG: " . (defined('PAYMENT_DEBUG') && PAYMENT_DEBUG ? 'Aktif' : 'Pasif') . " -->\n";
+    echo "<!-- Server: " . ($_SERVER['SERVER_NAME'] ?? 'Bilinmiyor') . " -->\n";
+    echo "<!-- Protocol: " . ((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') ? 'HTTPS' : 'HTTP') . " -->\n";
+}
+
+// Config dosyalarını dahil et
+require_once __DIR__ . '/../config/config.php';
 require_once __DIR__ . '/../config/payment_config.php';
 
-// HTTPS kontrolü (geliştirme ortamında devre dışı)
-if (PAYMENT_FORCE_HTTPS && (empty($_SERVER['HTTPS']) || $_SERVER['HTTPS'] === 'off')) {
-    header('HTTP/1.1 301 Moved Permanently');
-    header('Location: https://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']);
-    exit();
+// DEBUG_MODE'da rate limit verilerini temizle
+if (defined('DEBUG_MODE') && DEBUG_MODE) {
+    clear_rate_limits();
+}
+
+// Güvenli ödeme ortamı kontrolü
+if (!is_secure_payment_environment()) {
+    if (PAYMENT_FORCE_HTTPS && (!isset($_SERVER['HTTPS']) || $_SERVER['HTTPS'] !== 'on')) {
+        header('HTTP/1.1 301 Moved Permanently');
+        header('Location: https://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']);
+        exit();
+    } else {
+        // Yapılandırma hatası
+        header('Location: ' . BASE_URL . '/fail?error=configuration');
+        exit();
+    }
+}
+
+// Rate limiting kontrolü (DEBUG_MODE'da devre dışı)
+if (PAYMENT_RATE_LIMIT_ENABLED && !check_rate_limit('payment_page', PAYMENT_MAX_ATTEMPTS, PAYMENT_RATE_LIMIT_WINDOW)) {
+    log_payment_security_event('rate_limit_exceeded', ['action' => 'payment_page_access']);
+    // DEBUG_MODE'da warning göster ama engelleme
+    if (defined('DEBUG_MODE') && DEBUG_MODE) {
+        error_log('WARNING: Rate limit exceeded but allowing due to DEBUG_MODE');
+    } else {
+        header('Location: ' . BASE_URL . '/fail?error=rate_limit');
+        exit();
+    }
 }
 
 // Process-donation dosyasını dahil et
@@ -18,8 +54,33 @@ require_once __DIR__ . '/../includes/header.php';
 
 // Sepet ve bağış verilerini oturumdan al
 $donationAmount = isset($_SESSION['cart_total']) ? $_SESSION['cart_total'] : 0;
-$donationType = isset($_SESSION['donation_type']) ? $_SESSION['donation_type'] : 'Genel Bağış';
+$donationType = isset($_SESSION['donation_type']) ? $_SESSION['donation_type'] : (isset($_SESSION['selected_category']) ? $_SESSION['selected_category'] : 'Genel Bağış');
 $donationId = isset($_SESSION['donation_id']) ? $_SESSION['donation_id'] : 0;
+
+// ÖN KONTROLLER - Gerekli veriler var mı kontrol et
+$requiredSessionData = ['cart_total', 'donor_name', 'donor_email', 'donor_phone'];
+$missingData = [];
+
+foreach ($requiredSessionData as $field) {
+    if (!isset($_SESSION[$field]) || empty($_SESSION[$field])) {
+        $missingData[] = $field;
+    }
+}
+
+// Sepet tutarı kontrolü
+if ($donationAmount <= 0) {
+    $missingData[] = 'cart_total';
+}
+
+// Eğer gerekli veriler eksikse bağış sayfasına yönlendir
+if (!empty($missingData)) {
+    error_log("Payment sayfasına eksik bilgilerle erişim. Eksik veriler: " . implode(', ', $missingData));
+    
+    // Kullanıcıyı bilgilendirme mesajı ile birlikte bağış sayfasına yönlendir
+    $_SESSION['payment_error'] = 'Ödeme yapabilmek için önce bağış bilgilerinizi tamamlamanız gerekiyor.';
+    header('Location: ' . BASE_URL . '/donate');
+    exit();
+}
 
 // Bağışçı bilgileri session'dan alınır
 $donorName = isset($_SESSION['donor_name']) ? $_SESSION['donor_name'] : '';
@@ -114,7 +175,8 @@ $orderNo = "CIN" . time() . rand(1000, 9999);
                     <div class="card-number-container">
                         <input type="text" id="cardNumber" name="cardNumber" class="card-number-input"
                             placeholder="Kart Numarası" maxlength="19" autocomplete="cc-number">
-                        <div class="card-validation-icon"></div>
+                        <div class="card-type-display" id="cardTypeDisplay"></div>
+                        <div class="card-validation-icon" id="cardValidationIcon"></div>
                     </div>
 
                     <div class="form-row">
@@ -269,6 +331,7 @@ $orderNo = "CIN" . time() . rand(1000, 9999);
                     <div class="recaptcha-container">
                         <div class="g-recaptcha" id="recaptcha" data-sitekey="6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"
                             data-theme="light" data-size="normal" data-type="image"></div>
+                        <input type="hidden" name="g-recaptcha-response" id="g-recaptcha-response">
                     </div>
 
                     <button type="submit" class="btn-pay" id="payButton">ÖDEME YAP</button>
@@ -281,15 +344,34 @@ $orderNo = "CIN" . time() . rand(1000, 9999);
 <?php
 // Form gönderildiğinde işlem yap
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // CSRF token kontrolü
-    if (!isset($_POST['csrf_token']) || !verify_csrf_token($_POST['csrf_token'])) {
-            // CSRF token geçersizse işlemi reddet
-    error_log("Ödeme işlemi CSRF token hatası!");
-    echo "<script>window.location.href = '" . BASE_URL . "/fail?error=security';</script>";
-    exit;
+    // Debug bilgilerini logla
+    if (defined('DEBUG_MODE') && DEBUG_MODE) {
+        error_log('PAYMENT DEBUG: Form gönderildi');
+        error_log('PAYMENT DEBUG: POST verileri: ' . print_r($_POST, true));
+        error_log('PAYMENT DEBUG: reCAPTCHA response: ' . (isset($_POST['g-recaptcha-response']) ? 'Var (' . strlen($_POST['g-recaptcha-response']) . ' karakter)' : 'Yok'));
     }
     
-    // Bağış verilerini al
+    // Rate limiting kontrolü (ödeme denemesi) - DEBUG_MODE'da devre dışı
+    if (PAYMENT_RATE_LIMIT_ENABLED && !check_rate_limit('payment_attempt', PAYMENT_MAX_ATTEMPTS, PAYMENT_RATE_LIMIT_WINDOW)) {
+        log_payment_security_event('rate_limit_exceeded', ['action' => 'payment_attempt']);
+        // DEBUG_MODE'da warning göster ama engelleme
+        if (defined('DEBUG_MODE') && DEBUG_MODE) {
+            error_log('WARNING: Payment attempt rate limit exceeded but allowing due to DEBUG_MODE');
+        } else {
+            echo "<script>window.location.href = '" . BASE_URL . "/fail?error=rate_limit';</script>";
+            exit;
+        }
+    }
+    
+    // CSRF token kontrolü
+    if (PAYMENT_CSRF_PROTECTION && (!isset($_POST['csrf_token']) || !verify_csrf_token($_POST['csrf_token']))) {
+        log_payment_security_event('invalid_csrf', ['ip' => $_SERVER['REMOTE_ADDR']]);
+        error_log("Ödeme işlemi CSRF token hatası!");
+        echo "<script>window.location.href = '" . BASE_URL . "/fail?error=security';</script>";
+        exit;
+    }
+    
+    // Input validation ve sanitization
     $donationData = [
         'donation_option_id' => isset($_POST['donation_id']) ? (int)$_POST['donation_id'] : 0,
         'donor_name' => isset($_POST['donor_name']) ? sanitize_input($_POST['donor_name']) : '',
@@ -303,9 +385,96 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'order_number' => $orderNo // Sipariş numarasını ekle
     ];
     
+    // Comprehensive input validation
+    $validation_errors = [];
+    
+    // Bağış tutarı kontrolü
+    if (!validate_donation_amount($donationData['amount'])) {
+        $validation_errors[] = 'Geçersiz bağış tutarı';
+    }
+    
+    if ($donationData['amount'] < PAYMENT_MIN_AMOUNT || $donationData['amount'] > PAYMENT_MAX_AMOUNT) {
+        $validation_errors[] = 'Bağış tutarı belirlenen limitler dışında';
+    }
+    
+    // Email kontrolü
+    if (empty($donationData['donor_email']) || !validate_email($donationData['donor_email'])) {
+        $validation_errors[] = 'Geçersiz email adresi';
+    }
+    
+    // Telefon kontrolü
+    if (empty($donationData['donor_phone']) || !validate_phone($donationData['donor_phone'])) {
+        $validation_errors[] = 'Geçersiz telefon numarası';
+    }
+    
+    // İsim kontrolü
+    if (empty($donationData['donor_name']) || strlen($donationData['donor_name']) < 2) {
+        $validation_errors[] = 'Geçersiz isim';
+    }
+    
+    // Şehir kontrolü
+    if (empty($donationData['city'])) {
+        $validation_errors[] = 'Şehir seçimi zorunludur';
+    }
+    
+    // Kart bilgileri kontrolü
+    $cardNumber = isset($_POST['cardNumber']) ? preg_replace('/\D/', '', $_POST['cardNumber']) : '';
+    if (!validate_card_number($cardNumber)) {
+        $validation_errors[] = 'Geçersiz kart numarası';
+    }
+    
+    // CVV kontrolü
+    $cardCvv = isset($_POST['cardCvv']) ? preg_replace('/\D/', '', $_POST['cardCvv']) : '';
+    if (strlen($cardCvv) < 3 || strlen($cardCvv) > 4) {
+        $validation_errors[] = 'Geçersiz CVV';
+    }
+    
+    // Son kullanma tarihi kontrolü
+    $cardExpiry = isset($_POST['cardExpiry']) ? $_POST['cardExpiry'] : '';
+    if (!preg_match('/^(0[1-9]|1[0-2])\/([0-9]{2})$/', $cardExpiry)) {
+        $validation_errors[] = 'Geçersiz son kullanma tarihi';
+    }
+    
+    // Kart sahibi adı kontrolü
+    $cardHolderName = isset($_POST['cardHolderName']) ? sanitize_input($_POST['cardHolderName']) : '';
+    if (empty($cardHolderName) || strlen($cardHolderName) < 2) {
+        $validation_errors[] = 'Kart sahibi adı gereklidir';
+    }
+    
+    // reCAPTCHA doğrulama - DEBUG_MODE'da atla
+    if (!defined('DEBUG_MODE') || !DEBUG_MODE) {
+        $recaptcha_response = isset($_POST['g-recaptcha-response']) ? $_POST['g-recaptcha-response'] : '';
+        if (!verify_recaptcha($recaptcha_response)) {
+            $validation_errors[] = 'reCAPTCHA doğrulaması başarısız';
+        }
+    } else {
+        error_log('DEBUG_MODE: reCAPTCHA doğrulaması atlandı');
+    }
+    
+    // Validation hatası varsa durdur
+    if (!empty($validation_errors)) {
+        log_payment_security_event('validation_failed', [
+            'errors' => $validation_errors,
+            'donor_email' => $donationData['donor_email']
+        ]);
+        $error_message = implode(', ', $validation_errors);
+        echo "<script>window.location.href = '" . BASE_URL . "/fail?error=validation_failed&ErrorMessage=" . urlencode($error_message) . "';</script>";
+        exit;
+    }
+    
     // Debug: Bağış verilerini logla
     if (PAYMENT_DEBUG) {
         error_log("Bağış verileri: " . print_r($donationData, true));
+    }
+    
+    // Veritabanı bağlantısını test et
+    try {
+        $testDb = db_connect();
+        error_log("PAYMENT DEBUG: Veritabanı bağlantısı başarılı");
+    } catch (Exception $e) {
+        error_log("PAYMENT DEBUG: Veritabanı bağlantı hatası: " . $e->getMessage());
+        echo "<script>window.location.href = '" . BASE_URL . "/fail?error=database_connection&ErrorMessage=" . urlencode('Veritabanı bağlantısı kurulamadı') . "';</script>";
+        exit;
     }
     
     // Bağış verisini veritabanına kaydet
@@ -319,7 +488,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Kayıt başarısızsa hata sayfasına yönlendir
     if (!$donationId) {
         error_log("Bağış kaydetme hatası oluştu!");
-        echo "<script>window.location.href = '" . BASE_URL . "/fail?error=database';</script>";
+        // Daha detaylı hata mesajı için error log'u kontrol et
+        if (PAYMENT_DEBUG) {
+            echo "<script>alert('Bağış kaydetme hatası! Daha fazla bilgi için browser console ve server error log dosyasını kontrol edin.'); window.location.href = '" . BASE_URL . "/fail?error=database';</script>";
+        } else {
+            echo "<script>window.location.href = '" . BASE_URL . "/fail?error=database';</script>";
+        }
         exit;
     }
     
@@ -776,24 +950,115 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.25);
 }
 
+/* Kart tipi gösterme alanı */
+.card-type-display {
+    position: absolute;
+    right: 50px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 32px;
+    height: 20px;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: contain;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.card-type-display.show {
+    opacity: 1;
+}
+
+/* Kart tipi ikonları */
+.card-type-display.visa {
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 32" fill="none"><rect width="48" height="32" rx="4" fill="%231a1f71"/><path d="M18.5 11h-3.2l-2 10h2l.4-2h1.6c1.3 0 2.4-1.1 2.4-2.4v-3.2c0-1.3-1.1-2.4-2.4-2.4h-1.6z" fill="white"/><path d="M22.8 21l1.6-10h2l-1.6 10h-2z" fill="white"/><path d="M27.2 15.6c0-1.3 1.1-2.4 2.4-2.4h1.6c1.3 0 2.4 1.1 2.4 2.4v1.6h-4v1.6c0 .4.4.8.8.8h3.2l-.4 2h-3.2c-1.3 0-2.4-1.1-2.4-2.4v-3.2z" fill="white"/><path d="M36.8 11h2l-2 10h-2l2-10z" fill="white"/></svg>');
+}
+
+.card-type-display.mastercard {
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 32" fill="none"><rect width="48" height="32" rx="4" fill="%23eb001b"/><circle cx="18" cy="16" r="8" fill="%23ff5f00"/><circle cx="30" cy="16" r="8" fill="%23f79e1b"/><path d="M24 10.4c1.2 1.2 2 2.8 2 4.6s-.8 3.4-2 4.6c-1.2-1.2-2-2.8-2-4.6s.8-3.4 2-4.6z" fill="%23ff5f00"/></svg>');
+}
+
+.card-type-display.amex {
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 32" fill="none"><rect width="48" height="32" rx="4" fill="%23006fcf"/><path d="M12 11h8l-2 2h-4l-1 2h3l-1 2h-3l-1 2h4l2 2h-8l3-10z" fill="white"/><path d="M21 11h2l3 10h-2l-1-2h-2l-1 2h-2l3-10zm1 6h1l-1-3-1 3z" fill="white"/><path d="M28 11h6l-1 2h-2v8h-2v-8h-2l1-2z" fill="white"/><path d="M36 11h2l3 4v-4h2v10h-2l-3-4v4h-2v-10z" fill="white"/></svg>');
+}
+
+.card-type-display.troy {
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 32" fill="none"><rect width="48" height="32" rx="4" fill="%230066cc"/><text x="24" y="20" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="8" font-weight="bold">TROY</text></svg>');
+}
+
+.card-type-display.discover {
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 32" fill="none"><rect width="48" height="32" rx="4" fill="%23ff6000"/><text x="24" y="20" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="6" font-weight="bold">DISCOVER</text></svg>');
+}
+
+.card-type-display.unionpay {
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 32" fill="none"><rect width="48" height="32" rx="4" fill="%23e21836"/><circle cx="16" cy="16" r="6" fill="%23006fcf"/><circle cx="32" cy="16" r="6" fill="%2300aa44"/><path d="M24 10c3.3 0 6 2.7 6 6s-2.7 6-6 6-6-2.7-6-6 2.7-6 6-6z" fill="%23ff6000"/></svg>');
+}
+
+/* Türk bankaları için özel ikonlar */
+.card-type-display.ziraat {
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 32" fill="none"><rect width="48" height="32" rx="4" fill="%23c8102e"/><text x="24" y="20" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="6" font-weight="bold">ZİRAAT</text></svg>');
+}
+
+.card-type-display.garanti {
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 32" fill="none"><rect width="48" height="32" rx="4" fill="%23004225"/><text x="24" y="20" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="5" font-weight="bold">GARANTİ</text></svg>');
+}
+
+.card-type-display.isbank {
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 32" fill="none"><rect width="48" height="32" rx="4" fill="%23005aa0"/><text x="24" y="20" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="5" font-weight="bold">İŞ BANK</text></svg>');
+}
+
+.card-type-display.akbank {
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 32" fill="none"><rect width="48" height="32" rx="4" fill="%23e30613"/><text x="24" y="20" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="6" font-weight="bold">AKBANK</text></svg>');
+}
+
+.card-type-display.yapıkredi {
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 32" fill="none"><rect width="48" height="32" rx="4" fill="%23003a70"/><text x="24" y="18" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="4" font-weight="bold">YAPI</text><text x="24" y="24" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="4" font-weight="bold">KREDİ</text></svg>');
+}
+
+.card-type-display.teb {
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 32" fill="none"><rect width="48" height="32" rx="4" fill="%23ffd100"/><text x="24" y="20" text-anchor="middle" fill="%23000" font-family="Arial, sans-serif" font-size="8" font-weight="bold">TEB</text></svg>');
+}
+
+.card-type-display.enpara {
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 32" fill="none"><rect width="48" height="32" rx="4" fill="%23ff6900"/><text x="24" y="20" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="5" font-weight="bold">ENPARA</text></svg>');
+}
+
+/* Doğrulama ikonu */
 .card-validation-icon {
     position: absolute;
     right: 15px;
     top: 50%;
     transform: translateY(-50%);
-    width: 24px;
-    height: 24px;
+    width: 20px;
+    height: 20px;
     background-position: center;
     background-repeat: no-repeat;
     background-size: contain;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.card-validation-icon.show {
+    opacity: 1;
 }
 
 .card-validation-icon.valid {
-    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%234CAF50" width="24px" height="24px"><path d="M0 0h24v24H0z" fill="none"/><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>');
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%234CAF50" width="20px" height="20px"><path d="M0 0h24v24H0z" fill="none"/><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>');
 }
 
 .card-validation-icon.invalid {
-    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23F44336" width="24px" height="24px"><path d="M0 0h24v24H0z" fill="none"/><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>');
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23F44336" width="20px" height="20px"><path d="M0 0h24v24H0z" fill="none"/><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>');
+}
+
+/* Kart numarası input'u için ekstra stil */
+.card-number-input.valid {
+    border-color: #4CAF50;
+    box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.25);
+}
+
+.card-number-input.invalid {
+    border-color: #F44336;
+    box-shadow: 0 0 0 2px rgba(244, 67, 54, 0.25);
 }
 
 .form-group {
@@ -959,6 +1224,14 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+    // Şehir bilgisini session'dan al ve seç
+    <?php if (!empty($donorCity)): ?>
+    const citySelect = document.getElementById('city');
+    if (citySelect) {
+        citySelect.value = '<?= htmlspecialchars($donorCity) ?>';
+    }
+    <?php endif; ?>
+
     // Formu işleme
     const paymentForm = document.getElementById('paymentForm');
     const loadingOverlay = document.getElementById('loadingOverlay');
@@ -978,7 +1251,208 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
 
-        // Form doğrulama fonksiyonu
+
+
+        // Kredi kartı numarası formatı ve doğrulama
+        const cardInput = document.getElementById('cardNumber');
+        const cardTypeDisplay = document.getElementById('cardTypeDisplay');
+        const cardValidationIcon = document.getElementById('cardValidationIcon');
+
+        if (cardInput) {
+            cardInput.addEventListener('input', function(e) {
+                let value = e.target.value.replace(/\D/g, '');
+
+                // Kart tipine göre maksimum uzunluk belirle
+                const cardType = detectCardType(value);
+                const maxLength = getCardMaxLength(cardType);
+
+                // Maksimum uzunluktan fazla girilmesin
+                if (value.length > maxLength) {
+                    value = value.slice(0, maxLength);
+                }
+
+                // Formatlama - kart tipine göre
+                let formattedValue = formatCardNumber(value, cardType);
+                e.target.value = formattedValue;
+
+                // Kart tipi ve doğrulama durumunu güncelle
+                updateCardDisplay(value, cardType);
+            });
+
+            // Focus lost olduğunda son bir kez doğrulama yap
+            cardInput.addEventListener('blur', function(e) {
+                const value = e.target.value.replace(/\D/g, '');
+                const cardType = detectCardType(value);
+                updateCardDisplay(value, cardType, true);
+            });
+        }
+
+        // Kart tipini tespit etme fonksiyonu
+        function detectCardType(number) {
+            // Kart tipi regex tanımları (BIN kodlarına göre)
+            const cardTypes = {
+                visa: /^4[0-9]/,
+                mastercard: /^(5[1-5][0-9]|2(2[2-9][0-9]|[3-6][0-9][0-9]|7[0-1][0-9]|720))/,
+                amex: /^3[47]/,
+                discover: /^(6011|622(1(2[6-9]|[3-9][0-9])|[2-8][0-9]{2}|9([01][0-9]|2[0-5]))|64[4-9]|65)/,
+                troy: /^(9792|9794)/,
+                unionpay: /^(62|81)/,
+                // Türk bankaları için özel BIN kodları
+                ziraat: /^(4546|4576|5528|5279)/,
+                garanti: /^(4282|4355|5571|5504)/,
+                isbank: /^(4508|4253|5456|5552)/,
+                akbank: /^(4671|4090|5549|5274)/,
+                yapıkredi: /^(4511|4603|5401|5440)/,
+                teb: /^(4029|4543|5296|5183)/,
+                enpara: /^(5311|5312)/
+            };
+
+            for (const [type, regex] of Object.entries(cardTypes)) {
+                if (regex.test(number)) {
+                    return type;
+                }
+            }
+
+            return 'unknown';
+        }
+
+        // Kart tipi adını Türkçe olarak döndür
+        function getCardTypeName(cardType) {
+            const cardNames = {
+                visa: 'Visa',
+                mastercard: 'Mastercard',
+                amex: 'American Express',
+                discover: 'Discover',
+                troy: 'Troy',
+                unionpay: 'UnionPay',
+                ziraat: 'Ziraat Bankası',
+                garanti: 'Garanti BBVA',
+                isbank: 'Türkiye İş Bankası',
+                akbank: 'Akbank',
+                yapıkredi: 'Yapı Kredi',
+                teb: 'TEB',
+                enpara: 'Enpara.com',
+                unknown: 'Bilinmeyen Kart Tipi'
+            };
+
+            return cardNames[cardType] || cardNames.unknown;
+        }
+
+        // Kart tipine göre maksimum uzunluk
+        function getCardMaxLength(cardType) {
+            const lengths = {
+                visa: 16,
+                mastercard: 16,
+                amex: 15,
+                discover: 16,
+                troy: 16,
+                unionpay: 19,
+                // Türk bankaları (genellikle Visa/Mastercard altyapısı)
+                ziraat: 16,
+                garanti: 16,
+                isbank: 16,
+                akbank: 16,
+                yapıkredi: 16,
+                teb: 16,
+                enpara: 16
+            };
+            return lengths[cardType] || 16;
+        }
+
+        // Kart numarasını formatlama
+        function formatCardNumber(value, cardType) {
+            let formattedValue = '';
+
+            if (cardType === 'amex') {
+                // American Express: 4-6-5 formatı
+                for (let i = 0; i < value.length; i++) {
+                    if (i === 4 || i === 10) {
+                        formattedValue += ' ';
+                    }
+                    formattedValue += value[i];
+                }
+            } else {
+                // Diğer kartlar: 4-4-4-4 formatı
+                for (let i = 0; i < value.length; i++) {
+                    if (i > 0 && i % 4 === 0) {
+                        formattedValue += ' ';
+                    }
+                    formattedValue += value[i];
+                }
+            }
+
+            return formattedValue;
+        }
+
+        // Luhn algoritması ile kart numarası doğrulama
+        function validateCardNumber(number) {
+            if (!number || number.length < 13) return false;
+
+            let sum = 0;
+            let isEven = false;
+
+            // Sağdan sola doğru işle
+            for (let i = number.length - 1; i >= 0; i--) {
+                let digit = parseInt(number[i]);
+
+                if (isEven) {
+                    digit *= 2;
+                    if (digit > 9) {
+                        digit -= 9;
+                    }
+                }
+
+                sum += digit;
+                isEven = !isEven;
+            }
+
+            return sum % 10 === 0;
+        }
+
+        // Kart görüntüleme ve doğrulama durumunu güncelle
+        function updateCardDisplay(number, cardType, finalValidation = false) {
+            // Kart tipi gösterimi
+            if (cardTypeDisplay) {
+                cardTypeDisplay.className = 'card-type-display';
+                if (cardType !== 'unknown' && number.length >= 4) {
+                    cardTypeDisplay.classList.add('show', cardType);
+                }
+            }
+
+            // Doğrulama ikonu
+            if (cardValidationIcon && cardInput) {
+                cardValidationIcon.className = 'card-validation-icon';
+                cardInput.className = 'card-number-input';
+
+                if (number.length >= 13) {
+                    const isValid = validateCardNumber(number);
+                    const expectedLength = getCardMaxLength(cardType);
+                    const isCompleteLength = number.length >= expectedLength;
+
+                    if (finalValidation) {
+                        // Son doğrulama - tam uzunluk ve Luhn kontrolü
+                        if (isValid && isCompleteLength) {
+                            cardValidationIcon.classList.add('show', 'valid');
+                            cardInput.classList.add('valid');
+                        } else {
+                            cardValidationIcon.classList.add('show', 'invalid');
+                            cardInput.classList.add('invalid');
+                        }
+                    } else {
+                        // Gerçek zamanlı doğrulama - daha yumuşak
+                        if (isValid) {
+                            cardValidationIcon.classList.add('show', 'valid');
+                            cardInput.classList.add('valid');
+                        } else if (number.length >= expectedLength) {
+                            cardValidationIcon.classList.add('show', 'invalid');
+                            cardInput.classList.add('invalid');
+                        }
+                    }
+                }
+            }
+        }
+
+        // Form doğrulama fonksiyonunu güncelle
         function validatePaymentForm() {
             const cardNumber = document.getElementById('cardNumber').value.replace(/\s/g, '');
             const cardExpiry = document.getElementById('cardExpiry').value;
@@ -986,9 +1460,37 @@ document.addEventListener('DOMContentLoaded', function() {
             const cardHolderName = document.getElementById('cardHolderName').value;
             const city = document.getElementById('city').value;
 
-            // Kart numarası kontrolü
-            if (cardNumber.length < 13 || cardNumber.length > 19) {
+            // reCAPTCHA kontrolü - DEBUG_MODE'da atla
+            <?php if (!defined('DEBUG_MODE') || !DEBUG_MODE): ?>
+            const recaptchaResponse = grecaptcha.getResponse();
+            if (!recaptchaResponse) {
+                showNotification('Lütfen reCAPTCHA doğrulamasını tamamlayınız.', 'error');
+                return false;
+            }
+            
+            // Hidden input'a reCAPTCHA response'unu ekle
+            const recaptchaInput = document.getElementById('g-recaptcha-response');
+            if (recaptchaInput) {
+                recaptchaInput.value = recaptchaResponse;
+            }
+            <?php else: ?>
+            console.log('DEBUG_MODE: reCAPTCHA kontrolü atlandı');
+            <?php endif; ?>
+
+            // Kart numarası kontrolü - Luhn algoritması ile
+            if (!validateCardNumber(cardNumber)) {
                 showNotification('Geçersiz kart numarası. Lütfen kart bilgilerinizi kontrol ediniz.', 'error');
+                return false;
+            }
+
+            // Kart tipi kontrolü
+            const cardType = detectCardType(cardNumber);
+            const expectedLength = getCardMaxLength(cardType);
+            if (cardNumber.length < expectedLength) {
+                const cardTypeName = getCardTypeName(cardType);
+                showNotification(
+                    `Kart numarası eksik. ${cardTypeName} kartları ${expectedLength} haneli olmalıdır.`,
+                    'error');
                 return false;
             }
 
@@ -998,9 +1500,23 @@ document.addEventListener('DOMContentLoaded', function() {
                 return false;
             }
 
-            // CVV kontrolü
-            if (cardCvv.length < 3 || cardCvv.length > 4) {
-                showNotification('Geçersiz CVV. Lütfen kart arkasındaki 3 haneli kodu giriniz.', 'error');
+            // Son kullanma tarihinin geçmişte olup olmadığını kontrol et
+            const [month, year] = cardExpiry.split('/');
+            const expiryDate = new Date(2000 + parseInt(year), parseInt(month) - 1);
+            const currentDate = new Date();
+            if (expiryDate < currentDate) {
+                showNotification('Kartınızın son kullanma tarihi geçmiş. Lütfen geçerli bir kart kullanınız.',
+                    'error');
+                return false;
+            }
+
+            // CVV kontrolü - kart tipine göre
+            const expectedCvvLength = cardType === 'amex' ? 4 : 3;
+            if (cardCvv.length !== expectedCvvLength) {
+                const cardTypeName = getCardTypeName(cardType);
+                showNotification(
+                    `Geçersiz CVV. ${cardTypeName} kartları için ${expectedCvvLength} haneli kod giriniz.`,
+                    'error');
                 return false;
             }
 
@@ -1017,30 +1533,6 @@ document.addEventListener('DOMContentLoaded', function() {
             }
 
             return true;
-        }
-
-        // Kredi kartı numarası formatı
-        const cardInput = document.getElementById('cardNumber');
-        if (cardInput) {
-            cardInput.addEventListener('input', function(e) {
-                let value = e.target.value.replace(/\D/g, '');
-
-                // 16 haneden fazla girilmesin
-                if (value.length > 16) {
-                    value = value.slice(0, 16);
-                }
-
-                // 4'lü gruplara ayır
-                let formattedValue = '';
-                for (let i = 0; i < value.length; i++) {
-                    if (i > 0 && i % 4 === 0) {
-                        formattedValue += ' ';
-                    }
-                    formattedValue += value[i];
-                }
-
-                e.target.value = formattedValue;
-            });
         }
 
         // Son kullanma tarihi formatı
@@ -1063,18 +1555,32 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
 
-        // CVV formatı
+        // CVV formatı - kart tipine göre dinamik
         const cvvInput = document.getElementById('cardCvv');
         if (cvvInput) {
             cvvInput.addEventListener('input', function(e) {
                 let value = e.target.value.replace(/\D/g, '');
 
-                // 3 haneden fazla girilmesin
-                if (value.length > 3) {
-                    value = value.slice(0, 3);
+                // Kart tipini al
+                const cardNumber = document.getElementById('cardNumber').value.replace(/\D/g, '');
+                const cardType = detectCardType(cardNumber);
+
+                // CVV uzunluğunu kart tipine göre belirle
+                const maxCvvLength = cardType === 'amex' ? 4 : 3;
+
+                // Maksimum uzunluktan fazla girilmesin
+                if (value.length > maxCvvLength) {
+                    value = value.slice(0, maxCvvLength);
                 }
 
                 e.target.value = value;
+
+                // Placeholder'ı güncelle
+                if (cardType === 'amex') {
+                    e.target.placeholder = 'CVVV (4 hane)';
+                } else {
+                    e.target.placeholder = 'CVV (3 hane)';
+                }
             });
         }
 
@@ -1234,6 +1740,23 @@ function onRecaptchaLoad() {
         'size': 'normal',
         'tabindex': 0
     });
+}
+
+function onRecaptchaSuccess(token) {
+    // reCAPTCHA başarılı olduğunda yapılacak işlemler
+    console.log('reCAPTCHA başarılı:', token);
+    
+    // Hidden input'a token'ı ekle
+    const recaptchaInput = document.getElementById('g-recaptcha-response');
+    if (recaptchaInput) {
+        recaptchaInput.value = token;
+    }
+}
+
+function onRecaptchaExpired() {
+    // reCAPTCHA süresi dolduğunda yapılacak işlemler
+    console.log('reCAPTCHA süresi doldu');
+    grecaptcha.reset();
 }
 </script>
 

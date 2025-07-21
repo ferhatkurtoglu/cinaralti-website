@@ -1,4 +1,4 @@
-import { deleteDonationType, getDonationTypeById, updateDonationType } from '@/lib/db';
+import { deactivateDonationType, deleteDonationType, getDonationTypeById, updateDonationType } from '@/lib/db';
 import { NextResponse } from 'next/server';
 
 interface Params {
@@ -60,6 +60,30 @@ export async function PUT(request: Request, { params }: Params) {
       );
     }
     
+    // Eğer action deactivate ise, sadece pasif yap
+    if (data.action === 'deactivate') {
+      try {
+        console.log('Deactivating donation type with ID:', id);
+        const result = await deactivateDonationType(id);
+        console.log('Deactivation result:', result);
+        return NextResponse.json({ 
+          success: true, 
+          message: 'Bağış seçeneği pasif duruma alındı'
+        });
+      } catch (deactivateError) {
+        console.error('Deactivation error:', deactivateError);
+        return NextResponse.json(
+          { error: 'Pasif yapma işlemi sırasında hata oluştu: ' + (deactivateError as Error).message },
+          { status: 500 }
+        );
+      }
+    }
+    
+// is_active field mapping
+    if (data.is_active !== undefined) {
+      data.active = data.is_active;
+    }
+
     const result = await updateDonationType(id, data);
     
     return NextResponse.json(result);
@@ -96,8 +120,19 @@ export async function DELETE(request: Request, { params }: Params) {
     await deleteDonationType(id);
     
     return NextResponse.json({ success: true });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Bağış seçeneği silinirken hata oluştu:', error);
+    
+    if (error.message === 'HAS_DONATIONS') {
+      return NextResponse.json(
+        { 
+          error: 'HAS_DONATIONS',
+          message: 'Bu bağış seçeneği ile yapılan bağışlar bulunduğu için silinemez. Önce bu bağış seçeneği ile yapılan bağışları silmeniz gerekiyor. İsterseniz pasif durumuna alabilirsiniz.'
+        },
+        { status: 409 } // Conflict
+      );
+    }
+    
     return NextResponse.json(
       { error: 'Bağış seçeneği silinirken bir hata oluştu' },
       { status: 500 }

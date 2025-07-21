@@ -168,9 +168,27 @@ export async function deleteCategory(id: number) {
 export async function getDonationTypes() {
   const query = `
     SELECT * FROM donation_options
-    ORDER BY title
+    ORDER BY name
   `;
-  return executeQuery({ query });
+  const donationTypes = await executeQuery({ query });
+  
+  // Her bağış türü için kategorileri al ve boolean değerleri düzelt
+  for (const donationType of donationTypes) {
+    const categoriesQuery = `
+      SELECT dc.*
+      FROM donation_categories dc
+      JOIN donation_option_categories dtc ON dc.id = dtc.category_id
+      WHERE dtc.donation_option_id = ?
+    `;
+    
+    const categories = await executeQuery({ query: categoriesQuery, values: [donationType.id] });
+    donationType.categories = categories;
+    
+    // MySQL'den gelen 0/1 değerlerini boolean'a çevir
+    donationType.is_active = !!donationType.is_active;
+  }
+  
+  return donationTypes;
 }
 
 export async function getDonationTypeById(id: number) {
@@ -195,7 +213,11 @@ export async function getDonationTypeById(id: number) {
   
   const categories = await executeQuery({ query: categoriesQuery, values: [id] });
   
-  return { ...donationType[0], categories };
+  // Boolean değeri düzelt
+  const result = { ...donationType[0], categories };
+  result.is_active = !!result.is_active;
+  
+  return result;
 }
 
 export async function createDonationType(typeData: any) {
@@ -207,26 +229,24 @@ export async function createDonationType(typeData: any) {
     // Ana bağış türü bilgilerini ekle
     const insertQuery = `
       INSERT INTO donation_options (
-        title, 
+        name, 
         slug, 
         description, 
-        active, 
-        category_id, 
+        is_active, 
         target_amount, 
         collected_amount, 
         position,
         cover_image,
         gallery_images
       )
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
     
     const [result] = await connection.execute(insertQuery, [
-      typeData.title || typeData.name,
-      typeData.slug || (typeData.title || typeData.name).toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''),
+      typeData.name,
+      typeData.slug || typeData.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''),
       typeData.description || '',
-      typeData.active !== undefined ? typeData.active : true,
-      typeData.category_id || null,
+      typeData.is_active !== undefined ? typeData.is_active : true,
       typeData.target_amount || 0,
       typeData.collected_amount || 0,
       typeData.position || 0,
@@ -268,11 +288,10 @@ export async function updateDonationType(id: number, typeData: any) {
     const updateQuery = `
       UPDATE donation_options
       SET 
-        title = ?, 
+        name = ?, 
         slug = ?, 
         description = ?, 
-        active = ?,
-        category_id = ?,
+        is_active = ?,
         target_amount = ?,
         collected_amount = ?,
         position = ?,
@@ -282,11 +301,10 @@ export async function updateDonationType(id: number, typeData: any) {
     `;
     
     await connection.execute(updateQuery, [
-      typeData.title || typeData.name,
-      typeData.slug || (typeData.title || typeData.name).toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''),
+      typeData.name,
+      typeData.slug || typeData.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''),
       typeData.description || '',
-      typeData.active !== undefined ? typeData.active : true,
-      typeData.category_id || null,
+      typeData.is_active !== undefined ? typeData.is_active : true,
       typeData.target_amount || 0,
       typeData.collected_amount || 0,
       typeData.position || 0,
@@ -332,6 +350,17 @@ export async function deleteDonationType(id: number) {
   try {
     await connection.beginTransaction();
     
+    // Bu bağış seçeneği ile yapılan bağışlar var mı kontrol et
+    const [donationsCheck] = await connection.execute(
+      'SELECT COUNT(*) as count FROM donations_made WHERE donation_option_id = ?',
+      [id]
+    );
+    
+    if ((donationsCheck as any)[0].count > 0) {
+      await connection.rollback();
+      throw new Error('HAS_DONATIONS'); // Özel error kodu
+    }
+    
     // Önce kategorileri temizle
     await connection.execute(
       'DELETE FROM donation_option_categories WHERE donation_option_id = ?',
@@ -354,10 +383,42 @@ export async function deleteDonationType(id: number) {
   }
 }
 
+// Bağış seçeneğini pasif yapma fonksiyonu
+export async function deactivateDonationType(id: number) {
+  const connection = await pool.getConnection();
+  
+  try {
+    console.log('Deactivating donation type with ID:', id);
+    
+    const query = `
+      UPDATE donation_options
+      SET is_active = 0
+      WHERE id = ?
+    `;
+    
+    const [result] = await connection.execute(query, [id]);
+    console.log('Deactivate query result:', result);
+    
+    // Güncellenmiş kaydı kontrol et
+    const [checkResult] = await connection.execute(
+      'SELECT id, name, is_active FROM donation_options WHERE id = ?',
+      [id]
+    );
+    console.log('Updated record:', checkResult);
+    
+    return result;
+  } catch (error) {
+    console.error('Error in deactivateDonationType:', error);
+    throw error;
+  } finally {
+    connection.release();
+  }
+}
+
 // Bağışlar için CRUD işlemleri
 export async function getDonations() {
   const query = `
-    SELECT d.*, dt.title as donation_type_name
+    SELECT d.*, dt.name as donation_type_name
     FROM donations_made d
     LEFT JOIN donation_options dt ON d.donation_type = dt.slug
     ORDER BY d.created_at DESC
@@ -367,7 +428,7 @@ export async function getDonations() {
 
 export async function getDonationById(id: number) {
   const query = `
-    SELECT d.*, dt.title as donation_type_name
+    SELECT d.*, dt.name as donation_type_name
     FROM donations_made d
     LEFT JOIN donation_options dt ON d.donation_type = dt.slug
     WHERE d.id = ?
@@ -594,7 +655,7 @@ export async function getRecentDonations(limit = 10) {
       d.donor_name,
       d.created_at,
       d.payment_status,
-      dt.title as donation_type
+      dt.name as donation_type
     FROM 
       donations_made d
     JOIN 

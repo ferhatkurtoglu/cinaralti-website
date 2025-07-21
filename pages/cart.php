@@ -1,4 +1,80 @@
 <!-- Cart -->
+<?php
+// Güvenli session başlatma
+require_once __DIR__ . '/../includes/functions.php';
+secure_session_start();
+
+require_once __DIR__ . '/../config/config.php';
+require_once __DIR__ . '/../config/payment_config.php';
+
+// DEBUG_MODE'da rate limit verilerini temizle
+if (defined('DEBUG_MODE') && DEBUG_MODE) {
+    clear_rate_limits();
+}
+
+// Rate limiting kontrolü (DEBUG_MODE'da devre dışı)
+if (PAYMENT_RATE_LIMIT_ENABLED && !check_rate_limit('cart_access', 10, 300)) {
+    log_payment_security_event('rate_limit_exceeded', ['action' => 'cart_access']);
+    // DEBUG_MODE'da warning göster ama engelleme
+    if (defined('DEBUG_MODE') && DEBUG_MODE) {
+        error_log('WARNING: Cart rate limit exceeded but allowing due to DEBUG_MODE');
+    } else {
+        header('Location: ' . BASE_URL . '/fail?error=rate_limit');
+        exit();
+    }
+}
+
+// Cart API endpoint handling
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    header('Content-Type: application/json');
+    
+    $action = $_POST['action'] ?? '';
+    
+    // CSRF protection
+    if (PAYMENT_CSRF_PROTECTION && (!isset($_POST['csrf_token']) || !verify_csrf_token($_POST['csrf_token']))) {
+        echo json_encode(['success' => false, 'error' => 'Güvenlik doğrulaması başarısız']);
+        exit;
+    }
+    
+    switch ($action) {
+        case 'add_item':
+            $item = $_POST['item'] ?? [];
+            $result = add_to_server_cart($item);
+            echo json_encode($result);
+            break;
+            
+        case 'remove_item':
+            $item_id = $_POST['item_id'] ?? '';
+            $result = remove_from_server_cart($item_id);
+            echo json_encode(['success' => $result]);
+            break;
+            
+        case 'clear_cart':
+            $result = clear_server_cart();
+            echo json_encode(['success' => $result]);
+            break;
+            
+        case 'get_cart':
+            $cart = get_server_cart();
+            $total = calculate_cart_total();
+            echo json_encode(['success' => true, 'cart' => $cart, 'total' => $total]);
+            break;
+            
+        case 'validate_cart':
+            $validation = validate_cart_for_checkout();
+            echo json_encode($validation);
+            break;
+            
+        default:
+            echo json_encode(['success' => false, 'error' => 'Geçersiz işlem']);
+    }
+    exit;
+}
+
+require_once __DIR__ . '/../includes/header.php';
+?>
+
+<!-- Cart -->
 <div class="cart-container">
     <div class="cart-header">
         <div class="cart-title">
@@ -797,7 +873,99 @@
                 return;
             }
             
-            window.location.href = '<?= BASE_URL ?>/payment';
+            // Sepet bilgilerini session'a kaydet
+            const cart = JSON.parse(localStorage.getItem('donationCart')) || [];
+            if (cart.length === 0) {
+                alert('Sepetiniz boş. Lütfen önce bağış ekleyin.');
+                return;
+            }
+            
+            // İlk bağıştan donor bilgilerini al (tüm bağışlar aynı kişiden olmalı)
+            const firstDonation = cart[0];
+            
+            // Total amount'ı localStorage'dan al ve düzelt
+            const storedTotal = localStorage.getItem('cartTotalAmount') || '₺0,00';
+            console.log('Stored total from localStorage:', storedTotal);
+            
+            // ₺12.345,00 formatından 12345.00 formatına çevir
+            let totalAmount = 0;
+            try {
+                // Önce ₺ sembolünü ve boşlukları kaldır
+                let cleanAmount = storedTotal.replace(/[₺\s]/g, '');
+                console.log('After removing ₺ and spaces:', cleanAmount);
+                
+                // Türk formatındaki noktaları kaldır (1.000 -> 1000) ve virgülü noktaya çevir (,00 -> .00)
+                if (cleanAmount.includes(',')) {
+                    // Son virgülden önceki noktaları kaldır
+                    const parts = cleanAmount.split(',');
+                    const integerPart = parts[0].replace(/\./g, ''); // Binlik ayırıcı noktaları kaldır
+                    const decimalPart = parts[1] || '00';
+                    cleanAmount = integerPart + '.' + decimalPart;
+                }
+                
+                console.log('Final clean amount:', cleanAmount);
+                totalAmount = parseFloat(cleanAmount) || 0;
+            } catch (e) {
+                console.error('Error parsing total amount:', e);
+                totalAmount = 0;
+            }
+            
+            console.log('Calculated total amount:', totalAmount);
+            
+            // Donor bilgilerini kontrol et
+            if (!firstDonation.donorName || !firstDonation.donorEmail || !firstDonation.donorPhone) {
+                alert('Bağış yapabilmek için tüm bilgilerinizi girmelisiniz. Lütfen bağışlarınızı düzenleyerek eksik bilgileri tamamlayın.');
+                return;
+            }
+            
+            // Session'a kaydetmek için fetch ile backend'e gönder
+            // XAMPP için path düzeltmesi
+            const requestUrl = '/cinaralti-website/includes/actions/prepare-payment.php';
+            console.log('Fetch URL:', requestUrl);
+            console.log('Cart data:', cart);
+            console.log('Total amount:', totalAmount);
+            
+            fetch(requestUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    cart: cart,
+                    totalAmount: totalAmount
+                })
+            })
+            .then(response => {
+                console.log('Response status:', response.status);
+                console.log('Response headers:', response.headers);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP Error: ${response.status} ${response.statusText}`);
+                }
+                
+                return response.text(); // Önce text olarak al
+            })
+            .then(responseText => {
+                console.log('Response text:', responseText);
+                
+                try {
+                    const data = JSON.parse(responseText);
+                    console.log('Parsed data:', data);
+                    
+                    if (data.success) {
+                        window.location.href = '<?= BASE_URL ?>/payment';
+                    } else {
+                        alert('Ödeme hazırlığı sırasında hata oluştu: ' + (data.error || 'Bilinmeyen hata'));
+                    }
+                } catch (parseError) {
+                    console.error('JSON Parse Error:', parseError);
+                    alert('Sunucu yanıtı çözümlenemedi. Response: ' + responseText);
+                }
+            })
+            .catch(error => {
+                console.error('Fetch Error:', error);
+                alert('Bağlantı hatası oluştu: ' + error.message);
+            });
         });
         
         // Sepet öğelerini localStorage'dan yükle

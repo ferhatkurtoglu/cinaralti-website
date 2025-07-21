@@ -1,0 +1,22 @@
+RewriteEngine On
+
+# PHP dosyalarını çalıştır
+<Files "*.php">
+    ForceType application/x-httpd-php
+</Files>
+
+# Index dosyası ayarları
+DirectoryIndex index.php public/index.php
+
+# Güvenlik ayarları
+<FilesMatch "\.(htaccess|htpasswd|ini|log|sh|inc|bak)$">
+    Order Allow,Deny
+    Deny from all
+</FilesMatch>
+
+# CORS ayarları (sadece geliştirme için)
+<IfModule mod_headers.c>
+    Header add Access-Control-Allow-Origin "*"
+    Header add Access-Control-Allow-Headers "origin, x-requested-with, content-type"
+    Header add Access-Control-Allow-Methods "PUT, GET, POST, DELETE, OPTIONS"
+</IfModule> 

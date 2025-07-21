@@ -13,13 +13,11 @@ if (defined('FORCE_HTTPS') && FORCE_HTTPS === true) {
     }
 }
 
-// Oturum başlat
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-
 // Temel dosyaları dahil et
 require_once __DIR__ . '/../config/config.php';
+
+// Güvenli oturum başlat
+secure_session_start();
 
 // URL işleme
 $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
@@ -41,6 +39,7 @@ $routes = [
     '/home' => 'home.php',
     '/about' => 'about.php',
     '/video' => 'video.php',
+    '/video-details' => 'video-details.php',
     '/blog' => 'blog.php',
     '/contact' => 'contact.php',
     '/contact-ank' => 'contact-ank.php',

@@ -36,6 +36,11 @@ export async function POST(request: Request) {
       data.slug = (data.title || data.name).toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
     }
     
+    // is_active field mapping
+    if (data.is_active !== undefined) {
+      data.active = data.is_active;
+    }
+    
     const result = await createDonationType(data);
     
     return NextResponse.json(result, { status: 201 });
@@ -46,4 +51,4 @@ export async function POST(request: Request) {
       { status: 500 }
     );
   }
-} 
+}

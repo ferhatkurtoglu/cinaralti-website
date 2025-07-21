@@ -14,110 +14,70 @@
                 <div class="blog_content">
                     <div class="blog-card-large-row">
                         <?php
-            // Markdown dosyalarının bulunduğu klasör
-            $blogDir = dirname(__DIR__) . '/content/blog/';
-
-            // Hata ayıklama için - Klasör bulunabildi mi?
-            if (!is_dir($blogDir)) {
-              echo '<div class="alert alert-warning">Blog klasörü bulunamadı. Lütfen yöneticiyle iletişime geçin.</div>';
-              $blogPosts = array();
-            } else {
-              // Dosyaları tarihe göre sıralayacak dizi
-              $blogPosts = array();
-
-              // Markdown dosyalarını okuma
-              if ($dh = opendir($blogDir)) {
-                while (($file = readdir($dh)) !== false) {
-                  if (pathinfo($file, PATHINFO_EXTENSION) === 'md') {
-                    $filePath = $blogDir . $file;
-                    $content = file_get_contents($filePath);
-
-                    // Markdown meta verilerini çıkarma (YAML front matter)
-                    preg_match('/---\s*(.*?)\s*---\s*(.*)/s', $content, $matches);
-
-                    if (count($matches) >= 3) {
-                      $frontMatter = $matches[1];
-                      $markdownContent = $matches[2];
-
-                      // Meta verileri ayrıştırma
-                      preg_match('/title:\s*"(.+?)"/s', $frontMatter, $titleMatch);
-                      preg_match('/date:\s*"(.+?)"/s', $frontMatter, $dateMatch);
-                      preg_match('/author:\s*"(.+?)"/s', $frontMatter, $authorMatch);
-                      preg_match('/category:\s*"(.+?)"/s', $frontMatter, $categoryMatch);
-                      preg_match('/image:\s*"(.+?)"/s', $frontMatter, $imageMatch);
-
-                      $title = isset($titleMatch[1]) ? $titleMatch[1] : '';
-                      $date = isset($dateMatch[1]) ? $dateMatch[1] : '';
-                      $author = isset($authorMatch[1]) ? $authorMatch[1] : '';
-                      $category = isset($categoryMatch[1]) ? $categoryMatch[1] : '';
-                      $image = isset($imageMatch[1]) ? $imageMatch[1] : '';
-
-                      // İçeriği kısaltma (özet olarak)
-                      $summary = strip_tags(substr($markdownContent, 0, 150)) . '...';
-
-                      // Blog yazısını diziye ekleme
-                      $blogPosts[] = array(
-                        'id' => pathinfo($file, PATHINFO_FILENAME),
-                        'title' => $title,
-                        'date' => $date,
-                        'author' => $author,
-                        'category' => $category,
-                        'image' => $image,
-                        'summary' => $summary,
-                        'file' => pathinfo($file, PATHINFO_FILENAME)
-                      );
-                    }
-                  }
-                }
-                closedir($dh);
-              }
-            }
-
-            // Blog yazılarını tarihe göre sıralama (en yeni üstte)
-            if (!empty($blogPosts)) {
-              usort($blogPosts, function ($a, $b) {
-                return strtotime($b['date']) - strtotime($a['date']);
-              });
-
-              // Blog yazılarını gösterme
-              foreach ($blogPosts as $post) {
-                // Varsayılan blog görseli
-                $imagePath = "../public/assets/image/blog/blog-image-1.png";
-
-                $dateFormatted = date('d M Y', strtotime($post['date']));
-
-                echo '
-                <div class="blog-card-large mb-4">
-                  <div class="row">
-                    <div class="col-md-4">
-                      <div class="blog-card-large__image">
-                        <img src="' . $imagePath . '" alt="' . $post['title'] . '" class="img-fluid">
-                      </div>
-                    </div>
-                    <div class="col-md-8">
-                      <div class="blog-card-large__body">
-                        <div class="blog-card-large__meta mb-2">
-                          <span class="blog-card-large__category badge bg-light text-dark me-2">' . $post['category'] . '</span>
-                          <span class="blog-card-large__time text-muted"><i class="fa-regular fa-calendar-days me-1"></i>' . $dateFormatted . '</span>
-                          <span class="blog-card-large__user text-muted ms-2"><i class="fa-regular fa-user me-1"></i>' . $post['author'] . '</span>
-                        </div>
-                        <a href="blog-details?id=' . $post['id'] . '">
-                        <h3 class="blog-card-large__title h4">' . $post['title'] . '</h3>
-                        </a>
-                        <p class="text-muted">' . $post['summary'] . '</p>
-                        <a href="blog-details?id=' . $post['id'] . '"
-                            class="btn btn-sm btn-outline-primary">
-                            Devamını Oku <i class="fa-solid fa-arrow-right ms-1"></i>
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>';
-        }
-        } else {
-        echo '<div class="alert alert-info">Henüz blog yazısı bulunmuyor.</div>';
-        }
-        ?>
+                        // Blog servisini dahil et
+                        require_once dirname(__DIR__) . '/includes/blog-service.php';
+                        
+                        try {
+                            $blogService = getBlogService();
+                            
+                            // Blog yazılarını veritabanından getir
+                            $blogPosts = $blogService->getPublishedPosts();
+                            
+                            // Blog yazılarını göster
+                            if (!empty($blogPosts)) {
+                                foreach ($blogPosts as $post) {
+                                    // Görsel yolunu al
+                                    $imagePath = $blogService->getImagePath($post['cover_image']);
+                                    
+                                    // Tarihi formatla
+                                    $dateFormatted = $blogService->formatDate($post['created_at']);
+                                    
+                                    // Özet oluştur
+                                    $excerpt = !empty($post['excerpt']) 
+                                        ? $post['excerpt'] 
+                                        : $blogService->generateExcerpt($post['content']);
+                                    
+                                    // Kategori adını al
+                                    $categoryName = $post['category_name'] ?? 'Genel';
+                                    
+                                    // Yazar adını al
+                                    $authorName = $post['author_name'] ?? 'Çınaraltı Vakfı';
+                                    
+                                    echo '
+                                    <div class="blog-card-large mb-4">
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                                <div class="blog-card-large__image">
+                                                    <img src="' . $imagePath . '" alt="' . htmlspecialchars($post['title']) . '" class="img-fluid">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-8">
+                                                <div class="blog-card-large__body">
+                                                    <div class="blog-card-large__meta mb-2">
+                                                        <span class="blog-card-large__category badge bg-light text-dark me-2">' . htmlspecialchars($categoryName) . '</span>
+                                                        <span class="blog-card-large__time text-muted"><i class="fa-regular fa-calendar-days me-1"></i>' . $dateFormatted . '</span>
+                                                        <span class="blog-card-large__user text-muted ms-2"><i class="fa-regular fa-user me-1"></i>' . htmlspecialchars($authorName) . '</span>
+                                                    </div>
+                                                    <a href="blog-details?slug=' . htmlspecialchars($post['slug']) . '">
+                                                        <h3 class="blog-card-large__title h4">' . htmlspecialchars($post['title']) . '</h3>
+                                                    </a>
+                                                    <p class="text-muted">' . htmlspecialchars($excerpt) . '</p>
+                                                    <a href="blog-details?slug=' . htmlspecialchars($post['slug']) . '"
+                                                        class="btn btn-sm btn-outline-primary">
+                                                        Devamını Oku <i class="fa-solid fa-arrow-right ms-1"></i>
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>';
+                                }
+                            } else {
+                                echo '<div class="alert alert-info">Henüz blog yazısı bulunmuyor.</div>';
+                            }
+                        } catch (Exception $e) {
+                            echo '<div class="alert alert-danger">Blog yazıları yüklenirken bir hata oluştu.</div>';
+                        }
+                        ?>
                     </div>
                 </div>
                 <div class="pagination mt-4">
@@ -152,30 +112,25 @@
                             </div>
                             <ul class="sidebar-category-list">
                                 <?php
-                // Kategorileri sayma
-                $categories = array();
-                foreach ($blogPosts as $post) {
-                  if (isset($post['category'])) {
-                    if (!isset($categories[$post['category']])) {
-                      $categories[$post['category']] = 0;
-                    }
-                    $categories[$post['category']]++;
-                  }
-                }
-
-                // Kategorileri gösterme
-                foreach ($categories as $category => $count) {
-                  echo '<li class="sidebar-category-list-item">
-                    <a href="#" class="sidebar-category">
-                      ' . $category . ' (' . $count . ')
-                    </a>
-                  </li>';
-                }
-
-                if (empty($categories)) {
-                  echo '<li class="sidebar-category-list-item">Henüz kategori bulunmuyor</li>';
-                }
-                ?>
+                                try {
+                                    // Kategorileri veritabanından getir
+                                    $categories = $blogService->getCategories();
+                                    
+                                    if (!empty($categories)) {
+                                        foreach ($categories as $category) {
+                                            echo '<li class="sidebar-category-list-item">
+                                                <a href="#" class="sidebar-category">
+                                                    ' . htmlspecialchars($category['name']) . ' (' . $category['post_count'] . ')
+                                                </a>
+                                            </li>';
+                                        }
+                                    } else {
+                                        echo '<li class="sidebar-category-list-item">Henüz kategori bulunmuyor</li>';
+                                    }
+                                } catch (Exception $e) {
+                                    echo '<li class="sidebar-category-list-item">Kategoriler yüklenirken hata oluştu</li>';
+                                }
+                                ?>
                             </ul>
                         </div>
                     </div>
@@ -185,39 +140,44 @@
                         </div>
                         <div class="sidebar-blog-widget-wrapper">
                             <?php
-              // Son 3 blog yazısını gösterme
-              $recentPosts = array_slice($blogPosts, 0, 3);
-
-              if (!empty($recentPosts)) {
-                foreach ($recentPosts as $post) {
-                  // Varsayılan görsel
-                  $imagePath = "../public/assets/image/blog/recent-1.png";
-
-                  $dateFormatted = date('d M Y', strtotime($post['date']));
-
-                  echo '
-                  <div class="card mb-3">
-                    <div class="row g-0">
-                      <div class="col-4">
-                        <img src="' . $imagePath . '" alt="' . $post['title'] . '" class="img-fluid rounded-start">
-                      </div>
-                      <div class="col-8">
-                        <div class="card-body p-2">
-                          <small class="text-muted d-block mb-1"><i class="fa-regular fa-calendar-days me-1"></i>' . $dateFormatted . '</small>
-                          <h5 class="card-title h6">
-                            <a href="blog-details?id=' . $post['id'] . '" class="text-decoration-none">
-                ' . $post['title'] . '
-                </a>
-                </h5>
-            </div>
-        </div>
-</div>
-</div>';
-}
-} else {
-echo '<div class="card card-body">Henüz blog yazısı bulunmuyor</div>';
-}
-?>
+                            try {
+                                // Son 3 blog yazısını getir
+                                $recentPosts = $blogService->getRecentPosts(3);
+                                
+                                if (!empty($recentPosts)) {
+                                    foreach ($recentPosts as $post) {
+                                        // Görsel yolunu al
+                                        $imagePath = $blogService->getImagePath($post['cover_image']);
+                                        
+                                        // Tarihi formatla
+                                        $dateFormatted = $blogService->formatDate($post['created_at']);
+                                        
+                                        echo '
+                                        <div class="card mb-3">
+                                            <div class="row g-0">
+                                                <div class="col-4">
+                                                    <img src="' . $imagePath . '" alt="' . htmlspecialchars($post['title']) . '" class="img-fluid rounded-start">
+                                                </div>
+                                                <div class="col-8">
+                                                    <div class="card-body p-2">
+                                                        <small class="text-muted d-block mb-1"><i class="fa-regular fa-calendar-days me-1"></i>' . $dateFormatted . '</small>
+                                                        <h5 class="card-title h6">
+                                                            <a href="blog-details?slug=' . htmlspecialchars($post['slug']) . '" class="text-decoration-none">
+                                                                ' . htmlspecialchars($post['title']) . '
+                                                            </a>
+                                                        </h5>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>';
+                                    }
+                                } else {
+                                    echo '<div class="card card-body">Henüz blog yazısı bulunmuyor</div>';
+                                }
+                            } catch (Exception $e) {
+                                echo '<div class="card card-body">Son gönderiler yüklenirken hata oluştu</div>';
+                            }
+                            ?>
                         </div>
                     </div>
                     <div class="sidebar-single">

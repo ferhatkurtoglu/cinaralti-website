@@ -25,6 +25,20 @@ type Video = {
   createdAt: string
 }
 
+// YouTube URL'sinden video ID'sini çıkaran fonksiyon
+function getYouTubeVideoId(url: string): string | null {
+  const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/
+  const match = url.match(regExp)
+  return (match && match[2].length === 11) ? match[2] : null
+}
+
+// YouTube thumbnail URL'si oluşturan fonksiyon
+function getYouTubeThumbnail(url: string): string | null {
+  const videoId = getYouTubeVideoId(url)
+  if (!videoId) return null
+  return `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`
+}
+
 export default function VideosPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
@@ -118,43 +132,43 @@ export default function VideosPage() {
                       <tr>
                         <th
                           scope="col"
-                          className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6"
+                          className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6 w-1/3"
                         >
-                          Başlık
+                          Video
                         </th>
                         <th
                           scope="col"
-                          className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                          className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 w-24"
                         >
                           Kategori
                         </th>
                         <th
                           scope="col"
-                          className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                          className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 w-20"
                         >
                           Durum
                         </th>
                         <th
                           scope="col"
-                          className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                          className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 w-20"
                         >
                           Öne Çıkan
                         </th>
                         <th
                           scope="col"
-                          className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                          className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 w-24"
                         >
                           Yazar
                         </th>
                         <th
                           scope="col"
-                          className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                          className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 w-24"
                         >
                           Tarih
                         </th>
                         <th
                           scope="col"
-                          className="relative py-3.5 pl-3 pr-4 sm:pr-6"
+                          className="relative py-3.5 pl-3 pr-4 sm:pr-6 w-20"
                         >
                           <span className="sr-only">İşlemler</span>
                         </th>
@@ -171,78 +185,94 @@ export default function VideosPage() {
                           </td>
                         </tr>
                       ) : (
-                        videos.map((video) => (
-                          <tr key={video.id}>
-                            <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
-                              <div className="flex items-center">
-                                {video.thumbnail && (
-                                  <img
-                                    src={video.thumbnail}
-                                    alt={video.title}
-                                    className="h-10 w-16 object-cover rounded mr-3"
-                                  />
-                                )}
-                                <div>
-                                  <div className="font-medium">{video.title}</div>
-                                  {video.description && (
-                                    <div className="text-gray-500 text-xs mt-1 line-clamp-1">
-                                      {video.description}
+                        videos.map((video) => {
+                          const thumbnailUrl = getYouTubeThumbnail(video.url) || getYouTubeThumbnail(video.thumbnail)
+                          
+                          return (
+                            <tr key={video.id}>
+                              <td className="py-4 pl-4 pr-3 text-sm text-gray-900 sm:pl-6">
+                                <div className="flex items-center space-x-3">
+                                  {thumbnailUrl && (
+                                    <div className="flex-shrink-0">
+                                      <img
+                                        src={thumbnailUrl}
+                                        alt={video.title}
+                                        className="h-8 w-12 object-cover rounded"
+                                        onError={(e) => {
+                                          // Hata durumunda placeholder göster
+                                          e.currentTarget.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDgiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCA0OCAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjQ4IiBoZWlnaHQ9IjMyIiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0xOCAxMlYyMEwyMyAxNkwxOCAxMloiIGZpbGw9IiM5Q0EzQUYiLz4KPC9zdmc+Cg=='
+                                        }}
+                                      />
                                     </div>
                                   )}
+                                  <div className="min-w-0 flex-1">
+                                    <div className="font-medium text-gray-900 truncate" title={video.title}>
+                                      {video.title.length > 40 ? `${video.title.substring(0, 40)}...` : video.title}
+                                    </div>
+                                    {video.description && (
+                                      <div className="text-gray-500 text-xs mt-1 truncate" title={video.description}>
+                                        {video.description.length > 60 ? `${video.description.substring(0, 60)}...` : video.description}
+                                      </div>
+                                    )}
+                                  </div>
                                 </div>
-                              </div>
-                            </td>
-                            <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                              {video.category?.name || '-'}
-                            </td>
-                            <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                              <span
-                                className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${
-                                  video.status === 'published'
-                                    ? 'bg-green-50 text-green-700'
-                                    : 'bg-yellow-50 text-yellow-700'
-                                }`}
-                              >
-                                {video.status === 'published' ? 'Yayında' : 'Taslak'}
-                              </span>
-                            </td>
-                            <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                              {video.featured ? (
-                                <span className="inline-flex items-center rounded-full bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700">
-                                  Evet
-                                </span>
-                              ) : (
-                                <span className="inline-flex items-center rounded-full bg-gray-50 px-2 py-1 text-xs font-medium text-gray-700">
-                                  Hayır
-                                </span>
-                              )}
-                            </td>
-                            <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                              {video.author.name}
-                            </td>
-                            <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                              {new Date(video.createdAt).toLocaleDateString('tr-TR')}
-                            </td>
-                            <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
-                              <div className="flex justify-end gap-x-3">
-                                <Link
-                                  href={`/dashboard/videos/${video.id}`}
-                                  className="text-indigo-600 hover:text-indigo-900"
-                                  title="Düzenle"
+                              </td>
+                              <td className="px-3 py-4 text-sm text-gray-500">
+                                <div className="truncate" title={video.category?.name || '-'}>
+                                  {video.category?.name || '-'}
+                                </div>
+                              </td>
+                              <td className="px-3 py-4 text-sm text-gray-500">
+                                <span
+                                  className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${
+                                    video.status === 'published'
+                                      ? 'bg-green-50 text-green-700'
+                                      : 'bg-yellow-50 text-yellow-700'
+                                  }`}
                                 >
-                                  <PencilIcon className="h-5 w-5" />
-                                </Link>
-                                <button
-                                  onClick={() => handleDelete(video.id)}
-                                  className="text-red-600 hover:text-red-900"
-                                  title="Sil"
-                                >
-                                  <TrashIcon className="h-5 w-5" />
-                                </button>
-                              </div>
-                            </td>
-                          </tr>
-                        ))
+                                  {video.status === 'published' ? 'Yayında' : 'Taslak'}
+                                </span>
+                              </td>
+                              <td className="px-3 py-4 text-sm text-gray-500">
+                                {video.featured ? (
+                                  <span className="inline-flex items-center rounded-full bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700">
+                                    Evet
+                                  </span>
+                                ) : (
+                                  <span className="inline-flex items-center rounded-full bg-gray-50 px-2 py-1 text-xs font-medium text-gray-700">
+                                    Hayır
+                                  </span>
+                                )}
+                              </td>
+                              <td className="px-3 py-4 text-sm text-gray-500">
+                                <div className="truncate" title={video.author.name}>
+                                  {video.author.name}
+                                </div>
+                              </td>
+                              <td className="px-3 py-4 text-sm text-gray-500">
+                                {new Date(video.createdAt).toLocaleDateString('tr-TR')}
+                              </td>
+                              <td className="relative py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
+                                <div className="flex justify-end gap-x-2">
+                                  <Link
+                                    href={`/dashboard/videos/${video.id}`}
+                                    className="text-indigo-600 hover:text-indigo-900 p-1"
+                                    title="Düzenle"
+                                  >
+                                    <PencilIcon className="h-4 w-4" />
+                                  </Link>
+                                  <button
+                                    onClick={() => handleDelete(video.id)}
+                                    className="text-red-600 hover:text-red-900 p-1"
+                                    title="Sil"
+                                  >
+                                    <TrashIcon className="h-4 w-4" />
+                                  </button>
+                                </div>
+                              </td>
+                            </tr>
+                          )
+                        })
                       )}
                     </tbody>
                   </table>

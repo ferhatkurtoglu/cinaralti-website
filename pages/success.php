@@ -1,19 +1,61 @@
 <?php
-// Oturum başlatma
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
+// Güvenli session başlatma
+require_once __DIR__ . '/../includes/functions.php';
+secure_session_start();
+
+// Config dosyaları
+require_once __DIR__ . '/../config/config.php';
+require_once __DIR__ . '/../config/payment_config.php';
+
+// Rate limiting kontrolü (DEBUG_MODE'da devre dışı)
+if (PAYMENT_RATE_LIMIT_ENABLED && !check_rate_limit('success_page', 5, 300)) {
+    log_payment_security_event('rate_limit_exceeded', ['action' => 'success_page_access']);
+    // DEBUG_MODE'da veya success sayfasında sonsuz döngü önlemi için sadece log at
+    if (defined('DEBUG_MODE') && DEBUG_MODE) {
+        error_log('WARNING: Success page rate limit exceeded but allowing due to DEBUG_MODE');
+    } else {
+        error_log('SECURITY: Success page rate limit exceeded from IP: ' . $_SERVER['REMOTE_ADDR']);
+        // Success sayfasında redirect yapmayalım, kullanıcı başarılı ödeme yaptıysa görsin
+    }
 }
 
 // Process-donation dosyasını dahil et
 require_once __DIR__ . '/../includes/actions/process-donation.php';
 
-// Kuveyt Türk'ten gelen yanıtları al
+// Kuveyt Türk'ten gelen yanıtları al ve validate et
 $orderId = isset($_POST['oid']) ? sanitize_input($_POST['oid']) : 
           (isset($_GET['OrderId']) ? sanitize_input($_GET['OrderId']) : '');
 $authCode = isset($_POST['authcode']) ? sanitize_input($_POST['authcode']) : 
            (isset($_GET['AuthCode']) ? sanitize_input($_GET['AuthCode']) : '');
 $procReturnCode = isset($_POST['ProcReturnCode']) ? sanitize_input($_POST['ProcReturnCode']) : '';
 $response = isset($_POST['Response']) ? sanitize_input($_POST['Response']) : '';
+
+// Input validation
+$validation_errors = [];
+
+// Order ID kontrolü
+if (empty($orderId)) {
+    $validation_errors[] = 'Order ID eksik';
+} elseif (!preg_match('/^[A-Z0-9_-]+$/i', $orderId)) {
+    $validation_errors[] = 'Geçersiz Order ID formatı';
+    log_payment_security_event('invalid_order_id', ['order_id' => $orderId]);
+}
+
+// Auth Code kontrolü (eğer varsa)
+if (!empty($authCode) && !preg_match('/^[A-Z0-9_-]+$/i', $authCode)) {
+    $validation_errors[] = 'Geçersiz Auth Code formatı';
+    log_payment_security_event('invalid_auth_code', ['auth_code' => $authCode]);
+}
+
+// Validation hatası varsa fail sayfasına yönlendir
+if (!empty($validation_errors)) {
+    log_payment_security_event('success_page_validation_failed', [
+        'errors' => $validation_errors,
+        'order_id' => $orderId
+    ]);
+    header('Location: ' . BASE_URL . '/fail?error=validation_failed');
+    exit();
+}
 
 // Ödeme sonucunu veritabanında güncelle
 $donationId = isset($_SESSION['donation_made_id']) ? (int)$_SESSION['donation_made_id'] : 0;

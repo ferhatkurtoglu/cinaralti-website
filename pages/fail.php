@@ -1,13 +1,23 @@
 <?php
-// Oturum başlatma
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
+// Güvenli session başlatma
+require_once __DIR__ . '/../includes/functions.php';
+secure_session_start();
+
+// Config dosyaları
+require_once __DIR__ . '/../config/config.php';
+require_once __DIR__ . '/../config/payment_config.php';
+
+// Rate limiting kontrolü
+if (PAYMENT_RATE_LIMIT_ENABLED && !check_rate_limit('fail_page', 10, 300)) {
+    log_payment_security_event('rate_limit_exceeded', ['action' => 'fail_page_access']);
+    // Fail sayfasında sonsuz döngüyü önlemek için sadece log at
+    error_log('SECURITY: Fail page rate limit exceeded from IP: ' . $_SERVER['REMOTE_ADDR']);
 }
 
 // Process-donation dosyasını dahil et
 require_once __DIR__ . '/../includes/actions/process-donation.php';
 
-// Kuveyt Türk'ten gelen yanıtları al
+// Güvenli input handling
 $orderId = isset($_POST['oid']) ? sanitize_input($_POST['oid']) : 
           (isset($_GET['OrderId']) ? sanitize_input($_GET['OrderId']) : '');
 $errorCode = isset($_POST['ErrorCode']) ? sanitize_input($_POST['ErrorCode']) : 
@@ -17,6 +27,26 @@ $errorMessage = isset($_POST['ErrorMessage']) ? sanitize_input($_POST['ErrorMess
 $errorType = isset($_GET['error']) ? sanitize_input($_GET['error']) : 'payment_failed';
 $procReturnCode = isset($_POST['ProcReturnCode']) ? sanitize_input($_POST['ProcReturnCode']) : '';
 $response = isset($_POST['Response']) ? sanitize_input($_POST['Response']) : '';
+
+// Input validation
+if (!empty($orderId) && !preg_match('/^[A-Z0-9_-]+$/i', $orderId)) {
+    log_payment_security_event('invalid_order_id_fail_page', ['order_id' => $orderId]);
+    $orderId = ''; // Güvenlik için temizle
+}
+
+if (!empty($errorCode) && !preg_match('/^[A-Z0-9_-]+$/i', $errorCode)) {
+    log_payment_security_event('invalid_error_code', ['error_code' => $errorCode]);
+    $errorCode = ''; // Güvenlik için temizle
+}
+
+// Error type whitelist
+$allowed_error_types = ['security', 'database', 'configuration', 'payment_gateway', 'invalid_amount', 
+                       'invalid_card', 'network_error', 'rate_limit', 'amount_limit', 
+                       'session_expired', 'validation_failed', 'payment_failed'];
+if (!in_array($errorType, $allowed_error_types)) {
+    log_payment_security_event('invalid_error_type', ['error_type' => $errorType]);
+    $errorType = 'payment_failed'; // Varsayılan değer
+}
 
 // Ödeme sonucunu veritabanında güncelle
 $donationId = isset($_SESSION['donation_made_id']) ? (int)$_SESSION['donation_made_id'] : 0;
