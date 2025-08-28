@@ -8,10 +8,15 @@ class Database {
     private $conn;
     
     public function __construct() {
-        $this->host = defined('DB_HOST') ? DB_HOST : 'localhost';
-        $this->db_name = defined('DB_NAME') ? DB_NAME : 'cinaralti_db';
-        $this->username = defined('DB_USER') ? DB_USER : 'root';
-        $this->password = defined('DB_PASS') ? DB_PASS : '';
+        // Config dosyasından veritabanı bilgilerini al
+        if (!defined('DB_HOST')) {
+            throw new Exception('Veritabanı konfigürasyonu yüklenmemiş. config/database.php dosyasını dahil edin.');
+        }
+        
+        $this->host = DB_HOST;
+        $this->db_name = DB_NAME;
+        $this->username = DB_USER;
+        $this->password = DB_PASS;
         
         // Bağlantıyı kurur
         $this->getConnection();

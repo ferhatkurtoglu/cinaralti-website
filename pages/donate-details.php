@@ -27,6 +27,15 @@
 
                     <div class="donate-form">
                         <label class="donate-form__label">Bağış Tutarı</label>
+
+                        <!-- Preset Amount Buttons -->
+                        <div class="donate-form__preset-amounts">
+                            <button type="button" class="preset-amount-btn" data-amount="50">₺50</button>
+                            <button type="button" class="preset-amount-btn" data-amount="100">₺100</button>
+                            <button type="button" class="preset-amount-btn" data-amount="250">₺250</button>
+                            <button type="button" class="preset-amount-btn" data-amount="500">₺500</button>
+                        </div>
+
                         <div class="donate-form__input-wrapper">
                             <input type="text" class="donate-form__input" placeholder="₺0" value="₺0" />
                         </div>
@@ -66,7 +75,7 @@
                         </div>
 
                         <div class="donate-form__buttons">
-                            <button type="button" class="btn-donate">
+                            <button type="button" class="btn-donate-form">
                                 <span class="btn-icon">❤️</span>
                                 Bağış Yap
                             </button>
@@ -265,6 +274,42 @@
     box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.1);
 }
 
+/* Preset Amount Buttons */
+.donate-form__preset-amounts {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+}
+
+.preset-amount-btn {
+    padding: 8px 16px;
+    border: 2px solid #e9ecef;
+    background: #fff;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #666;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    flex: 1;
+    min-width: 70px;
+}
+
+.preset-amount-btn:hover {
+    border-color: #28a745;
+    color: #28a745;
+    background: rgba(40, 167, 69, 0.05);
+}
+
+.preset-amount-btn.selected {
+    background: #28a745;
+    border-color: #28a745;
+    color: #fff;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(40, 167, 69, 0.2);
+}
+
 .donate-form__options {
     display: flex;
     gap: 20px;
@@ -373,7 +418,7 @@
     gap: 12px;
 }
 
-.btn-donate,
+.btn-donate-form,
 .btn-cart {
     flex: 1;
     padding: 14px;
@@ -389,13 +434,13 @@
     transition: all 0.3s ease;
 }
 
-.btn-donate {
+.btn-donate-form {
     background: #28a745;
     color: #fff;
     box-shadow: 0 4px 12px rgba(40, 167, 69, 0.2);
 }
 
-.btn-donate:hover {
+.btn-donate-form:hover {
     background: #218838;
     transform: translateY(-2px);
     box-shadow: 0 6px 15px rgba(40, 167, 69, 0.3);
@@ -521,13 +566,13 @@ document.addEventListener('DOMContentLoaded', function() {
             if (!response.ok) {
                 throw new Error('Veri yüklenemedi');
             }
-            
+
             const data = await response.json();
-            
+
             // Sayfa verilerini güncelle
             document.getElementById('donation-title').textContent = data.name;
             document.getElementById('donation-type').textContent = data.name;
-            
+
             // Kategorileri göster
             if (data.categories && data.categories.length > 0) {
                 const categoryNames = data.categories.map(cat => cat.name).join(', ');
@@ -535,43 +580,62 @@ document.addEventListener('DOMContentLoaded', function() {
             } else {
                 document.getElementById('donation-category').textContent = 'Genel Bağış';
             }
-            
+
             // Açıklama
             if (data.description) {
                 document.getElementById('donation-description').innerHTML = `<p>${data.description}</p>`;
             }
-            
+
             // Ana görsel
             if (data.cover_image) {
                 document.getElementById('donation-main-image').src = data.cover_image;
             }
-            
+
             // Galeri görselleri
             if (data.gallery_images && Array.isArray(data.gallery_images)) {
                 updateCarouselImages(data.gallery_images);
             }
-            
+
         } catch (error) {
             console.error('Bağış verisi yüklenirken hata:', error);
             // Varsayılan değerler
             document.getElementById('donation-category').textContent = 'Genel Bağış';
         }
     }
-    
+
     // Carousel görsellerini güncelle
     function updateCarouselImages(images) {
         const carouselInner = document.querySelector('#donationImagesCarousel .carousel-inner');
         if (!carouselInner || images.length === 0) return;
-        
+
         carouselInner.innerHTML = '';
-        
+
         images.forEach((image, index) => {
             const carouselItem = document.createElement('div');
             carouselItem.className = `carousel-item ${index === 0 ? 'active' : ''}`;
-            carouselItem.innerHTML = `<img src="${image}" class="d-block w-100" alt="Yardım Faaliyeti">`;
+            carouselItem.innerHTML =
+                `<img src="${image}" class="d-block w-100" alt="Yardım Faaliyeti">`;
             carouselInner.appendChild(carouselItem);
         });
     }
+
+    // Preset amount buttons functionality
+    document.querySelectorAll('.preset-amount-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            // Remove selected class from all preset buttons
+            document.querySelectorAll('.preset-amount-btn').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+
+            // Add selected class to clicked button
+            this.classList.add('selected');
+
+            // Update the donation amount input
+            const amount = this.getAttribute('data-amount');
+            const formattedAmount = `₺${parseInt(amount).toLocaleString('tr-TR')}`;
+            document.querySelector('.donate-form__input').value = formattedAmount;
+        });
+    });
 
     // Para formatı için input işleyici
     const donateInputs = document.querySelectorAll('.donate-form__input, .donate-card-price-input');
@@ -610,69 +674,59 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Bağış Yap butonuna tıklama
-    document.querySelector('.btn-donate').addEventListener('click', function() {
-        try {
-            console.log("Bağış Yap butonuna tıklandı");
-
-            // Bağış bilgilerini al
-            const donationTitle = document.getElementById('donation-type').textContent;
-            const donationAmount = document.querySelector('.donate-form__input').value;
-            let donationType = '';
+    const donateBtn = document.querySelector('.btn-donate-form');
+    if (donateBtn) {
+        donateBtn.addEventListener('click', function(e) {
+            e.preventDefault();
             try {
+                // Form doğrulama
+                if (!validateDonationForm()) {
+                    console.log("Form doğrulama başarısız");
+                    return;
+                }
+
+                // Bağış bilgilerini al
+                const donationTitle = document.getElementById('donation-type')?.textContent ||
+                    'Genel Bağış';
+                const donationAmount = document.querySelector('.donate-form__input')?.value || '₺0';
+
+                // Bağış türü
+                let donationType = "Standart Bağış";
                 const donateTypeEl = document.querySelector('input[name="donateType"]:checked');
                 if (donateTypeEl) {
-                    donationType = donateTypeEl.nextElementSibling.nextElementSibling.textContent;
-                } else {
-                    donationType = "Standart Bağış";
+                    const radioText = donateTypeEl.parentElement.querySelector('.donate-radio__text');
+                    if (radioText) {
+                        donationType = radioText.textContent.trim();
+                    }
                 }
-            } catch (e) {
-                console.error("Bağış türü alınamadı:", e);
-                donationType = "Standart Bağış";
-            }
 
-            let donorName = '';
-            try {
-                donorName = document.querySelector('.donate-form__field input[placeholder="Ad Soyad"]')
-                    .value || '';
-            } catch (e) {
-                console.error("Bağışçı adı alınamadı:", e);
-            }
+                // Kişisel bilgiler
+                const donorName = document.querySelector(
+                    '.donate-form__field input[placeholder="Ad Soyad"]')?.value || '';
+                const donorPhone = document.querySelector(
+                    '.donate-form__field input[placeholder="+90"]')?.value || '';
+                const donorEmail = document.querySelector(
+                    '.donate-form__field input[placeholder="E-Posta"]')?.value || '';
 
-            let donorPhone = '';
-            try {
-                donorPhone = document.querySelector('.donate-form__field input[placeholder="+90"]')
-                    .value || '';
-            } catch (e) {
-                console.error("Bağışçı telefonu alınamadı:", e);
-            }
+                // Bağışçı türü
+                let donorType = "Bireysel";
+                const activeTypeBtn = document.querySelector('.donate-type-btn.active');
+                if (activeTypeBtn) {
+                    donorType = activeTypeBtn.textContent.trim();
+                }
 
-            let donorEmail = '';
-            try {
-                donorEmail = document.querySelector('.donate-form__field input[placeholder="E-Posta"]')
-                    .value || '';
-            } catch (e) {
-                console.error("Bağışçı e-postası alınamadı:", e);
-            }
+                console.log("Toplanan veriler:", {
+                    title: donationTitle,
+                    amount: donationAmount,
+                    donationType: donationType,
+                    donorName: donorName,
+                    donorPhone: donorPhone,
+                    donorEmail: donorEmail,
+                    donorType: donorType
+                });
 
-            let donorType = '';
-            try {
-                donorType = document.querySelector('.donate-type-btn.active').textContent || "Bireysel";
-            } catch (e) {
-                console.error("Bağışçı türü alınamadı:", e);
-                donorType = "Bireysel";
-            }
-
-            // Bağış tutarı 
-            if (!donationAmount || donationAmount === '₺0') {
-                showNotification('Lütfen bir bağış tutarı giriniz', 'error');
-                return;
-            }
-
-            console.log("Tüm veriler alındı, sepete ekleniyor");
-
-            // Sepete ekle
-            try {
-                addToCart({
+                // Sepete ekle
+                const donationData = {
                     title: donationTitle,
                     amount: donationAmount,
                     donationType: donationType,
@@ -680,20 +734,35 @@ document.addEventListener('DOMContentLoaded', function() {
                     donorPhone: donorPhone,
                     donorEmail: donorEmail,
                     donorType: donorType,
-                    image: document.getElementById('donation-main-image').src
-                });
-                console.log("Sepete eklendi, yönlendirme yapılıyor");
-            } catch (e) {
-                console.error("Sepete eklenirken hata:", e);
-            }
+                    image: document.getElementById('donation-main-image')?.src || ''
+                };
 
-            // Doğrudan sepet sayfasına git
-            window.location.href = "<?= BASE_URL ?>/cart";
-        } catch (error) {
-            console.error("Bağış yapma işleminde hata:", error);
-            alert("İşlem sırasında bir hata oluştu. Lütfen tekrar deneyiniz.");
-        }
-    });
+                addToCart(donationData);
+                console.log("Sepete eklendi, yönlendirme yapılıyor");
+
+                // Sepet sayfasına git - daha güvenli yöntem
+                const baseUrl = window.location.origin + window.location.pathname.replace(
+                    '/donate-details', '').replace('/pages/donate-details', '');
+                console.log("Base URL:", baseUrl);
+
+                // Farklı URL yapılarını deneme
+                const possibleCartUrls = [
+                    baseUrl + '/cart',
+                    baseUrl + '/pages/cart',
+                    window.location.origin + '/cinaralti-website/pages/cart'
+                ];
+
+                // İlk denemeyi yap
+                window.location.href = possibleCartUrls[0];
+
+            } catch (error) {
+                console.error("Bağış işlemi sırasında hata:", error);
+                showNotification('Bağış işlemi sırasında bir hata oluştu.', 'error');
+            }
+        });
+    } else {
+        console.error('Bağış Yap butonu bulunamadı!');
+    }
 
     // Sepete Ekle butonuna tıklama
     document.querySelector('.btn-cart').addEventListener('click', function() {
@@ -804,8 +873,14 @@ document.addEventListener('DOMContentLoaded', function() {
         const donationAmount = document.querySelector('.donate-form__input').value;
 
         // Bağış tutarı kontrolü (sadece bu zorunlu)
-        const amountValue = donationAmount.replace(/[₺,.]/g, '');
-        if (!amountValue || parseInt(amountValue) <= 0) {
+        if (!donationAmount || donationAmount === '₺0' || donationAmount === '₺') {
+            showValidationError('Lütfen geçerli bir bağış tutarı giriniz.');
+            return false;
+        }
+
+        // Tutardan sadece sayıları al ve kontrol et
+        const amountValue = donationAmount.replace(/[₺,.\s]/g, '');
+        if (!amountValue || isNaN(amountValue) || parseInt(amountValue) <= 0) {
             showValidationError('Lütfen geçerli bir bağış tutarı giriniz.');
             return false;
         }
@@ -824,5 +899,6 @@ document.addEventListener('DOMContentLoaded', function() {
     function showValidationError(message) {
         showNotification(message, 'error');
     }
+
 });
 </script>

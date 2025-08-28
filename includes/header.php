@@ -71,20 +71,20 @@ if (isset($page_titles[$current_page])) {
 ?>
         Çınaraltı
     </title>
-    <link rel="shortcut icon" href="./../public/assets/image/favicon.ico" type="image/x-icon">
-    <link rel="icon" href="./../public/assets/image/favicon.ico" type="image/x-icon">
-    <link rel="apple-touch-icon" href="./../public/assets/image/logo.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="./../public/assets/image/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="./../public/assets/image/favicon-16x16.png">
+    <link rel="shortcut icon" href="<?= BASE_URL ?>/assets/image/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="<?= BASE_URL ?>/assets/image/favicon.ico" type="image/x-icon">
+    <link rel="apple-touch-icon" href="<?= BASE_URL ?>/assets/image/logo.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="<?= BASE_URL ?>/assets/image/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="<?= BASE_URL ?>/assets/image/favicon-16x16.png">
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
     <!-- Plugin'stylesheets  -->
-    <link rel="stylesheet" type="text/css" href="./../public/assets/fonts/typography/fonts.css">
-    <link rel="stylesheet" href="./../public/assets/fonts/fontawesome/css/all.min.css">
-    <link rel="stylesheet" type="text/css" href="./../public/assets/plugins/aos/aos.min.css">
-    <link rel="stylesheet" type="text/css" href="./../public/assets/plugins/fancybox/jquery.fancybox.min.css">
+    <link rel="stylesheet" type="text/css" href="<?= BASE_URL ?>/assets/fonts/typography/fonts.css">
+    <link rel="stylesheet" href="<?= BASE_URL ?>/assets/fonts/fontawesome/css/all.min.css">
+    <link rel="stylesheet" type="text/css" href="<?= BASE_URL ?>/assets/plugins/aos/aos.min.css">
+    <link rel="stylesheet" type="text/css" href="<?= BASE_URL ?>/assets/plugins/fancybox/jquery.fancybox.min.css">
     <!-- Vendor stylesheets  -->
-    <link rel="stylesheet" type="text/css" href="./../public/assets/plugins/bootstrap/dist/css/bootstrap.min.css">
-    <link rel="stylesheet" type="text/css" href="./../public/assets/css/style.css">
+    <link rel="stylesheet" type="text/css" href="<?= BASE_URL ?>/assets/plugins/bootstrap/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="<?= BASE_URL ?>/assets/css/style.css">
     <style>
     @import url('https://fonts.cdnfonts.com/css/clash-display');
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
@@ -95,54 +95,596 @@ if (isset($page_titles[$current_page])) {
     @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap');
     @import url('https://fonts.cdnfonts.com/css/clash-display');
 
+    /* Dropdown için genel override */
+    .page-wrapper,
+    .container,
+    nav,
+    .navbar,
+    .menu-block,
+    .menu-block-wrapper {
+        overflow: visible !important;
+    }
+
+    /* Fixed header için body padding */
+    body {
+        padding-top: 115px !important;
+        transition: padding-top 0.3s ease !important;
+    }
+
+    body.scroll-active {
+        padding-top: 70px !important;
+    }
+
+
+
+
+
+
+
+    /* Üst Header Stilleri */
+    .page-wrapper .top-header {
+        background: linear-gradient(135deg, #f8f9ff 0%, #ffffff 100%) !important;
+        padding: 6px 0 !important;
+        border-bottom: 1px solid rgba(248, 249, 255, 0.3) !important;
+        font-size: 12px !important;
+        min-height: 32px !important;
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        z-index: 1002 !important;
+        display: block !important;
+        width: 100% !important;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+        margin: 0 !important;
+        transition: transform 0.3s ease, opacity 0.3s ease !important;
+    }
+
+    /* Scroll edildiğinde üst header gizlenir */
+    .page-wrapper .top-header.scroll-hidden {
+        transform: translateY(-100%) !important;
+        opacity: 0 !important;
+    }
+
+    .top-header-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .contact-info {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    /* Üst Header Contact Dropdown */
+    .top-header-contact {
+        flex: 1;
+        display: flex;
+        justify-content: center;
+    }
+
+    .contact-dropdown {
+        position: relative;
+        z-index: 99999 !important;
+    }
+
+    .contact-trigger {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        color: #495057;
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        padding: 6px 12px;
+        border-radius: 5px;
+        transition: all 0.3s ease;
+        background: rgba(82, 198, 83, 0.05);
+        border: 1px solid rgba(82, 198, 83, 0.2);
+    }
+
+    .contact-trigger:hover {
+        background-color: rgba(82, 198, 83, 0.1);
+        color: #52c653;
+        border-color: rgba(82, 198, 83, 0.3);
+        transform: translateY(-1px);
+    }
+
+    .contact-trigger i:first-child {
+        color: #52c653;
+        font-size: 10px;
+    }
+
+    .contact-trigger i:last-child {
+        font-size: 8px;
+        transition: transform 0.3s ease;
+    }
+
+    .contact-dropdown:hover .contact-trigger i:last-child {
+        transform: rotate(180deg);
+    }
+
+    .contact-dropdown-menu {
+        position: absolute !important;
+        top: 100% !important;
+        left: 50% !important;
+        transform: translateX(-50%) !important;
+        background: white !important;
+        border-radius: 8px !important;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15) !important;
+        padding: 10px 0 !important;
+        min-width: 200px !important;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease !important;
+        z-index: 99999 !important;
+        margin-top: 5px !important;
+    }
+
+    .contact-dropdown:hover .contact-dropdown-menu {
+        opacity: 1;
+        visibility: visible;
+        transform: translateX(-50%) translateY(0);
+    }
+
+    .contact-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 10px 20px;
+        color: #666;
+        text-decoration: none;
+        font-size: 14px;
+        transition: all 0.3s ease;
+    }
+
+    .contact-item:hover {
+        background-color: #f8f9fa;
+        color: #52c653;
+        text-decoration: none;
+    }
+
+    .contact-item i {
+        width: 16px;
+        color: #999;
+        font-size: 12px;
+    }
+
+    .contact-item:hover i {
+        color: #52c653;
+    }
+
+    .phone-number {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: #495057;
+        font-weight: 600;
+        font-size: 12px;
+        padding: 4px 8px;
+        border-radius: 4px;
+        transition: all 0.3s ease;
+    }
+
+    .phone-number:hover {
+        background: rgba(76, 175, 80, 0.1);
+        color: #4CAF50;
+    }
+
+    .phone-number i {
+        color: #4CAF50;
+        font-size: 11px;
+    }
+
+    .follow-text {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        color: #28a745;
+        font-weight: 600;
+        font-size: 12px;
+        padding: 4px 8px;
+        border-radius: 4px;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+
+    .follow-text:hover {
+        background: rgba(40, 167, 69, 0.1);
+        color: #1e7e34;
+    }
+
+    .follow-text i {
+        font-size: 10px;
+        color: #28a745;
+    }
+
+    .follow-text i:last-child {
+        font-size: 8px;
+        margin-left: 2px;
+        transition: transform 0.3s ease;
+    }
+
+    /* Sosyal Medya Dropdown */
+    .social-dropdown {
+        position: relative;
+        z-index: 99999 !important;
+    }
+
+    .social-dropdown:hover .follow-text i:last-child {
+        transform: rotate(180deg);
+    }
+
+    .social-dropdown-menu {
+        position: absolute !important;
+        top: 100% !important;
+        left: 50% !important;
+        transform: translateX(-50%) !important;
+        background: white !important;
+        border-radius: 8px !important;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15) !important;
+        padding: 10px 0 !important;
+        min-width: 180px !important;
+        opacity: 0;
+        visibility: hidden;
+        transform: translateX(-50%) translateY(-10px);
+        transition: all 0.3s ease !important;
+        z-index: 99999 !important;
+        margin-top: 5px !important;
+    }
+
+    .social-dropdown:hover .social-dropdown-menu {
+        opacity: 1;
+        visibility: visible;
+        transform: translateX(-50%) translateY(0);
+    }
+
+    .social-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 10px 20px;
+        color: #666;
+        text-decoration: none;
+        font-size: 14px;
+        transition: all 0.3s ease;
+    }
+
+    .social-item:hover {
+        background-color: #f8f9fa;
+        text-decoration: none;
+    }
+
+    .social-item i {
+        width: 18px;
+        font-size: 16px;
+        text-align: center;
+    }
+
+    /* Sosyal medya ikonları için renkler */
+    .social-item:hover i.fa-twitter {
+        color: #1DA1F2;
+    }
+
+    .social-item:hover i.fa-instagram {
+        color: #E4405F;
+    }
+
+    .social-item:hover i.fa-youtube {
+        color: #FF0000;
+    }
+
+    .social-item:hover i.fa-tiktok {
+        color: #000000;
+    }
+
+    .social-item:hover i.fa-facebook {
+        color: #1877F2;
+    }
+
+    .social-item:hover span {
+        color: #333;
+    }
+
+    .top-header-right {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .currency,
+    .language {
+        color: #6c757d;
+        font-size: 11px;
+        font-weight: 600;
+        padding: 3px 6px;
+        border-radius: 3px;
+        background: rgba(108, 117, 125, 0.1);
+        transition: all 0.3s ease;
+    }
+
+    .currency:hover,
+    .language:hover {
+        background: rgba(108, 117, 125, 0.2);
+        color: #495057;
+    }
+
+    /* Ana Header Stilleri */
+    .page-wrapper .site-header {
+        background: white !important;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+        position: fixed !important;
+        top: 32px !important;
+        left: 0 !important;
+        right: 0 !important;
+        z-index: 1001 !important;
+        margin: 0 !important;
+        overflow: visible !important;
+        width: 100% !important;
+        transition: all 0.3s ease !important;
+    }
+
+    /* Scroll edildiğinde ana header küçülür ve üste yapışır */
+    .page-wrapper .site-header.scroll-compact {
+        top: 0 !important;
+        padding: 10px 0 !important;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15) !important;
+    }
+
+    .page-wrapper .site-header.scroll-compact .site-navbar {
+        padding: 8px 0 !important;
+        min-height: 60px !important;
+    }
+
+    .page-wrapper .site-header.scroll-compact .brand-logo img {
+        width: 45px !important;
+        height: 45px !important;
+        transition: all 0.3s ease !important;
+    }
+
+    .page-wrapper .site-header.scroll-compact .brand-text {
+        font-size: 22px !important;
+        transition: all 0.3s ease !important;
+    }
+
+    .page-wrapper .site-header.scroll-compact .nav-link-item {
+        font-size: 10px !important;
+        padding: 4px 8px !important;
+        transition: all 0.3s ease !important;
+    }
+
+    .page-wrapper .site-header.scroll-compact .btn-donate {
+        height: 40px !important;
+        padding: 0 20px !important;
+        font-size: 14px !important;
+        transition: all 0.3s ease !important;
+    }
+
+    .page-wrapper .site-header.scroll-compact .btn-cart-header {
+        width: 40px !important;
+        height: 40px !important;
+        transition: all 0.3s ease !important;
+    }
+
+    .page-wrapper .site-header.scroll-compact .btn-login {
+        height: 40px !important;
+        padding: 0 15px !important;
+        font-size: 13px !important;
+        transition: all 0.3s ease !important;
+    }
+
+
+
+    /* Yeni Layout - 3 Bölüm */
+    .site-navbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        position: relative;
+        z-index: 9998;
+        overflow: visible !important;
+        padding: 15px 0;
+        min-height: 80px;
+    }
+
+    .left-menu {
+        flex: 1;
+        display: flex;
+        justify-content: flex-start;
+        overflow: visible !important;
+        position: relative;
+        z-index: 9999;
+        max-width: 35%;
+    }
+
+    .brand-logo {
+        flex: 0 0 auto;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 10;
+    }
+
+    .brand-logo img {
+        width: 55px;
+        height: 55px;
+    }
+
+    .header-cta-btn-wrapper {
+        flex: 1;
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 10px;
+        padding-right: 0;
+        max-width: 35%;
+    }
+
+    /* Mega Menu Stilleri */
+    .nav-item-has-mega {
+        position: relative;
+        z-index: 99999 !important;
+    }
+
+    .mega-menu {
+        position: absolute !important;
+        top: 100% !important;
+        left: 0 !important;
+        background: white !important;
+        border-radius: 10px !important;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1) !important;
+        padding: 30px !important;
+        min-width: 800px !important;
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(-10px);
+        transition: all 0.3s ease !important;
+        z-index: 99999 !important;
+    }
+
+    .nav-item-has-mega:hover .mega-menu {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+    }
+
+    .mega-menu-content {
+        display: flex;
+        gap: 40px;
+    }
+
+    .mega-menu-section {
+        flex: 1;
+        min-width: 200px;
+    }
+
+    .mega-menu-section.single-column {
+        flex: none;
+        width: 100%;
+    }
+
+
+
+    .mega-menu-section h3 {
+        font-size: 16px;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 15px;
+        padding-bottom: 8px;
+        border-bottom: 2px solid #52c653;
+    }
+
+    .mega-menu-section ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .mega-menu-section ul li {
+        margin-bottom: 8px;
+    }
+
+    .mega-menu-section ul li a {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 0;
+        color: #666;
+        text-decoration: none;
+        font-size: 14px;
+        transition: all 0.3s ease;
+    }
+
+    .mega-menu-section ul li a:hover {
+        color: #52c653;
+        padding-left: 5px;
+    }
+
+    .mega-menu-section ul li a i {
+        width: 16px;
+        color: #999;
+        font-size: 12px;
+    }
+
+    .mega-menu-section ul li a:hover i {
+        color: #52c653;
+    }
+
+    /* Login Butonu */
+    .btn-login {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 44px;
+        padding: 0 18px;
+        border-radius: 8px;
+        background: transparent;
+        color: #333;
+        font-size: 14px;
+        font-weight: 500;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        border: 1px solid #ddd;
+        white-space: nowrap;
+    }
+
+    .btn-login:hover {
+        background: #f8f9fa;
+        color: #333;
+        text-decoration: none;
+    }
+
     .btn-cart-header {
         display: flex;
         align-items: center;
         justify-content: center;
-        width: 40px;
-        height: 40px;
-        border-radius: 10px;
+        width: 44px;
+        height: 44px;
+        border-radius: 8px;
         background: #f2f9f4;
         color: #4CAF50;
         transition: all 0.3s ease;
+        position: relative;
     }
 
     .btn-cart-header i {
         font-size: 16px;
     }
 
+    .btn-cart-header:hover {
+        background: #e8f5e8;
+        transform: translateY(-1px);
+    }
+
     .btn-donate {
         display: flex;
         align-items: center;
         justify-content: center;
-        height: 40px;
-        padding: 0 15px;
-        border-radius: 10px;
-        background: #4CAF50;
+        height: 44px;
+        padding: 0 24px;
+        border-radius: 8px;
+        background: #52c653;
         color: white;
-        font-size: 14px;
+        font-size: 15px;
         font-weight: 600;
         text-decoration: none;
         transition: all 0.3s ease;
+        box-shadow: 0 2px 4px rgba(82, 198, 83, 0.3);
+        white-space: nowrap;
+        border: none;
     }
 
     .btn-donate:hover {
-        background: #3d9140;
+        background: #45b846;
         color: white;
         text-decoration: none;
-    }
-
-    .header-cta-btn-wrapper {
-        display: flex;
-        align-items: center;
-        margin-left: auto;
-        gap: 4px;
-    }
-
-    .brand-logo {
-        display: flex;
-        align-items: center;
-        gap: 10px;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(82, 198, 83, 0.4);
     }
 
     .brand-logo a {
@@ -152,24 +694,89 @@ if (isset($page_titles[$current_page])) {
         text-decoration: none;
     }
 
-    .nav-link-item {
-        white-space: nowrap;
-        font-size: 8px;
+    .brand-text {
+        font-size: 26px;
+        font-weight: 700;
+        color: #333;
+        font-family: 'Inter', sans-serif;
+        line-height: 1;
+        margin: 0;
     }
 
-    /* iPad Pro ve büyük tablet görünümü için medya sorguları */
+    .nav-link-item {
+        white-space: nowrap;
+        font-size: 11px;
+        padding: 6px 10px;
+        font-weight: 600;
+        color: #333;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        border-radius: 4px;
+        letter-spacing: 0.3px;
+    }
+
+    .nav-link-item:hover {
+        color: #52c653;
+        text-decoration: none;
+        background: rgba(82, 198, 83, 0.1);
+        transform: translateY(-1px);
+    }
+
+    .site-menu-main {
+        display: flex;
+        align-items: center;
+        gap: 2px;
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        overflow: visible !important;
+        position: relative;
+        z-index: 9999;
+    }
+
+    /* Masaüstü ve büyük ekranlar */
     @media screen and (min-width: 1024px) {
-        .brand-logo {
-            gap: 6px;
+        .top-header {
+            padding: 6px 0;
         }
 
-        .brand-logo a {
-            gap: 6px;
+        .contact-info {
+            gap: 25px;
+        }
+
+        .phone-number,
+        .follow-text {
+            font-size: 13px;
+        }
+
+        .phone-number i,
+        .follow-text i {
+            font-size: 11px;
+        }
+
+        .currency,
+        .language {
+            font-size: 12px;
+        }
+
+        /* Desktop contact dropdown */
+        .contact-trigger {
+            font-size: 13px;
+            padding: 6px 12px;
+        }
+
+        .contact-dropdown-menu {
+            min-width: 200px;
+        }
+
+        .contact-item {
+            padding: 10px 20px;
+            font-size: 13px;
         }
 
         .brand-logo img {
-            width: 40px;
-            height: 40px;
+            width: 50px;
+            height: 50px;
         }
 
         .brand-text {
@@ -178,17 +785,15 @@ if (isset($page_titles[$current_page])) {
 
         .nav-link-item {
             font-size: 12px;
-            padding: 0 6px;
+            padding: 0 12px;
         }
 
         .site-menu-main {
-            margin-left: 12px;
-            gap: 4px;
+            gap: 15px;
         }
 
         .header-cta-btn-wrapper {
-            gap: 5px;
-            margin-right: 5px;
+            gap: 12px;
         }
 
         .btn-cart-header {
@@ -198,13 +803,29 @@ if (isset($page_titles[$current_page])) {
             border-radius: 8px;
         }
 
+        .btn-login {
+            height: 44px;
+            padding: 0 18px;
+            font-size: 15px;
+        }
+
         .btn-donate {
             height: 44px;
-            padding: 0 16px;
+            padding: 0 24px;
             font-size: 15px;
             border-radius: 8px;
-            font-weight: 500;
+            font-weight: 600;
             white-space: nowrap;
+        }
+
+        /* Mega Menu Desktop */
+        .mega-menu {
+            min-width: 900px;
+            padding: 40px;
+        }
+
+        .mega-menu-content {
+            gap: 50px;
         }
     }
 
@@ -400,37 +1021,103 @@ if (isset($page_titles[$current_page])) {
         }
     }
 
-    @media screen and (max-width: 768px) {
+    @media screen and (max-width: 1023.98px) {
+
+        /* Tablet ve mobil için mega menüyü gizle */
+        .mega-menu {
+            display: none;
+        }
+
+        /* Mobil menü için layout değişikliği */
+        .site-navbar {
+            flex-direction: row;
+            justify-content: space-between;
+        }
+
+        .left-menu {
+            order: 3;
+        }
+
         .brand-logo {
-            gap: 4px;
-        }
-
-        .brand-logo a {
-            gap: 4px;
-        }
-
-        .brand-logo img {
-            width: 35px;
-            height: 35px;
-        }
-
-        .brand-text {
-            font-size: 22px;
+            position: static;
+            transform: none;
+            order: 1;
+            flex: 0 0 auto;
         }
 
         .header-cta-btn-wrapper {
-            margin-right: 10px;
-            gap: 8px;
+            order: 2;
+            flex: 0 0 auto;
+        }
+
+        .mobile-menu-trigger {
+            order: 4;
+        }
+    }
+
+    @media screen and (max-width: 768px) {
+        .top-header {
+            padding: 6px 0;
+            font-size: 12px;
+        }
+
+        .contact-info {
+            gap: 15px;
+        }
+
+        .phone-number,
+        .follow-text {
+            font-size: 12px;
+        }
+
+        .currency,
+        .language {
+            font-size: 11px;
+        }
+
+        /* Mobil için contact dropdown */
+        .top-header-contact {
+            display: none;
+        }
+
+        /* Mobil için sosyal medya dropdown */
+        .social-dropdown-menu {
+            min-width: 160px !important;
+            font-size: 13px !important;
+        }
+
+        .social-item {
+            padding: 8px 15px !important;
+            font-size: 13px !important;
+        }
+
+        .social-item i {
+            width: 16px !important;
+            font-size: 14px !important;
+        }
+
+        .top-header-content {
+            justify-content: space-between;
+        }
+
+        /* Mobil menüde iletişim için geçici çözüm - mobil menü içinde iletişim linkleri eklenebilir */
+
+        .brand-logo img {
+            width: 45px;
+            height: 45px;
+        }
+
+        .header-cta-btn-wrapper {
+            gap: 6px;
             display: flex;
             align-items: center;
         }
 
         .btn-cart-header {
-            width: 34px;
-            height: 34px;
-            min-width: 34px;
+            width: 36px;
+            height: 36px;
+            min-width: 36px;
             border-radius: 8px;
-            margin-right: 0;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -440,22 +1127,26 @@ if (isset($page_titles[$current_page])) {
             font-size: 14px;
         }
 
+        .btn-login {
+            height: 36px;
+            padding: 0 12px;
+            font-size: 13px;
+        }
+
         .btn-donate {
-            height: 34px;
-            padding: 0 14px;
-            font-size: 14px;
+            height: 36px;
+            padding: 0 16px;
+            font-size: 13px;
             white-space: nowrap;
             min-width: max-content;
             border-radius: 8px;
-            background-color: #4CAF50;
-            color: white;
             display: flex;
             align-items: center;
             justify-content: center;
         }
 
         .nav-link-item {
-            font-size: 15px;
+            font-size: 14px;
         }
 
         .navbar {
@@ -464,20 +1155,44 @@ if (isset($page_titles[$current_page])) {
     }
 
     @media screen and (max-width: 480px) {
+        .top-header {
+            padding: 5px 0;
+            font-size: 11px;
+        }
+
+        .contact-info {
+            gap: 10px;
+        }
+
+        .phone-number,
+        .follow-text {
+            font-size: 11px;
+        }
+
+        .currency,
+        .language {
+            font-size: 10px;
+        }
+
         .header-cta-btn-wrapper {
-            margin-right: 4px;
-            gap: 6px;
+            gap: 4px;
         }
 
         .btn-cart-header {
-            width: 30px;
-            height: 30px;
-            min-width: 30px;
+            width: 32px;
+            height: 32px;
+            min-width: 32px;
             border-radius: 6px;
         }
 
+        .btn-login {
+            height: 32px;
+            padding: 0 10px;
+            font-size: 11px;
+        }
+
         .btn-donate {
-            height: 30px;
+            height: 32px;
             padding: 0 12px;
             font-size: 12px;
             border-radius: 6px;
@@ -487,22 +1202,9 @@ if (isset($page_titles[$current_page])) {
             font-size: 12px;
         }
 
-        .brand-logo {
-            gap: 2px;
-        }
-
-        .brand-logo a {
-            gap: 2px;
-        }
-
         .brand-logo img {
-            width: 25px;
-            height: 25px;
-        }
-
-        .brand-text {
-            font-size: 15px;
-            line-height: 1;
+            width: 35px;
+            height: 35px;
         }
 
         .navbar {
@@ -510,7 +1212,7 @@ if (isset($page_titles[$current_page])) {
         }
 
         .nav-link-item {
-            font-size: 12px;
+            font-size: 11px;
         }
     }
 
@@ -537,18 +1239,40 @@ if (isset($page_titles[$current_page])) {
 
     /* En küçük mobil ekranlar için logo ayarları */
     @media screen and (max-width: 320px) {
+        .top-header {
+            padding: 4px 0;
+        }
+
+        .contact-info {
+            gap: 8px;
+        }
+
+        .phone-number,
+        .follow-text {
+            font-size: 10px;
+        }
+
         .brand-logo img {
+            width: 30px;
+            height: 30px;
+        }
+
+        .btn-cart-header {
             width: 28px;
             height: 28px;
+            min-width: 28px;
         }
 
-        .brand-text {
-            font-size: 16px;
+        .btn-login {
+            height: 28px;
+            padding: 0 8px;
+            font-size: 10px;
         }
 
-        .brand-logo,
-        .brand-logo a {
-            gap: 3px;
+        .btn-donate {
+            height: 28px;
+            padding: 0 10px;
+            font-size: 11px;
         }
     }
 
@@ -649,75 +1373,252 @@ if (isset($page_titles[$current_page])) {
     </div>
 
     <div class="page-wrapper overflow-hidden">
+        <!-- Üst Header -->
+        <div class="top-header">
+            <div class="container">
+                <div class="top-header-content">
+                    <div class="contact-info">
+                        <span class="phone-number">
+                            <i class="fas fa-phone"></i>
+                            0 212 631 21 21
+                        </span>
+                        <div class="social-dropdown">
+                            <span class="follow-text">
+                                <i class="fas fa-check-circle"></i>
+                                Takip Et
+                                <i class="fas fa-angle-down"></i>
+                            </span>
+                            <div class="social-dropdown-menu">
+                                <a href="#" class="social-item" target="_blank">
+                                    <i class="fab fa-twitter"></i>
+                                    <span>Twitter/X</span>
+                                </a>
+                                <a href="#" class="social-item" target="_blank">
+                                    <i class="fab fa-instagram"></i>
+                                    <span>Instagram</span>
+                                </a>
+                                <a href="#" class="social-item" target="_blank">
+                                    <i class="fab fa-youtube"></i>
+                                    <span>YouTube</span>
+                                </a>
+                                <a href="#" class="social-item" target="_blank">
+                                    <i class="fab fa-tiktok"></i>
+                                    <span>TikTok</span>
+                                </a>
+                                <a href="#" class="social-item" target="_blank">
+                                    <i class="fab fa-facebook"></i>
+                                    <span>Facebook</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="top-header-contact">
+                        <div class="contact-dropdown">
+                            <span class="contact-trigger">
+                                <i class="fas fa-map-marker-alt"></i>
+                                İletişim
+                                <i class="fas fa-angle-down"></i>
+                            </span>
+                            <div class="contact-dropdown-menu">
+                                <a href="<?= BASE_URL ?>/contact-ank" class="contact-item">
+                                    <i class="fas fa-building"></i>
+                                    <span>Çınaraltı - Ankara</span>
+                                </a>
+                                <a href="<?= BASE_URL ?>/contact-ist" class="contact-item">
+                                    <i class="fas fa-building"></i>
+                                    <span>Çınaraltı - İstanbul</span>
+                                </a>
+                                <a href="<?= BASE_URL ?>/contact-deu" class="contact-item">
+                                    <i class="fas fa-globe"></i>
+                                    <span>Çınaraltı - Almanya</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="top-header-right">
+                        <span class="currency">TR</span>
+                        <span class="language">TRY</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ana Header -->
         <header class="site-header site-header--transparent site-header--sticky">
             <div class="container">
                 <nav class="navbar site-navbar">
-                    <!--~~~~~~~~~~~~~~~~~~~~~~~~
-            Brand Logo
-        ~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+                    <!-- Sol Menü -->
+                    <div class="left-menu">
+                        <div class="menu-block-wrapper">
+                            <div class="menu-overlay"></div>
+                            <nav class="menu-block" id="append-menu-header">
+                                <div class="mobile-menu-head">
+                                    <div class="current-menu-title"></div>
+                                    <div class="mobile-menu-close">&times;</div>
+                                </div>
+                                <ul class="site-menu-main">
+                                    <!-- Biz Kimiz Mega Menu -->
+                                    <li class="nav-item nav-item-has-mega">
+                                        <a href="<?= BASE_URL ?>/home" class="nav-link-item">KURUMSAL</a>
+                                        <div class="mega-menu">
+                                            <div class="mega-menu-content">
+                                                <div class="mega-menu-section">
+                                                    <h3>Kurumsal</h3>
+                                                    <ul>
+                                                        <li><a href="#"><i class="fas fa-file-alt"></i> Biz Kimiz</a>
+                                                        </li>
+                                                        <li><a href="#"><i class="fas fa-info-circle"></i>
+                                                                Hakkımızda</a></li>
+                                                        <li><a href="#"><i class="fas fa-history"></i> Tarihçe</a></li>
+                                                        <li><a href="#"><i class="fas fa-users"></i> Yetkili
+                                                                Kurullar</a></li>
+                                                        <li><a href="#"><i class="fas fa-file-contract"></i> Vakıf
+                                                                Kuruluş Senedi</a></li>
+                                                        <li><a href="#"><i class="fas fa-clock"></i> Denetim</a></li>
+                                                        <li><a href="#"><i class="fas fa-balance-scale"></i> Etik
+                                                                Değerler</a></li>
+                                                        <li><a href="#"><i class="fas fa-chart-line"></i> Uyum ve
+                                                                Risk</a></li>
+                                                        <li><a href="#"><i class="fas fa-newspaper"></i> Medya Odası</a>
+                                                        </li>
+                                                        <li><a href="#"><i class="fas fa-hands-helping"></i> İnsan
+                                                                Kaynakları</a></li>
+                                                    </ul>
+                                                </div>
+                                                <div class="mega-menu-section">
+                                                    <h3>Bilgilendirme</h3>
+                                                    <ul>
+                                                        <li><a href="#"><i class="fas fa-shield-alt"></i> Kişisel
+                                                                Verilerin Korunması Kanunu</a></li>
+                                                        <li><a href="#"><i class="fas fa-lock"></i> Bilgi Güvenliği
+                                                                Politikası</a></li>
+                                                        <li><a href="#"><i class="fas fa-ban"></i> Yolsuzluk ve Rüşvetle
+                                                                Mücadele</a></li>
+                                                        <li><a href="#"><i class="fas fa-users"></i> Bağışçı Hakları</a>
+                                                        </li>
+                                                        <li><a href="#"><i class="fas fa-credit-card"></i> Gıda
+                                                                Bankacılığı</a></li>
+                                                    </ul>
+                                                </div>
+                                                <div class="mega-menu-section">
+                                                    <h3>Dökümanlar</h3>
+                                                    <ul>
+                                                        <li><a href="#"><i class="fas fa-percentage"></i> Vergi
+                                                                Muafiyeti</a></li>
+                                                        <li><a href="#"><i class="fas fa-table"></i> Gelir Gider
+                                                                Tablosu</a></li>
+                                                        <li><a href="#"><i class="fas fa-file-pdf"></i> Bağımsız Denetim
+                                                                Raporu</a></li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </li>
 
+                                    <!-- Ne Yapıyoruz Mega Menu -->
+                                    <li class="nav-item nav-item-has-mega">
+                                        <a href="<?= BASE_URL ?>/about" class="nav-link-item">PROJELER</a>
+                                        <div class="mega-menu">
+                                            <div class="mega-menu-content">
+                                                <div class="mega-menu-section">
+                                                    <h3>Gündem</h3>
+                                                    <ul>
+                                                        <li><a href="#"><i class="fas fa-globe-asia"></i> Filistin /
+                                                                Gazze</a></li>
+                                                        <li><a href="#"><i class="fas fa-eye"></i> Katarakt</a></li>
+                                                        <li><a href="#"><i class="fas fa-child"></i> Yetim</a></li>
+                                                        <li><a href="#"><i class="fas fa-flag"></i> Suriye</a></li>
+                                                        <li><a href="#"><i class="fas fa-tint"></i> Su</a></li>
+                                                        <li><a href="#"><i class="fas fa-ship"></i> Mavi Marmara</a>
+                                                        </li>
+                                                        <li><a href="#"><i class="fas fa-users"></i> İyilikte Yarışan
+                                                                Sınıflar</a></li>
+                                                        <li><a href="#"><i class="fas fa-map-marker-alt"></i>
+                                                                Türkiye</a></li>
+                                                    </ul>
+                                                </div>
+                                                <div class="mega-menu-section">
+                                                    <h3>Çalışma Alanları</h3>
+                                                    <ul>
+                                                        <li><a href="#"><i class="fas fa-box"></i> İnsani Yardım</a>
+                                                        </li>
+                                                        <li><a href="#"><i class="fas fa-users"></i> İnsan Hakları</a>
+                                                        </li>
+                                                        <li><a href="#"><i class="fas fa-comments"></i> İnsani
+                                                                Diplomasi</a></li>
+                                                        <li><a href="#"><i class="fas fa-first-aid"></i> Acil Yardım</a>
+                                                        </li>
+                                                        <li><a href="#"><i class="fas fa-globe"></i> Afet Yönetimi</a>
+                                                        </li>
+                                                        <li><a href="#"><i class="fas fa-hands"></i> Gönüllü
+                                                                Faaliyetleri</a></li>
+                                                        <li><a href="#"><i class="fas fa-bullhorn"></i>
+                                                                Bilinçlendirme</a></li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </li>
+
+                                    <!-- Destekle Mega Menu -->
+                                    <li class="nav-item nav-item-has-mega">
+                                        <a href="<?= BASE_URL ?>/video" class="nav-link-item">DESTEKLE</a>
+                                        <div class="mega-menu">
+                                            <div class="mega-menu-content">
+                                                <div class="mega-menu-section">
+                                                    <h3>Bağış Türleri</h3>
+                                                    <ul>
+                                                        <li><a href="<?= BASE_URL ?>/donate"><i
+                                                                    class="fas fa-heart"></i> Bağış Yapın</a></li>
+                                                        <li><a href="#"><i class="fas fa-smile"></i> Sponsor Olun</a>
+                                                        </li>
+                                                        <li><a href="#"><i class="fas fa-tint"></i> Su Kuyusu Açın</a>
+                                                        </li>
+                                                        <li><a href="#"><i class="fas fa-building"></i> Gayrimenkul
+                                                                Bağışı</a></li>
+                                                        <li><a href="#"><i class="fas fa-piggy-bank"></i> Kumbara
+                                                                Alın</a></li>
+                                                    </ul>
+                                                </div>
+                                                <div class="mega-menu-section">
+                                                    <h3>Destek Yöntemleri</h3>
+                                                    <ul>
+                                                        <li><a href="#"><i class="fas fa-download"></i> Uygulamayı
+                                                                İndirin</a></li>
+                                                        <li><a href="#"><i class="fas fa-hands"></i> Gönüllü Olun</a>
+                                                        </li>
+                                                        <li><a href="#"><i class="fas fa-bell"></i> Haberdar Olun</a>
+                                                        </li>
+                                                        <li><a href="#"><i class="fas fa-share"></i> Paylaş</a></li>
+                                                        <li><a href="#"><i class="fas fa-envelope"></i> Bize Ulaşın</a>
+                                                        </li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </li>
+
+
+                                </ul>
+                            </nav>
+                        </div>
+                    </div>
+
+                    <!-- Orta - Brand Logo -->
                     <div class="brand-logo">
                         <a href="<?= BASE_URL ?>/" class="href">
-                            <!-- light version logo (logo must be black)-->
-                            <img class="logo-light" src="../public/assets/image/logo.png" alt="brand logo">
-                            <!-- Dark version logo (logo must be White)-->
-                            <img class="logo-dark" src="../public/assets/image/logo.png" alt="brand logo">
+                            <!-- Çınaraltı Logo -->
+                            <img class="logo-light" src="<?= BASE_URL ?>/assets/image/logo.png" alt="Çınaraltı">
+                            <img class="logo-dark" src="<?= BASE_URL ?>/assets/image/logo.png" alt="Çınaraltı">
                             <span class="brand-text">Çınaraltı</span>
                         </a>
                     </div>
-                    <div class="menu-block-wrapper">
-                        <div class="menu-overlay"></div>
-                        <nav class="menu-block" id="append-menu-header">
-                            <div class="mobile-menu-head">
-                                <div class="current-menu-title"></div>
-                                <div class="mobile-menu-close">&times;</div>
-                            </div>
-                            <ul class="site-menu-main">
-                                <li class="nav-item">
-                                    <a href="<?= BASE_URL ?>/home" class="nav-link-item">Ana Sayfa</i>
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a href="<?= BASE_URL ?>/about" class="nav-link-item">Hakkımızda</i>
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a href="<?= BASE_URL ?>/video" class="nav-link-item">Videolar</i>
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a href="<?= BASE_URL ?>/blog" class="nav-link-item">Makaleler</i>
-                                    </a>
-                                </li>
 
-                                <li class="nav-item nav-item-has-children">
-                                    <a href="<?= BASE_URL ?>/contact" class="nav-link-item drop-trigger">İletişim<i
-                                            class="fas fa-angle-down"></i>
-                                    </a>
-                                    <div class="sub-menu" id="submenu-13">
-                                        <ul class="sub-menu_list">
-                                            <li class="sub-menu_item">
-                                                <a href="<?= BASE_URL ?>/contact-ank">
-                                                    <span class="menu-item-text">Çınaraltı - Ankara</span>
-                                                </a>
-                                            </li>
-                                            <li class="sub-menu_item">
-                                                <a href="<?= BASE_URL ?>/contact-ist">
-                                                    <span class="menu-item-text">Çınaraltı - İstanbul</span>
-                                                </a>
-                                            </li>
-                                            <li class="sub-menu_item">
-                                                <a href="<?= BASE_URL ?>/contact-deu">
-                                                    <span class="menu-item-text">Çınaraltı - Almanya</span>
-                                                </a>
-                                            </li>
-                                        </ul>
-                                    </div>
-                                </li>
-                            </ul>
-                        </nav>
-                    </div>
+                    <!-- Sağ - Header Butonları -->
                     <div class="header-cta-btn-wrapper">
+                        <a href="#" class="btn-login">Oturum aç</a>
                         <a href="<?= BASE_URL ?>/cart" class="btn-cart-header">
                             <i class="fas fa-shopping-bag"></i>
                             <span class="cart-badge" id="cartBadge"></span>
@@ -726,15 +1627,13 @@ if (isset($page_titles[$current_page])) {
                             <span>Bağış Yap</span>
                         </a>
                     </div>
+
                     <!--~~~~~~~~~~~~~~~~~~~~~~~~
           mobile menu trigger
          ~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
                     <div class="mobile-menu-trigger">
                         <span></span>
                     </div>
-                    <!--~~~~~~~~~~~~~~~~~~~~~~~~
-            Mobile Menu Hamburger Ends
-          ~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
                 </nav>
             </div>
         </header>
@@ -768,6 +1667,30 @@ if (isset($page_titles[$current_page])) {
 
         // İlk yüklemede badge'i güncelle
         updateCartBadge();
+
+        // Scroll efekti için JavaScript
+        let lastScrollTop = 0;
+        const topHeader = document.querySelector('.top-header');
+        const siteHeader = document.querySelector('.site-header');
+        const body = document.body;
+
+        window.addEventListener('scroll', function() {
+            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+
+            if (scrollTop > 50) {
+                // Aşağı scroll - header'ları küçült
+                topHeader.classList.add('scroll-hidden');
+                siteHeader.classList.add('scroll-compact');
+                body.classList.add('scroll-active');
+            } else {
+                // Üste scroll - header'ları normale döndür
+                topHeader.classList.remove('scroll-hidden');
+                siteHeader.classList.remove('scroll-compact');
+                body.classList.remove('scroll-active');
+            }
+
+            lastScrollTop = scrollTop <= 0 ? 0 : scrollTop;
+        });
         </script>
     </div>
 </body>

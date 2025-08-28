@@ -5,7 +5,7 @@
                     <div class="footer__content-block">
                         <div class="footer__content-text">
                             <div class="footer-brand">
-                                <img src="../public/assets/image/logo-dark.png" alt="image alt">
+                                <img src="<?= BASE_URL ?>/assets/image/logo-dark.png" alt="image alt">
                             </div>
                             <p>
                                 "İnsanların heyet-i içtimaiyesinde intizam ve asayişi temin eden köprü, zekâttır.
@@ -125,22 +125,22 @@
     </div>
     </div>
     <!-- Vendor Scripts -->
-    <script src="./../public/assets/plugins/jquery/jquery.min.js"></script>
-    <script src="./../public/assets/plugins/jquery/jquery-migrate.min.js"></script>
-    <script src="./../public/assets/plugins/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="<?= BASE_URL ?>/assets/plugins/jquery/jquery.min.js"></script>
+    <script src="<?= BASE_URL ?>/assets/plugins/jquery/jquery-migrate.min.js"></script>
+    <script src="<?= BASE_URL ?>/assets/plugins/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <!-- Plugin's Scripts -->
-    <script src="./../public/assets/plugins/inlineSvg/inlineSvg.min.js"></script>
+    <script src="<?= BASE_URL ?>/assets/plugins/inlineSvg/inlineSvg.min.js"></script>
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
-    <script src="../public/assets/plugins/fancybox/jquery.fancybox.min.js"></script>
-    <script src="../public/assets/plugins/aos/aos.min.js"></script>
-    <script src="./../public/assets/plugins/isotope/isotope.pkgd.min.js"></script>
-    <script src="./../public/assets/plugins/isotope/packery.pkgd.min.js"></script>
-    <script src="./../public/assets/plugins/isotope/image.loaded.js"></script>
-    <script src="../public/assets/plugins/slick/slick.min.js"></script>
-    <script src="./../public/assets/plugins/countdown/jquery.countdown.js" defer></script>
+    <script src="<?= BASE_URL ?>/assets/plugins/fancybox/jquery.fancybox.min.js"></script>
+    <script src="<?= BASE_URL ?>/assets/plugins/aos/aos.min.js"></script>
+    <script src="<?= BASE_URL ?>/assets/plugins/isotope/isotope.pkgd.min.js"></script>
+    <script src="<?= BASE_URL ?>/assets/plugins/isotope/packery.pkgd.min.js"></script>
+    <script src="<?= BASE_URL ?>/assets/plugins/isotope/image.loaded.js"></script>
+    <script src="<?= BASE_URL ?>/assets/plugins/slick/slick.min.js"></script>
+    <script src="<?= BASE_URL ?>/assets/plugins/countdown/jquery.countdown.js" defer></script>
 
-    <script src="../public/assets/js/menu.js"></script>
-    <script src="../public/assets/js/custom.js"></script>
+    <script src="<?= BASE_URL ?>/assets/js/menu.js"></script>
+    <script src="<?= BASE_URL ?>/assets/js/custom.js"></script>
 
 
 

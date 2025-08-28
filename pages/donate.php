@@ -421,6 +421,16 @@ echo "<!-- Donate sayfası çalışıyor -->";
                         <a href="<?= $url ?>" class="donate-new-card-link">
                             <h3 class="donate-new-card-title"><?= $donation['title'] ?></h3>
                         </a>
+                        
+                        <!-- Kart İçi Hazır Tutar Seçenekleri -->
+                        <div class="card-preset-amounts">
+                            <button type="button" class="card-preset-btn" data-amount="100">100₺</button>
+                            <button type="button" class="card-preset-btn" data-amount="250">250₺</button>
+                            <button type="button" class="card-preset-btn" data-amount="500">500₺</button>
+                            <button type="button" class="card-preset-btn" data-amount="1000">1K₺</button>
+                            <button type="button" class="card-preset-btn" data-amount="5000">5K₺</button>
+                        </div>
+                        
                         <div class="donate-new-card-price">
                             <input type="text" class="donate-card-price-input" placeholder="₺0">
                         </div>
@@ -472,6 +482,16 @@ echo "<!-- Donate sayfası çalışıyor -->";
                     </div>
 
                     <label class="donate-form__label">Bağış Tutarı</label>
+                    
+                    <!-- Hazır Tutar Seçenekleri -->
+                    <div class="donate-form__preset-amounts">
+                        <button type="button" class="preset-amount-btn" data-amount="100">100 ₺</button>
+                        <button type="button" class="preset-amount-btn" data-amount="250">250 ₺</button>
+                        <button type="button" class="preset-amount-btn" data-amount="500">500 ₺</button>
+                        <button type="button" class="preset-amount-btn" data-amount="1000">1.000 ₺</button>
+                        <button type="button" class="preset-amount-btn" data-amount="5000">5.000 ₺</button>
+                    </div>
+                    
                     <div class="donate-form__input-wrapper">
                         <input type="text" class="donate-form__input" placeholder="₺0" />
                     </div>
@@ -1599,6 +1619,124 @@ echo "<!-- Donate sayfası çalışıyor -->";
 .donation-target {
     opacity: 0.8;
 }
+
+/* Hazır Tutar Seçenekleri Stilleri */
+.donate-form__preset-amounts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 20px;
+    justify-content: center;
+}
+
+.preset-amount-btn {
+    background: #f8f9fa;
+    border: 2px solid #dee2e6;
+    color: #495057;
+    padding: 12px 20px;
+    border-radius: 25px;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-width: 80px;
+}
+
+.preset-amount-btn:hover {
+    background: rgba(40, 167, 69, 0.1);
+    border-color: #28a745;
+    color: #28a745;
+    transform: translateY(-2px);
+}
+
+.preset-amount-btn.selected {
+    background: #28a745;
+    border-color: #28a745;
+    color: white;
+    box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3);
+}
+
+@media (max-width: 576px) {
+    .donate-form__preset-amounts {
+        gap: 8px;
+    }
+    
+    .preset-amount-btn {
+        padding: 10px 16px;
+        font-size: 14px;
+        min-width: 70px;
+    }
+}
+
+/* Kart İçi Hazır Tutar Seçenekleri Stilleri */
+.card-preset-amounts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 15px;
+    justify-content: center;
+    padding: 0 10px;
+}
+
+.card-preset-btn {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    color: #6c757d;
+    padding: 6px 12px;
+    border-radius: 15px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-width: 45px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.card-preset-btn:hover {
+    background: rgba(40, 167, 69, 0.1);
+    border-color: #28a745;
+    color: #28a745;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(40, 167, 69, 0.2);
+}
+
+.card-preset-btn.selected {
+    background: #28a745;
+    border-color: #28a745;
+    color: white;
+    box-shadow: 0 2px 6px rgba(40, 167, 69, 0.4);
+    transform: translateY(-1px);
+}
+
+.card-preset-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+    transition: left 0.5s;
+}
+
+.card-preset-btn:hover::before {
+    left: 100%;
+}
+
+@media (max-width: 576px) {
+    .card-preset-amounts {
+        gap: 4px;
+        padding: 0 5px;
+    }
+    
+    .card-preset-btn {
+        padding: 5px 8px;
+        font-size: 11px;
+        min-width: 40px;
+    }
+}
 </style>
 
 <script>
@@ -1660,6 +1798,53 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
+    // Kart içindeki hazır tutar butonları için event listener
+    const cardPresetButtons = document.querySelectorAll('.card-preset-btn');
+    cardPresetButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            // Bu butona tıklandığında
+            const amount = parseInt(this.getAttribute('data-amount'));
+            const formattedAmount = `₺${amount.toLocaleString('tr-TR')}`;
+            
+            // Aynı kart içindeki diğer butonlardan 'selected' sınıfını kaldır
+            const siblingButtons = this.parentElement.querySelectorAll('.card-preset-btn');
+            siblingButtons.forEach(btn => btn.classList.remove('selected'));
+            
+            // Bu butona 'selected' sınıfını ekle
+            this.classList.add('selected');
+            
+            // Aynı kart içindeki input alanını güncelle
+            const cardBody = this.closest('.donate-new-card-body');
+            const priceInput = cardBody.querySelector('.donate-card-price-input');
+            if (priceInput) {
+                priceInput.value = formattedAmount;
+            }
+        });
+    });
+
+    // Modal içindeki hazır tutar butonları için event listener
+    const modalPresetButtons = document.querySelectorAll('.preset-amount-btn');
+    modalPresetButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            // Bu butona tıklandığında
+            const amount = parseInt(this.getAttribute('data-amount'));
+            const formattedAmount = `₺${amount.toLocaleString('tr-TR')}`;
+            
+            // Modal içindeki diğer butonlardan 'selected' sınıfını kaldır
+            const siblingButtons = document.querySelectorAll('.preset-amount-btn');
+            siblingButtons.forEach(btn => btn.classList.remove('selected'));
+            
+            // Bu butona 'selected' sınıfını ekle
+            this.classList.add('selected');
+            
+            // Modal içindeki input alanını güncelle
+            const modalInput = document.querySelector('.donate-form__input');
+            if (modalInput) {
+                modalInput.value = formattedAmount;
+            }
+        });
+    });
+
     // Bağış kartındaki input alanlarının event propagation'ı engelleme
     const cardInputs = document.querySelectorAll('.donate-card-price-input');
     cardInputs.forEach(input => {
@@ -1676,6 +1861,7 @@ document.addEventListener('DOMContentLoaded', function() {
             this.classList.add('active');
         });
     });
+
 
     // Bağış Yap butonuna tıklama
     document.querySelector('.modal-btn-donate').addEventListener('click', function() {

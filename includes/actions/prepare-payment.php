@@ -53,6 +53,7 @@ $cart = $data['cart'];
 $totalAmount = (float)$data['totalAmount'];
 
 if (empty($cart) || $totalAmount <= 0) {
+    error_log("CART TO PAYMENT ERROR: Geçersiz sepet veya tutar - Cart count: " . count($cart) . ", Total: $totalAmount");
     ob_clean();
     echo '{"success":false,"error":"Geçersiz sepet veya tutar"}';
     exit;
@@ -64,10 +65,15 @@ $name = trim($first['donorName'] ?? '');
 $email = trim($first['donorEmail'] ?? '');
 $phone = trim($first['donorPhone'] ?? '');
 
-if (empty($name) || empty($email) || empty($phone)) {
-    ob_clean();
-    echo '{"success":false,"error":"Donor bilgileri eksik"}';
-    exit;
+// Boş bilgiler için varsayılan değerler ata
+if (empty($name)) {
+    $name = 'Anonim Bağışçı';
+}
+if (empty($email)) {
+    $email = 'bagisci@example.com';
+}
+if (empty($phone)) {
+    $phone = '+90 555 000 0000';
 }
 
 // Bağış türünü sepetteki ilk öğeden al
@@ -86,8 +92,10 @@ $_SESSION['donor_type'] = 'Bireysel';
 $_SESSION['donation_type'] = $donationType;
 $_SESSION['donation_id'] = 1;
 
+// Debug bilgilerini logla
+error_log("CART TO PAYMENT: Başarılı transfer - Total: $totalAmount, Donor: $name, Cart items: " . count($cart));
+
 // Başarılı yanıt
 ob_clean();
 echo '{"success":true,"message":"Hazır","totalAmount":' . $totalAmount . ',"donorName":"' . $name . '"}';
 exit;
-?> 

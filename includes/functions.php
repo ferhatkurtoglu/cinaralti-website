@@ -1,4 +1,36 @@
 <?php
+// Güvenlik dosyasını geçici olarak devre dışı bırakıldı
+// if (!defined('DEBUG_MODE') || !DEBUG_MODE) {
+//     if (file_exists(__DIR__ . '/security.php')) {
+//         require_once __DIR__ . '/security.php';
+//     }
+// }
+
+// Temel güvenlik fonksiyonları (security.php yerine)
+if (!function_exists('get_client_ip')) {
+    function get_client_ip() {
+        $headers = ['HTTP_X_FORWARDED_FOR', 'HTTP_CLIENT_IP', 'REMOTE_ADDR'];
+        foreach ($headers as $header) {
+            if (!empty($_SERVER[$header])) {
+                $ip = $_SERVER[$header];
+                if (strpos($ip, ',') !== false) {
+                    $ip = trim(explode(',', $ip)[0]);
+                }
+                if (filter_var($ip, FILTER_VALIDATE_IP)) {
+                    return $ip;
+                }
+            }
+        }
+        return $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
+    }
+}
+
+if (!function_exists('clean_output')) {
+    function clean_output($text) {
+        return htmlspecialchars($text, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+    }
+}
+
 // Env yardımcı fonksiyonu
 function getenv_var($key, $default = null) {
     $value = getenv($key);
@@ -383,7 +415,7 @@ function set_language($lang) {
 // Hata yönetimi
 function handle_error($errno, $errstr, $errfile, $errline) {
     error_log("Hata [$errno]: $errstr in $errfile on line $errline");
-    if (DEBUG_MODE) {
+    if (defined('DEBUG_MODE') && DEBUG_MODE) {
         echo "Hata: $errstr";
     } else {
         echo "Bir hata oluştu. Lütfen daha sonra tekrar deneyin.";
@@ -603,6 +635,10 @@ function mask_email($email) {
     }
     
     $parts = explode('@', $email);
+    if (count($parts) < 2) {
+        return $email;
+    }
+    
     $username = $parts[0];
     $domain = $parts[1];
     

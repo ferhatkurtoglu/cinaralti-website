@@ -7,7 +7,8 @@ define('DB_HOST', getenv_var('DB_HOST', 'localhost'));
 define('DB_NAME', getenv_var('DB_NAME', 'cinaralti_db'));
 define('DB_USER', getenv_var('DB_USER', 'root'));
 define('DB_PASS', getenv_var('DB_PASS', ''));
-define('DB_SOCKET', '/Applications/XAMPP/xamppfiles/var/mysql/mysql.sock');
+// MySQL socket - production'da genellikle gerekli değil
+define('DB_SOCKET', getenv_var('DB_SOCKET', ''));
 
 // Cache ayarları
 define('CACHE_DIR', __DIR__ . '/../cache');

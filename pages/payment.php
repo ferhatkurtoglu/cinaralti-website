@@ -57,27 +57,25 @@ $donationAmount = isset($_SESSION['cart_total']) ? $_SESSION['cart_total'] : 0;
 $donationType = isset($_SESSION['donation_type']) ? $_SESSION['donation_type'] : (isset($_SESSION['selected_category']) ? $_SESSION['selected_category'] : 'Genel Bağış');
 $donationId = isset($_SESSION['donation_id']) ? $_SESSION['donation_id'] : 0;
 
-// ÖN KONTROLLER - Gerekli veriler var mı kontrol et
-$requiredSessionData = ['cart_total', 'donor_name', 'donor_email', 'donor_phone'];
+// ÖN KONTROLLER - Sadece kritik veriler kontrol edilsin
 $missingData = [];
 
-foreach ($requiredSessionData as $field) {
-    if (!isset($_SESSION[$field]) || empty($_SESSION[$field])) {
-        $missingData[] = $field;
-    }
-}
-
-// Sepet tutarı kontrolü
+// Sepet tutarı kontrolü (en kritik alan)
 if ($donationAmount <= 0) {
     $missingData[] = 'cart_total';
 }
 
-// Eğer gerekli veriler eksikse bağış sayfasına yönlendir
+// Session'da cart_total yoksa da hata ver
+if (!isset($_SESSION['cart_total'])) {
+    $missingData[] = 'cart_total';
+}
+
+// Eğer sadece sepet tutarı eksikse bağış sayfasına yönlendir
 if (!empty($missingData)) {
-    error_log("Payment sayfasına eksik bilgilerle erişim. Eksik veriler: " . implode(', ', $missingData));
+    error_log("Payment sayfasına sepet tutarı olmadan erişim. Eksik veriler: " . implode(', ', $missingData));
     
     // Kullanıcıyı bilgilendirme mesajı ile birlikte bağış sayfasına yönlendir
-    $_SESSION['payment_error'] = 'Ödeme yapabilmek için önce bağış bilgilerinizi tamamlamanız gerekiyor.';
+    $_SESSION['payment_error'] = 'Sepetinizde bağış bulunmuyor. Lütfen önce bağış ekleyin.';
     header('Location: ' . BASE_URL . '/donate');
     exit();
 }
@@ -408,7 +406,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
     
     // İsim kontrolü
-    if (empty($donationData['donor_name']) || strlen($donationData['donor_name']) < 2) {
+    $donorName = $donationData['donor_name'];
+    if (empty($donorName) || !is_string($donorName) || strlen($donorName) < 2) {
         $validation_errors[] = 'Geçersiz isim';
     }
     

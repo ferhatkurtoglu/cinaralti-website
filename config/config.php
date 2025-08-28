@@ -12,7 +12,7 @@ if (session_status() === PHP_SESSION_NONE) {
 // Gerekli dosyaları dahil et - functions.php dosyasını önce dahil ediyoruz
 require_once __DIR__ . '/../includes/functions.php';
 
-// Temel URL tanımı - Geliştirme ortamı için
+// Temel URL tanımı - Geliştirme ve production ortamı için
 if (isset($_SERVER['SERVER_NAME']) && $_SERVER['SERVER_NAME'] === 'localhost' && isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] == '8000') {
     // PHP built-in server için (localhost:8000)
     define('BASE_URL', '');
@@ -20,8 +20,8 @@ if (isset($_SERVER['SERVER_NAME']) && $_SERVER['SERVER_NAME'] === 'localhost' &&
     // XAMPP için (localhost/cinaralti-website/)
     define('BASE_URL', '/cinaralti-website/public');
 } else {
-    // Production için
-    define('BASE_URL', '/cinaralti-website/public');
+    // Production için - hosting'de public klasörü root olacak
+    define('BASE_URL', '');
 }
 
 // Geliştirme ortamında HTTP kullan, yayın ortamında HTTPS kullan
@@ -30,8 +30,9 @@ $httpHost = isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : 'localhost';
 $baseUrl = BASE_URL ?: '';
 define('SITE_URL', $protocol . '://' . $httpHost . $baseUrl);
 
-// HTTPS zorunluluğu - geliştirme ortamında devre dışı bırakalım
-define('FORCE_HTTPS', false);
+// HTTPS zorunluluğu - production'da aktif olmalı
+$is_production = !in_array($_SERVER['SERVER_NAME'] ?? '', ['localhost', '127.0.0.1']);
+define('FORCE_HTTPS', $is_production);
 
 // Site ayarları
 define('SITE_NAME', 'Çınaraltı');
@@ -41,8 +42,8 @@ define('SITE_KEYWORDS', 'çınaraltı, vakıf, dernek, yardım');
 // Ödeme sistemi yapılandırmasını dahil et
 require_once __DIR__ . '/payment_config.php';
 
-// Debug modu açık
-define('DEBUG_MODE', true);
+// Debug modu - production'da kapalı olmalı
+define('DEBUG_MODE', !$is_production);
 
 // Zaman dilimi
 date_default_timezone_set('Europe/Istanbul');

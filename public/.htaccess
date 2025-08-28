@@ -21,7 +21,7 @@ ServerSignature Off
 
 # URL yönlendirmeleri
 RewriteEngine On
-RewriteBase /cinaralti-website/public/
+RewriteBase /public/
 
 # Blog detay sayfası için özel yönlendirme
 RewriteRule ^blog-details/([^/]+)$ index.php?page=blog-details&post=$1 [QSA,L]
