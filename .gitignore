@@ -23,4 +23,8 @@ Thumbs.db
 
 # Admin uygulaması build klasörleri
 /admin/.next
-/admin/node_modules 
+/admin/node_modules
+
+# Node.js bağımlılıkları
+node_modules/
+**/node_modules/ 
